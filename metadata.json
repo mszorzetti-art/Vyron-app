@@ -1,0 +1,8 @@
+{
+  "name": "Vyron",
+  "description": "Plataforma privada de inteligência operacional, gestão de marcas, produtos, conteúdo, finanças e automação controlada.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
