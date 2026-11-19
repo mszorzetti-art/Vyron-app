@@ -3,6 +3,9 @@ import { Search } from 'lucide-react';
 import { useVyron } from '../context/VyronContext';
 import { ActivityCategory } from '../types/vyron';
 import { filterActivities } from '../utils/vyronRules';
+import { useI18n } from '../i18n/useI18n';
+import { labelActivityCategory } from '../i18n/domainLabels';
+import { localizeActivity } from '../i18n/seedTranslations';
 import {
   EmptyState,
   PageHeader,
@@ -25,29 +28,63 @@ const CATEGORIES: Array<ActivityCategory | 'Todas'> = [
 
 export const ActivityView: React.FC = () => {
   const { state, globalBrandFilter, globalPeriodFilter } = useVyron();
+  const { lang, t, fmtDateTime } = useI18n();
   const [category, setCategory] = useState<ActivityCategory | 'Todas'>('Todas');
   const [query, setQuery] = useState('');
 
-  const items = filterActivities(state.activities, {
+  const scopedItems = filterActivities(state.activities, {
     brandId: globalBrandFilter,
     period: globalPeriodFilter,
     category,
-    query,
+    query: '',
   });
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const items = scopedItems.filter((rawEv) => {
+    if (!normalizedQuery) return true;
+    const loc = localizeActivity(rawEv, lang);
+    const catLabel = labelActivityCategory(rawEv.category, lang);
+    const hay = [
+      rawEv.action,
+      rawEv.detail,
+      rawEv.justification ?? '',
+      rawEv.actor,
+      loc.action,
+      loc.detail,
+      loc.justification ?? '',
+      catLabel,
+    ]
+      .join(' ')
+      .toLowerCase();
+    return hay.includes(normalizedQuery);
+  });
+
+  const formatActor = (actor: string): string => {
+    if (actor === 'Proprietário' || actor === 'Owner') {
+      return t('common.owner');
+    }
+    if (actor === 'batch-executor') {
+      return lang === 'EN-US' ? 'Batch executor' : 'Executor em lotes';
+    }
+    return actor;
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Activity & audit_log"
-        subtitle="Registro cronológico append-only de decisões, autorizações por hash SHA-256, eventos de Stop All, execuções em lote e justificativas."
+        title={t('activity.title')}
+        subtitle={t('activity.subtitle')}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SegmentedControl
-          ariaLabel="Filtrar atividades por categoria"
+          ariaLabel={t('activity.filterAria')}
           value={category}
           onChange={(v) => setCategory(v as ActivityCategory | 'Todas')}
-          options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+          options={CATEGORIES.map((c) => ({
+            value: c,
+            label: c === 'Todas' ? t('common.allFemale') : labelActivityCategory(c, lang),
+          }))}
         />
 
         <div className="relative w-full sm:w-64">
@@ -59,8 +96,8 @@ export const ActivityView: React.FC = () => {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filtrar ação, hash ou justificativa..."
-            aria-label="Filtrar atividades"
+            placeholder={t('activity.searchPlaceholder')}
+            aria-label={t('activity.searchAria')}
             className="w-full h-9 pl-8 pr-3 text-xs rounded-md bg-white dark:bg-[#171A20] border border-black/10 dark:border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#315FEA]"
           />
         </div>
@@ -68,13 +105,14 @@ export const ActivityView: React.FC = () => {
 
       {items.length === 0 ? (
         <EmptyState
-          title="Nenhum evento encontrado"
-          description="Não há registros no audit_log para os filtros de marca, período ou categoria selecionados."
+          title={t('activity.emptyTitle')}
+          description={t('activity.emptyDesc')}
         />
       ) : (
         <SurfacePanel padding="none" className="overflow-hidden">
           <ul className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
-            {items.map((ev) => {
+            {items.map((rawEv) => {
+              const ev = localizeActivity(rawEv, lang);
               const brand = state.brands.find((b) => b.id === ev.brandId);
               const severityText = {
                 info: 'text-[#525B68] dark:text-[#AEB7C2]',
@@ -87,7 +125,9 @@ export const ActivityView: React.FC = () => {
                 <li key={ev.id} className="p-4 sm:px-6 space-y-1.5 text-xs">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`font-medium ${severityText}`}>{ev.category}</span>
+                      <span className={`font-medium ${severityText}`}>
+                        {labelActivityCategory(ev.category, lang)}
+                      </span>
                       <span aria-hidden="true" className="text-[#AEB7C2]">
                         ·
                       </span>
@@ -104,13 +144,13 @@ export const ActivityView: React.FC = () => {
                       )}
                     </div>
                     <span className="font-mono tabular-nums text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                      {ev.timestamp.slice(0, 16).replace('T', ' ')} · {ev.actor}
+                      {fmtDateTime(ev.timestamp)} · {formatActor(ev.actor)}
                     </span>
                   </div>
                   <p className="text-[#525B68] dark:text-[#AEB7C2]">{ev.detail}</p>
                   {ev.justification && (
                     <p className="text-[11px] text-[#101216] dark:text-[#F1F2F3] bg-[#F1F2F3] dark:bg-[#101216] px-3 py-1.5 rounded border border-black/10 dark:border-white/10">
-                      Justificativa: {ev.justification}
+                      {t('activity.justificationPrefix', { text: ev.justification })}
                     </p>
                   )}
                 </li>
@@ -122,3 +162,4 @@ export const ActivityView: React.FC = () => {
     </div>
   );
 };
+

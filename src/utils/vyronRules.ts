@@ -15,6 +15,8 @@ import {
   ProductStatus,
   SystemControlState,
 } from '../types/vyron';
+import { UiLanguage } from '../i18n/types';
+import { formatCompactNumberForLang, formatCurrencyForLang } from '../i18n/formatters';
 
 /**
  * Deterministic FX rates relative to BRL (1 unit -> BRL)
@@ -37,24 +39,19 @@ export function convertCurrency(
   return inBRL / FX_TO_BRL[to];
 }
 
-export function formatCurrency(amount: number, currency: CurrencyCode): string {
-  const locale = currency === 'BRL' ? 'pt-BR' : currency === 'EUR' ? 'de-DE' : 'en-US';
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+export function formatCurrency(
+  amount: number,
+  currency: CurrencyCode,
+  language: UiLanguage = 'PT-BR'
+): string {
+  return formatCurrencyForLang(amount, currency, language);
 }
 
-export function formatCompactNumber(value: number): string {
-  if (Math.abs(value) >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1)}M`;
-  }
-  if (Math.abs(value) >= 1_000) {
-    return `${(value / 1_000).toFixed(1)}K`;
-  }
-  return value.toString();
+export function formatCompactNumber(
+  value: number,
+  language: UiLanguage = 'PT-BR'
+): string {
+  return formatCompactNumberForLang(value, language);
 }
 
 export function getPeriodStartDate(period: PeriodFilter, referenceDate = '2026-11-18'): string {
@@ -244,8 +241,10 @@ export function evaluateContentPreSendChecks(
   item: ContentItem,
   systemControl: SystemControlState,
   nowIso = '2026-11-18T18:00:00Z',
-  options?: { evidenceFreshnessMaxHours?: number }
+  options?: { evidenceFreshnessMaxHours?: number; language?: UiLanguage }
 ): PreSendEvaluation {
+  const lang: UiLanguage = options?.language ?? 'PT-BR';
+  const en = lang === 'EN-US';
   const maxFreshHours = options?.evidenceFreshnessMaxHours ?? 48;
   const nowMs = Date.parse(nowIso);
   const recalculatedHash = computeContentManifestHash(item);
@@ -255,12 +254,20 @@ export function evaluateContentPreSendChecks(
   const hashMatch = Boolean(auth && auth.authorizedHash === recalculatedHash);
   const check1: PreSendCheckItem = {
     id: 'hash_match',
-    label: '1. Hash SHA-256 do manifesto coincide com versão autorizada',
+    label: en
+      ? '1. Manifest SHA-256 hash matches authorized version'
+      : '1. Hash SHA-256 do manifesto coincide com versão autorizada',
     passed: hashMatch,
     detail: !auth
-      ? 'Nenhuma autorização vinculada a esta versão.'
+      ? en
+        ? 'No authorization linked to this version.'
+        : 'Nenhuma autorização vinculada a esta versão.'
       : hashMatch
-      ? `Hash íntegro (${recalculatedHash.slice(0, 12)}...).`
+      ? en
+        ? `Hash intact (${recalculatedHash.slice(0, 12)}...).`
+        : `Hash íntegro (${recalculatedHash.slice(0, 12)}...).`
+      : en
+      ? 'Mismatch detected: content edited after authorization (zero inheritance).'
       : 'Divergência detectada: conteúdo alterado após autorização (herança zero).',
   };
 
@@ -274,19 +281,32 @@ export function evaluateContentPreSendChecks(
     (!Number.isNaN(offerEndsMs) && nowMs <= offerEndsMs && (!auth || expiresMs <= offerEndsMs));
 
   const authValid = notRevoked && notExpired && withinOfferWindow;
+  const expiresFormatted = auth ? auth.expiresAt.slice(0, 16).replace('T', ' ') : '';
   const check2: PreSendCheckItem = {
     id: 'auth_valid',
-    label: '2. Autorização vigente, não revogada e dentro da validade da oferta',
+    label: en
+      ? '2. Authorization active, not revoked, and within offer window'
+      : '2. Autorização vigente, não revogada e dentro da validade da oferta',
     passed: authValid,
     detail: !auth
-      ? 'Aguardando autorização individual com timestamp de expiração.'
+      ? en
+        ? 'Awaiting individual authorization with expiration timestamp.'
+        : 'Aguardando autorização individual com prazo de expiração.'
       : auth.revoked
-      ? `Autorização revogada: ${auth.revokedReason ?? 'Sem motivo registrado'}.`
+      ? en
+        ? `Authorization revoked: ${auth.revokedReason ?? 'No reason recorded'}.`
+        : `Autorização revogada: ${auth.revokedReason ?? 'Sem motivo registrado'}.`
       : !notExpired
-      ? `Autorização expirada em ${auth.expiresAt.slice(0, 16).replace('T', ' ')}.`
+      ? en
+        ? `Authorization expired at ${expiresFormatted}.`
+        : `Autorização expirada em ${expiresFormatted}.`
       : !withinOfferWindow
-      ? `Janela da oferta (${item.offerEndsAt?.slice(0, 10)}) incompatível ou expirada.`
-      : `Válida até ${auth.expiresAt.slice(0, 16).replace('T', ' ')}.`,
+      ? en
+        ? `Offer window (${item.offerEndsAt?.slice(0, 10)}) incompatible or expired.`
+        : `Janela da oferta (${item.offerEndsAt?.slice(0, 10)}) incompatível ou expirada.`
+      : en
+      ? `Valid until ${expiresFormatted}.`
+      : `Válida até ${expiresFormatted}.`,
   };
 
   // 3. Affiliate link destination verified & fresh
@@ -305,14 +325,24 @@ export function evaluateContentPreSendChecks(
 
   const check3: PreSendCheckItem = {
     id: 'link_verified',
-    label: '3. Link e destino comercial verificados recentemente',
+    label: en
+      ? '3. Commercial link and destination recently verified'
+      : '3. Link e destino comercial verificados recentemente',
     passed: linkOk,
     detail: !isCommercial
-      ? 'Peça puramente editorial sem link comercial.'
+      ? en
+        ? 'Purely editorial item with no commercial link.'
+        : 'Peça puramente editorial sem link comercial.'
       : !item.affiliateLinkUrl.trim() || !item.verifiedDestinationUrl.trim()
-      ? 'URL comercial ou destino verificado ausente.'
+      ? en
+        ? 'Commercial URL or verified destination missing.'
+        : 'URL comercial ou destino verificado ausente.'
       : !linkFresh
-      ? `Verificação de link expirada (> ${maxFreshHours}h). Revalide o destino.`
+      ? en
+        ? `Link verification expired (> ${maxFreshHours}h). Revalidate destination.`
+        : `Verificação de link expirada (> ${maxFreshHours}h). Revalide o destino.`
+      : en
+      ? `Destination verified (${item.verifiedDestinationUrl}).`
       : `Destino verificado (${item.verifiedDestinationUrl}).`,
   };
 
@@ -331,18 +361,24 @@ export function evaluateContentPreSendChecks(
     aiDiscOk;
 
   const missingDetails: string[] = [];
-  if (!item.relevanceTestPassed) missingDetails.push('teste de relevância (7 pts)');
-  if (!item.editorialChecklistPassed) missingDetails.push('checklist editorial (9 pts)');
-  if (isCommercial && !condFresh) missingDetails.push('condições comerciais frescas');
-  if (!affDiscOk) missingDetails.push('divulgação de afiliação');
-  if (!aiDiscOk) missingDetails.push('divulgação de IA generativa');
+  if (!item.relevanceTestPassed) missingDetails.push(en ? 'relevance check (7 pts)' : 'teste de relevância (7 pts)');
+  if (!item.editorialChecklistPassed) missingDetails.push(en ? 'editorial checklist (9 pts)' : 'checklist editorial (9 pts)');
+  if (isCommercial && !condFresh) missingDetails.push(en ? 'fresh commercial conditions' : 'condições comerciais recentes');
+  if (!affDiscOk) missingDetails.push(en ? 'affiliate disclosure' : 'divulgação de afiliação');
+  if (!aiDiscOk) missingDetails.push(en ? 'generative AI disclosure' : 'divulgação de IA generativa');
 
   const check4: PreSendCheckItem = {
     id: 'commercial_disclosures',
-    label: '4. Evidência comercial, checklists e divulgações obrigatórias',
+    label: en
+      ? '4. Commercial evidence, checklists & mandatory disclosures'
+      : '4. Evidência comercial, checklists e divulgações obrigatórias',
     passed: gatesOk,
     detail: gatesOk
-      ? 'Relevância, checklist editorial, condições e divulgações em conformidade.'
+      ? en
+        ? 'Relevance, editorial checklist, conditions, and disclosures compliant.'
+        : 'Relevância, checklist editorial, condições e divulgações em conformidade.'
+      : en
+      ? `Pending: ${missingDetails.join(', ')}.`
       : `Pendente: ${missingDetails.join(', ')}.`,
   };
 
@@ -353,33 +389,66 @@ export function evaluateContentPreSendChecks(
 
   const check5: PreSendCheckItem = {
     id: 'risk_compliance',
-    label: '5. Classificação de risco e trava para temas sensíveis',
+    label: en
+      ? '5. Risk classification & sensitive-topic safeguard'
+      : '5. Classificação de risco e trava para temas sensíveis',
     passed: riskOk,
     detail: item.unclassifiedRiskFlag
-      ? 'Bloqueado: item marcado com risco não classificado.'
+      ? en
+        ? 'Blocked: item flagged with unclassified risk.'
+        : 'Bloqueado: item marcado com risco não classificado.'
       : hasSensitiveTopic && auth?.type !== 'individual'
-      ? `Tema sensível (${item.sensitiveTopic}) exige autorização individual humana.`
+      ? en
+        ? `Sensitive topic (${item.sensitiveTopic}) requires individual human authorization.`
+        : `Tema sensível (${item.sensitiveTopic}) exige autorização individual humana.`
       : hasSensitiveTopic
-      ? `Tema sensível (${item.sensitiveTopic}) com autorização individual registrada.`
+      ? en
+        ? `Sensitive topic (${item.sensitiveTopic}) has individual authorization recorded.`
+        : `Tema sensível (${item.sensitiveTopic}) com autorização individual registrada.`
+      : en
+      ? 'No unclassified risk flags.'
       : 'Sem sinalizadores de risco não classificado.',
   };
 
-  // 6. SystemControl ACTIVE + PUBLISHING_ENABLED + Phase A/B visibility gate
+  // 6. SystemControl ACTIVE + Automated Publishing + Environment visibility gate
   const phaseOk = item.visibility !== 'public' || systemControl.phaseBPublicAllowed;
   const sysOk = systemControl.state === 'ACTIVE' && systemControl.publishingEnabled && phaseOk;
 
+  const visLabel =
+    item.visibility === 'public'
+      ? en
+        ? 'Public'
+        : 'Público'
+      : item.visibility === 'unlisted'
+      ? en
+        ? 'Unlisted'
+        : 'Não listado'
+      : en
+      ? 'Private'
+      : 'Privado';
+
   const check6: PreSendCheckItem = {
     id: 'system_control_phase',
-    label: '6. Stop All inativo, Publishing habilitado e visibilidade da Fase',
+    label: en
+      ? '6. Stop All inactive, automated publishing enabled & environment visibility'
+      : '6. Stop All inativo, publicação automática habilitada e visibilidade permitida',
     passed: sysOk,
     detail:
       systemControl.state === 'HALTED'
-        ? `Sistema em HALTED (${systemControl.reason}).`
+        ? en
+          ? `System halted (${systemControl.reason}).`
+          : `Sistema interrompido (${systemControl.reason}).`
         : !systemControl.publishingEnabled
-        ? 'PUBLISHING_ENABLED desligado (modo seguro).'
+        ? en
+          ? 'Automated publishing disabled (safe mode).'
+          : 'Publicação automática desligada (modo seguro).'
         : !phaseOk
-        ? `Visibilidade 'public' bloqueada na Fase A (permitido apenas private/unlisted).`
-        : `Sistema ACTIVE · Visibilidade '${item.visibility}' permitida.`,
+        ? en
+          ? 'Public visibility is blocked in the private environment (only private/unlisted allowed).'
+          : 'Visibilidade pública bloqueada no ambiente privado (apenas privado ou não listado).'
+        : en
+        ? `System active · Visibility "${visLabel}" allowed.`
+        : `Sistema ativo · Visibilidade '${visLabel}' permitida.`,
   };
 
   const checks = [check1, check2, check3, check4, check5, check6];
@@ -405,13 +474,17 @@ export interface ProductScoreV61Result {
  *   returns `score: null` so incomplete candidates are never misranked as 0.
  * - Operates strictly within the product's native currency (no FX mixing).
  */
-export function scoreProductV61(product: Product): ProductScoreV61Result {
+export function scoreProductV61(
+  product: Product,
+  language: UiLanguage = 'PT-BR'
+): ProductScoreV61Result {
+  const en = language === 'EN-US';
   const missingCriticalFields: string[] = [];
-  if (product.price === null) missingCriticalFields.push('price');
+  if (product.price === null) missingCriticalFields.push(en ? 'price' : 'preço');
   if (product.commissionRatePct === null && product.cpaValue === null) {
-    missingCriticalFields.push('remuneration');
+    missingCriticalFields.push(en ? 'payout' : 'remuneração');
   }
-  if (product.epcValue === null) missingCriticalFields.push('epc');
+  if (product.epcValue === null) missingCriticalFields.push('EPC');
 
   const optionalNulls = [
     product.cookieWindowDays,
@@ -426,7 +499,9 @@ export function scoreProductV61(product: Product): ProductScoreV61Result {
       version: 'v0-hipotese',
       unknownFieldsCount,
       missingCriticalFields,
-      explanation: `Score indeterminado (null): campos críticos ausentes (${missingCriticalFields.join(', ')}).`,
+      explanation: en
+        ? `Indeterminate index (no data): missing critical fields (${missingCriticalFields.join(', ')}).`
+        : `Índice indeterminado (sem dados): campos críticos ausentes (${missingCriticalFields.join(', ')}).`,
     };
   }
 
@@ -471,7 +546,9 @@ export function scoreProductV61(product: Product): ProductScoreV61Result {
     version: 'v0-hipotese',
     unknownFieldsCount,
     missingCriticalFields: [],
-    explanation: `Calculado na moeda nativa (${product.currency}) com ${unknownFieldsCount} campo(s) desconhecido(s).`,
+    explanation: en
+      ? `Computed in native currency (${product.currency}) with ${unknownFieldsCount} missing field(s).`
+      : `Calculado na moeda nativa (${product.currency}) com ${unknownFieldsCount} campo(s) sem dados.`,
   };
 }
 
@@ -679,8 +756,10 @@ export function transitionContentStatus(
 
 export function applyStopAllToAutomations(
   automations: AutomationAgent[],
-  timestamp = new Date().toISOString()
+  timestamp = new Date().toISOString(),
+  language: UiLanguage = 'PT-BR'
 ): { updated: AutomationAgent[]; stoppedCount: number } {
+  const en = language === 'EN-US';
   let stoppedCount = 0;
   const updated = automations.map((agent) => {
     if (agent.state === 'Running' || agent.state === 'Waiting Approval') {
@@ -694,7 +773,9 @@ export function applyStopAllToAutomations(
             timestamp,
             status: 'Paused' as const,
             durationSec: 0,
-            summary: 'Operação interrompida via comando global Stop All (HALTED).',
+            summary: en
+              ? 'Operation halted via global Stop All command.'
+              : 'Operação interrompida via comando global Stop All.',
             recordsAffected: 0,
           },
           ...agent.history,
@@ -712,8 +793,10 @@ export function applyStopAllToAutomations(
 export function reconcileOrphanedJobRuns(
   jobRuns: JobRun[],
   nowIso = new Date().toISOString(),
-  olderThanMinutes = 30
+  olderThanMinutes = 30,
+  language: UiLanguage = 'PT-BR'
 ): { updated: JobRun[]; reconciledIds: number[] } {
+  const en = language === 'EN-US';
   const nowMs = Date.parse(nowIso);
   const reconciledIds: number[] = [];
 
@@ -726,7 +809,9 @@ export function reconcileOrphanedJobRuns(
         ...job,
         status: 'failed' as const,
         finishedAt: nowIso,
-        error: `Reconciliado como órfão após ${Math.round(ageMinutes)} min sem heartbeat.`,
+        error: en
+          ? `Reconciled as stalled after ${Math.round(ageMinutes)} min without heartbeat.`
+          : `Reconciliado como pendente após ${Math.round(ageMinutes)} min sem resposta.`,
       };
     }
     return job;
@@ -738,11 +823,15 @@ export function reconcileOrphanedJobRuns(
 /**
  * Lote 8 rule: `control resume` is blocked while any job_run is `running` or `unknown`.
  */
-export function canResumeSystemControl(jobRuns: JobRun[]): {
+export function canResumeSystemControl(
+  jobRuns: JobRun[],
+  language: UiLanguage = 'PT-BR'
+): {
   allowed: boolean;
   blockingJobIds: number[];
   reason?: string;
 } {
+  const en = language === 'EN-US';
   const blocking = jobRuns.filter((j) => j.status === 'running' || j.status === 'unknown');
   if (blocking.length === 0) {
     return { allowed: true, blockingJobIds: [] };
@@ -751,7 +840,9 @@ export function canResumeSystemControl(jobRuns: JobRun[]): {
   return {
     allowed: false,
     blockingJobIds: ids,
-    reason: `Resume bloqueado: existem ${blocking.length} execução(ões) pendentes/órfãs (#${ids.join(', #')}). Execute 'jobs reconcile' antes de retomar.`,
+    reason: en
+      ? `Resume blocked: ${blocking.length} pending run(s) detected (#${ids.join(', #')}). Reconcile runs before resuming.`
+      : `Retomada bloqueada: existem ${blocking.length} execução(ões) pendente(s) (#${ids.join(', #')}). Reconcilie as execuções antes de retomar.`,
   };
 }
 

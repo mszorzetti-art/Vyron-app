@@ -6,14 +6,16 @@ import {
   computeBrandRollups,
   computeOperationalEfficiency,
   convertCurrency,
-  formatCompactNumber,
-  formatCurrency,
 } from '../utils/vyronRules';
+import { useI18n } from '../i18n/useI18n';
+import { labelAttributionStatus, labelValidationStage } from '../i18n/domainLabels';
+import { localizeContentDisplay } from '../i18n/seedTranslations';
 import { DualLineChart, HorizontalBarComparison } from '../components/Charts';
 import { MetricBlock, PageHeader, SegmentedControl, SurfacePanel } from '../components/ui';
 
 export const AnalyticsView: React.FC = () => {
   const { state, globalBrandFilter, globalPeriodFilter, excludeTestData } = useVyron();
+  const { lang, t, fmtCurrency, fmtCompact, fmtNumber, fmtPercent } = useI18n();
   const [geoTab, setGeoTab] = useState<'geo' | 'lang'>('geo');
   const [exportNotice, setExportNotice] = useState('');
 
@@ -53,31 +55,37 @@ export const AnalyticsView: React.FC = () => {
   );
 
   const trafficSeries = [
-    { label: 'Sem 1', primary: Math.round(totalTraffic * 0.19), secondary: Math.round(totalConversions * 0.18) * 100 },
-    { label: 'Sem 2', primary: Math.round(totalTraffic * 0.23), secondary: Math.round(totalConversions * 0.22) * 100 },
-    { label: 'Sem 3', primary: Math.round(totalTraffic * 0.27), secondary: Math.round(totalConversions * 0.28) * 100 },
-    { label: 'Sem 4', primary: Math.round(totalTraffic * 0.31), secondary: Math.round(totalConversions * 0.32) * 100 },
+    { label: t('analytics.chart.week1'), primary: Math.round(totalTraffic * 0.19), secondary: Math.round(totalConversions * 0.18) * 100 },
+    { label: t('analytics.chart.week2'), primary: Math.round(totalTraffic * 0.23), secondary: Math.round(totalConversions * 0.22) * 100 },
+    { label: t('analytics.chart.week3'), primary: Math.round(totalTraffic * 0.27), secondary: Math.round(totalConversions * 0.28) * 100 },
+    { label: t('analytics.chart.week4'), primary: Math.round(totalTraffic * 0.31), secondary: Math.round(totalConversions * 0.32) * 100 },
   ];
 
   const geoBreakdown = [
-    { id: 'br', label: 'Brasil', sublabel: 'Apex & Veloce (CDC/CONAR)', value: 44, formattedValue: '44%' },
-    { id: 'us', label: 'Estados Unidos', sublabel: 'Nordic & Kinetix', value: 33, formattedValue: '33%' },
-    { id: 'eu', label: 'França / União Europeia', sublabel: 'Piloto UE (Loi 2023-451)', value: 16, formattedValue: '16%' },
-    { id: 'other', label: 'Outros Mercados', sublabel: 'Tráfego orgânico global', value: 7, formattedValue: '7%' },
+    { id: 'br', label: t('analytics.geo.br'), sublabel: t('analytics.geo.brSub'), value: 44, formattedValue: fmtPercent(44, 0) },
+    { id: 'us', label: t('analytics.geo.us'), sublabel: t('analytics.geo.usSub'), value: 33, formattedValue: fmtPercent(33, 0) },
+    { id: 'eu', label: t('analytics.geo.eu'), sublabel: t('analytics.geo.euSub'), value: 16, formattedValue: fmtPercent(16, 0) },
+    { id: 'other', label: t('analytics.geo.other'), sublabel: t('analytics.geo.otherSub'), value: 7, formattedValue: fmtPercent(7, 0) },
   ];
 
   const langBreakdown = [
-    { id: 'en', label: 'EN-US (Inglês)', sublabel: 'Nordic Desk + Kinetix', value: 54, formattedValue: '54%' },
-    { id: 'pt', label: 'PT-BR (Português)', sublabel: 'Apex Hardware + Veloce', value: 46, formattedValue: '46%' },
+    { id: 'en', label: t('analytics.lang.en'), sublabel: t('analytics.lang.enSub'), value: 54, formattedValue: fmtPercent(54, 0) },
+    { id: 'pt', label: t('analytics.lang.pt'), sublabel: t('analytics.lang.ptSub'), value: 46, formattedValue: fmtPercent(46, 0) },
   ];
 
   const handleExportReport = () => {
     const csvRows = [
-      ['Marca', 'Estagio', 'Views 30d', 'Produtos Aprovados', `Comercial Confirmado (${currency})`].join(','),
+      [
+        t('analytics.csv.brand'),
+        t('analytics.csv.stage'),
+        t('analytics.csv.views'),
+        t('analytics.csv.approvedProducts'),
+        t('analytics.csv.confirmedCommercial', { currency }),
+      ].join(','),
       ...brandRollups.map((r) =>
         [
           `"${r.brand.name}"`,
-          `"${r.brand.validationStage}"`,
+          `"${labelValidationStage(r.brand.validationStage, lang)}"`,
           r.totalViews30d,
           r.approvedProductsCount,
           r.confirmedCommercial.toFixed(2),
@@ -91,14 +99,14 @@ export const AnalyticsView: React.FC = () => {
     a.download = `vyron-analytics-${globalPeriodFilter}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    setExportNotice(`Relatório CSV gerado (${globalPeriodFilter}).`);
+    setExportNotice(t('analytics.exportNotice', { period: globalPeriodFilter }));
   };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Analytics & Inteligência"
-        subtitle="Atribuição por peça explicitamente rotulada [Em investigação] até validação V1–V5, além de eficiência operacional (Dimensão 2)."
+        title={t('analytics.title')}
+        subtitle={t('analytics.subtitle')}
         actions={
           <button
             type="button"
@@ -106,7 +114,7 @@ export const AnalyticsView: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-md bg-[#315FEA] text-white hover:bg-[#274FC9] whitespace-nowrap"
           >
             <Download className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Exportar Relatório CSV</span>
+            <span>{t('analytics.exportCsv')}</span>
           </button>
         }
       />
@@ -119,33 +127,38 @@ export const AnalyticsView: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricBlock
-          label="Tráfego Total (Canais 30d)"
-          value={formatCompactNumber(totalTraffic)}
-          helper={`Janela ${globalPeriodFilter}`}
+          label={t('analytics.kpi.traffic')}
+          value={fmtCompact(totalTraffic)}
+          helper={t('analytics.kpi.window', { period: globalPeriodFilter })}
           tone="cobalt"
         />
         <MetricBlock
-          label="Conversões (Estimativa V1–V5)"
+          label={t('analytics.kpi.conversions')}
           value={`${totalConversions}`}
-          helper={`${formatCompactNumber(totalClicks)} cliques · Conv. est. ${conversionRate.toFixed(2)}%`}
+          helper={t('analytics.kpi.clicksConv', {
+            clicks: fmtCompact(totalClicks),
+            rate: fmtPercent(conversionRate, 2),
+          })}
         />
         <MetricBlock
-          label="Dim. 2 · Retorno / Hora Humana"
+          label={t('analytics.kpi.efficiency')}
           value={
             efficiency.realizedCashPerHour !== null
-              ? `${formatCurrency(efficiency.realizedCashPerHour, currency)}/h`
-              : 'N/D'
+              ? `${fmtCurrency(efficiency.realizedCashPerHour, currency)}/h`
+              : t('common.na')
           }
-          helper={`${efficiency.totalHumanHours.toFixed(1)}h humanas no escopo`}
+          helper={t('analytics.kpi.hoursScope', {
+            hours: fmtNumber(efficiency.totalHumanHours, 1),
+          })}
           tone="emerald"
         />
         <MetricBlock
-          label="Receita Confirmada / 1k Views"
-          value={formatCurrency(
+          label={t('analytics.kpi.rpm')}
+          value={fmtCurrency(
             totalTraffic > 0 ? (finance.confirmedCommercialResult / totalTraffic) * 1000 : 0,
             currency
           )}
-          helper="RPM comercial consolidado (12.1.1)"
+          helper={t('analytics.kpi.rpmHelper')}
         />
       </div>
 
@@ -153,31 +166,31 @@ export const AnalyticsView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <SurfacePanel className="lg:col-span-7">
           <h2 className="font-display text-sm font-semibold mb-1">
-            Tendência de Tráfego e Conversões Estimadas
+            {t('analytics.chart.title')}
           </h2>
           <p className="text-xs text-[#525B68] dark:text-[#AEB7C2] mb-4">
-            Evolução semanal consolidada entre canais e links rastreados por src
+            {t('analytics.chart.subtitle')}
           </p>
           <DualLineChart
             data={trafficSeries}
-            primaryLabel="Tráfego (Views)"
-            secondaryLabel="Índice Conversões (x100)"
-            formatValue={(v) => formatCompactNumber(v)}
+            primaryLabel={t('analytics.chart.primary')}
+            secondaryLabel={t('analytics.chart.secondary')}
+            formatValue={(v) => fmtCompact(v)}
           />
         </SurfacePanel>
 
         <SurfacePanel className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between gap-2">
             <h2 className="font-display text-sm font-semibold">
-              Análise Geográfica & Idioma
+              {t('analytics.geo.title')}
             </h2>
             <SegmentedControl
-              ariaLabel="Alternar geografia ou idioma"
+              ariaLabel={t('analytics.geo.switchAria')}
               value={geoTab}
               onChange={(v) => setGeoTab(v as 'geo' | 'lang')}
               options={[
-                { value: 'geo', label: 'Região' },
-                { value: 'lang', label: 'Idioma' },
+                { value: 'geo', label: t('analytics.geo.tabRegion') },
+                { value: 'lang', label: t('analytics.geo.tabLang') },
               ]}
             />
           </div>
@@ -185,15 +198,15 @@ export const AnalyticsView: React.FC = () => {
         </SurfacePanel>
       </div>
 
-      {/* Content & Product Attribution Table (Rule 12.4: Always labeled Estimate [Em investigação]) */}
+      {/* Content & Product Attribution Table */}
       <SurfacePanel>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div>
             <h2 className="font-display text-sm font-semibold">
-              Atribuição por Peça (Regra 12.4 — Tracking src / UTM)
+              {t('analytics.attribution.title')}
             </h2>
             <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
-              Valores por peça são tratados estritamente como estimativa até conclusão do protocolo V1–V5 (Bloco 9).
+              {t('analytics.attribution.subtitle')}
             </p>
           </div>
         </div>
@@ -201,40 +214,46 @@ export const AnalyticsView: React.FC = () => {
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-black/10 dark:border-white/10 text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                <th className="py-2 pr-4">Conteúdo Publicado</th>
-                <th className="py-2 pr-4">Tag src</th>
-                <th className="py-2 pr-4">Atribuição</th>
-                <th className="py-2 pr-4 text-right">Views / Ret. 30s</th>
-                <th className="py-2 pr-4 text-right">Cliques</th>
-                <th className="py-2 pr-4 text-right">Conv. Est.</th>
-                <th className="py-2 text-right">Receita Est. ({currency})</th>
+                <th className="py-2 pr-4">{t('analytics.attribution.colContent')}</th>
+                <th className="py-2 pr-4">{t('analytics.attribution.colTag')}</th>
+                <th className="py-2 pr-4">{t('analytics.attribution.colStatus')}</th>
+                <th className="py-2 pr-4 text-right">{t('analytics.attribution.colViewsRet')}</th>
+                <th className="py-2 pr-4 text-right">{t('analytics.attribution.colClicks')}</th>
+                <th className="py-2 pr-4 text-right">{t('analytics.attribution.colConv')}</th>
+                <th className="py-2 text-right">
+                  {t('analytics.attribution.colRev', { currency })}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
               {filteredContents.map((c) => {
+                const localized = localizeContentDisplay(c, lang);
                 const rev = c.metrics
                   ? convertCurrency(c.metrics.revenueGenerated, c.metrics.currency, currency)
                   : 0;
+                const attrLabel = c.metrics?.attributionStatus
+                  ? labelAttributionStatus(c.metrics.attributionStatus, lang)
+                  : labelAttributionStatus('Estimativa [Em investigação]', lang);
                 return (
                   <tr key={c.id}>
-                    <td className="py-2.5 pr-4 font-medium">{c.title}</td>
+                    <td className="py-2.5 pr-4 font-medium">{localized.title}</td>
                     <td className="py-2.5 pr-4 font-mono text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
                       {c.metrics?.trackingSrc ?? '-'}
                     </td>
                     <td className="py-2.5 pr-4 font-mono text-[11px] text-amber-700 dark:text-amber-400">
-                      {c.metrics?.attributionStatus ?? 'Estimativa [Em investigação]'}
+                      {attrLabel}
                     </td>
                     <td className="py-2.5 pr-4 text-right font-mono tabular-nums">
-                      {formatCompactNumber(c.metrics?.views ?? 0)} ({c.metrics?.retention30sPct ?? 0}%)
+                      {fmtCompact(c.metrics?.views ?? 0)} ({fmtPercent(c.metrics?.retention30sPct ?? 0, 0)})
                     </td>
                     <td className="py-2.5 pr-4 text-right font-mono tabular-nums">
-                      {formatCompactNumber(c.metrics?.clicks ?? 0)}
+                      {fmtCompact(c.metrics?.clicks ?? 0)}
                     </td>
                     <td className="py-2.5 pr-4 text-right font-mono tabular-nums">
                       {c.metrics?.conversions ?? 0}
                     </td>
                     <td className="py-2.5 text-right font-mono tabular-nums font-medium text-emerald-700 dark:text-emerald-400">
-                      {formatCurrency(rev, currency)}
+                      {fmtCurrency(rev, currency)}
                     </td>
                   </tr>
                 );
@@ -248,23 +267,23 @@ export const AnalyticsView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <SurfacePanel className="space-y-3">
           <h2 className="font-display text-sm font-semibold">
-            Anomalias Detectadas no Período
+            {t('analytics.anomalies.title')}
           </h2>
           <ul className="space-y-2.5 text-xs">
             <li className="p-3 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10">
               <div className="font-medium text-emerald-700 dark:text-emerald-400">
-                +18,3% Alcance acima da baseline · Pinterest (Nordic Desk Studio)
+                {t('analytics.anomalies.item1Title')}
               </div>
               <p className="mt-1 text-[#525B68] dark:text-[#AEB7C2]">
-                Pins arquitetônicos do ScreenBar Halo elevaram CTR de saída em 2,3x nas últimas 3 semanas.
+                {t('analytics.anomalies.item1Desc')}
               </p>
             </li>
             <li className="p-3 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10">
               <div className="font-medium text-amber-700 dark:text-amber-400">
-                Queda de cadência · TikTok (@nordic.desk)
+                {t('analytics.anomalies.item2Title')}
               </div>
               <p className="mt-1 text-[#525B68] dark:text-[#AEB7C2]">
-                Sincronização interrompida por token demo expirado; dados dos últimos 2 dias pendentes.
+                {t('analytics.anomalies.item2Desc')}
               </p>
             </li>
           </ul>
@@ -272,25 +291,37 @@ export const AnalyticsView: React.FC = () => {
 
         <SurfacePanel className="space-y-3">
           <h2 className="font-display text-sm font-semibold">
-            Preparação Estrutural para Machine Learning Futuro (Fase F)
+            {t('analytics.ml.title')}
           </h2>
           <p className="text-xs text-[#525B68] dark:text-[#AEB7C2] leading-relaxed">
-            Camada planejada (não executada no MVP): histórico de decisões humanas, categorias de rejeição (Tom, Precisão/Fonte, Conformidade), hashes SHA-256 e resultados financeiros líquidos compõem o dataset rotulado.
+            {t('analytics.ml.desc')}
           </p>
           <div className="grid grid-cols-3 gap-3 pt-2 border-t border-black/10 dark:border-white/10 text-xs">
             <div>
-              <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">Amostras Rotuladas</div>
+              <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                {t('analytics.ml.samples')}
+              </div>
               <div className="font-mono tabular-nums font-semibold mt-0.5">
-                {state.products.reduce((s, p) => s + p.decisions.length, 0) + state.activities.length} eventos
+                {t('analytics.ml.eventsCount', {
+                  count: state.products.reduce((s, p) => s + p.decisions.length, 0) + state.activities.length,
+                })}
               </div>
             </div>
             <div>
-              <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">Chaves Cruzadas</div>
-              <div className="font-mono tabular-nums font-semibold mt-0.5">Brand · Prod · Hash</div>
+              <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                {t('analytics.ml.keys')}
+              </div>
+              <div className="font-mono tabular-nums font-semibold mt-0.5">
+                {t('analytics.ml.keysVal')}
+              </div>
             </div>
             <div>
-              <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">Estado do Pipeline</div>
-              <div className="font-mono font-semibold mt-0.5 text-[#AEB7C2]">Planejado (Bloco 10+)</div>
+              <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                {t('analytics.ml.pipelineState')}
+              </div>
+              <div className="font-mono font-semibold mt-0.5 text-[#525B68] dark:text-[#AEB7C2]">
+                {t('analytics.ml.planned')}
+              </div>
             </div>
           </div>
         </SurfacePanel>
@@ -298,3 +329,4 @@ export const AnalyticsView: React.FC = () => {
     </div>
   );
 };
+

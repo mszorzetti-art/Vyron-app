@@ -1,41 +1,23 @@
 import React, { useState } from 'react';
-import { OctagonAlert, RefreshCw, RotateCcw } from 'lucide-react';
+import { Lock, LogOut, OctagonAlert, RefreshCw, RotateCcw } from 'lucide-react';
+import { useVyronAccess } from '../context/VyronAccessContext';
 import { useVyron } from '../context/VyronContext';
 import { CurrencyCode, ThemeMode } from '../types/vyron';
+import { IDLE_TIMEOUT_OPTIONS } from '../utils/vyronAccess';
 import { canResumeSystemControl } from '../utils/vyronRules';
+import { useI18n } from '../i18n/useI18n';
+import {
+  labelIntegrationConfigStatus,
+  labelRiskStatus,
+  labelSystemControlState,
+} from '../i18n/domainLabels';
+import { localizeIntegration, localizeRisk } from '../i18n/seedTranslations';
 import {
   PageHeader,
   SegmentedControl,
   StatusLabel,
   SurfacePanel,
 } from '../components/ui';
-
-const ARCHITECTURE_BLOCKS = [
-  {
-    group: 'Implementado no Repositório (main · Lotes 1–9)',
-    status: 'Active',
-    items: [
-      'Blocos 0–4: Fundação SQLAlchemy + Alembic, Catálogo Compartilhado (platform, external_id), is_test isolado e score-6.1 (v0-hipotese) por moeda sem FX mixing.',
-      'Bloco 5 (Lotes 7–9): Executor em lotes (job_runs), --dry-run padrão, --commit fail-closed, jobs reconcile para órfãos, system_controls (ACTIVE/HALTED) e audit_log append-only.',
-    ],
-  },
-  {
-    group: 'Em Integração (Fase A Operacional)',
-    status: 'In Review',
-    items: [
-      'Bloco 6: Content Studio (Brief -> Draft -> In Review -> Approved -> Published/Rejected), dossiê com níveis de fonte (1–4) e histórico de rejeição estruturado.',
-      'Bloco 7: Autorização individual por hash SHA-256 com herança zero, expiração explícita e 6 travas obrigatórias pré-envio.',
-    ],
-  },
-  {
-    group: 'Planejado (Próximos Ciclos)',
-    status: 'Draft',
-    items: [
-      'Blocos 8–10: Conectores reais de canais (YouTube/Instagram/TikTok/Web), atribuição real de cliques/conversões e conciliação bancária/FX automática.',
-      'Blocos 11–12 & Fase F: Compliance Intelligence regional (BR/FR-UE), reclassificação A/B/C e modelos calibrados de ML após base empírica auditada.',
-    ],
-  },
-];
 
 export const SettingsView: React.FC = () => {
   const {
@@ -49,50 +31,79 @@ export const SettingsView: React.FC = () => {
     reconcileJobsDemo,
     resetDemoData,
   } = useVyron();
+  const {
+    session,
+    lock,
+    logout,
+    setIdleTimeoutMinutes,
+    updateAccessPassword,
+  } = useVyronAccess();
+  const { lang, t } = useI18n();
 
   const [controlFeedback, setControlFeedback] = useState<{
+    ok: boolean;
+    message: string;
+  } | null>(null);
+  const [currentPwd, setCurrentPwd] = useState('');
+  const [newPwd, setNewPwd] = useState('');
+  const [pwdFeedback, setPwdFeedback] = useState<{
     ok: boolean;
     message: string;
   } | null>(null);
 
   const s = state.settings;
   const isHalted = state.systemControl.state === 'HALTED';
-  const resumeGate = canResumeSystemControl(state.jobRuns);
+  const resumeGate = canResumeSystemControl(state.jobRuns, lang);
+
+  const architectureBlocks = [
+    {
+      group: t('settings.arch.grp1Title'),
+      statusKey: 'Active',
+      statusLabel: lang === 'EN-US' ? 'Active' : 'Ativo',
+      items: [t('settings.arch.grp1Item1'), t('settings.arch.grp1Item2')],
+    },
+    {
+      group: t('settings.arch.grp2Title'),
+      statusKey: 'In Review',
+      statusLabel: lang === 'EN-US' ? 'In Integration' : 'Em integração',
+      items: [t('settings.arch.grp2Item1'), t('settings.arch.grp2Item2')],
+    },
+    {
+      group: t('settings.arch.grp3Title'),
+      statusKey: 'Draft',
+      statusLabel: lang === 'EN-US' ? 'Planned' : 'Planejado',
+      items: [t('settings.arch.grp3Item1'), t('settings.arch.grp3Item2')],
+    },
+  ];
 
   const handleHalt = () => {
-    const count = haltSystemControl(
-      s.ownerName,
-      'Stop All acionado pelo proprietário via Settings & Governança.'
-    );
+    const count = haltSystemControl(s.ownerName, t('settings.haltReason'));
     setControlFeedback({
       ok: true,
-      message: `system_controls definido como HALTED (${count} agente(s) interrompido(s)).`,
+      message: t('settings.haltFeedback', { count }),
     });
   };
 
   const handleResume = () => {
-    const res = resumeSystemControl(
-      s.ownerName,
-      'Retomada solicitada pelo proprietário via Settings & Governança.'
-    );
+    const res = resumeSystemControl(s.ownerName, t('settings.resumeReason'));
     if (!res.ok) {
       setControlFeedback({
         ok: false,
-        message: res.reason ?? 'Retomada bloqueada enquanto houver job_runs pendentes.',
+        message: res.reason ?? t('settings.resumeBlockedFallback'),
       });
       return;
     }
     setControlFeedback({
       ok: true,
-      message: 'system_controls retomado para ACTIVE.',
+      message: t('settings.resumeFeedback'),
     });
   };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Settings & Governança"
-        subtitle="Preferências do proprietário, switches de publicação (Fase A/B), validade de hash/evidência, matriz RISK_REGISTER e estado dos blocos."
+        title={t('settings.title')}
+        subtitle={t('settings.subtitle')}
         actions={
           <button
             type="button"
@@ -100,7 +111,7 @@ export const SettingsView: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-md border border-black/15 dark:border-white/15 hover:border-[#315FEA] whitespace-nowrap"
           >
             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Restaurar Dados Demo</span>
+            <span>{t('settings.resetDemo')}</span>
           </button>
         }
       />
@@ -108,14 +119,12 @@ export const SettingsView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Owner Profile & Preferences */}
         <SurfacePanel className="lg:col-span-6 space-y-5">
-          <h2 className="font-display text-sm font-semibold">
-            Perfil do Proprietário & Preferências
-          </h2>
+          <h2 className="font-display text-sm font-semibold">{t('settings.profileTitle')}</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
               <label htmlFor="owner-name" className="block font-medium mb-1">
-                Nome do Proprietário (Actor)
+                {t('settings.ownerNameLabel')}
               </label>
               <input
                 id="owner-name"
@@ -126,7 +135,7 @@ export const SettingsView: React.FC = () => {
             </div>
             <div>
               <label htmlFor="owner-email" className="block font-medium mb-1">
-                E-mail Operacional
+                {t('settings.ownerEmailLabel')}
               </label>
               <input
                 id="owner-email"
@@ -140,31 +149,29 @@ export const SettingsView: React.FC = () => {
           <div className="space-y-3 text-xs pt-2 border-t border-black/10 dark:border-white/10">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <div className="font-medium">Tema da Interface</div>
-                <div className="text-[#525B68] dark:text-[#AEB7C2]">
-                  Obsidian Black (#101216) ou Cool White (#F1F2F3)
-                </div>
+                <div className="font-medium">{t('settings.themeLabel')}</div>
+                <div className="text-[#525B68] dark:text-[#AEB7C2]">{t('settings.themeDesc')}</div>
               </div>
               <SegmentedControl
-                ariaLabel="Selecionar tema"
+                ariaLabel={t('settings.themeAria')}
                 value={s.theme}
-                onChange={(t) => setTheme(t as ThemeMode)}
+                onChange={(th) => setTheme(th as ThemeMode)}
                 options={[
-                  { value: 'dark', label: 'Obsidian Escuro' },
-                  { value: 'light', label: 'Cool White Claro' },
+                  { value: 'dark', label: t('settings.themeDark') },
+                  { value: 'light', label: t('settings.themeLight') },
                 ]}
               />
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <div className="font-medium">Moeda Base Consolidada</div>
+                <div className="font-medium">{t('settings.currencyLabel')}</div>
                 <div className="text-[#525B68] dark:text-[#AEB7C2]">
-                  Overview/Finanças (ranking de produtos permanece por moeda nativa)
+                  {t('settings.currencyDesc')}
                 </div>
               </div>
               <SegmentedControl
-                ariaLabel="Selecionar moeda base"
+                ariaLabel={t('settings.currencyAria')}
                 value={s.baseCurrency}
                 onChange={(c) => setBaseCurrency(c as CurrencyCode)}
                 options={[
@@ -177,13 +184,13 @@ export const SettingsView: React.FC = () => {
 
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <div className="font-medium">Idioma da Interface</div>
+                <div className="font-medium">{t('settings.languageLabel')}</div>
                 <div className="text-[#525B68] dark:text-[#AEB7C2]">
-                  Escopo operacional padrão
+                  {t('settings.languageDesc')}
                 </div>
               </div>
               <SegmentedControl
-                ariaLabel="Selecionar idioma"
+                ariaLabel={t('settings.languageAria')}
                 value={s.uiLanguage}
                 onChange={(l) => updateSettings({ uiLanguage: l as 'PT-BR' | 'EN-US' })}
                 options={[
@@ -197,41 +204,35 @@ export const SettingsView: React.FC = () => {
 
         {/* Autonomy Policies, Publishing Switches, Validity Windows & Security Stop All */}
         <SurfacePanel className="lg:col-span-6 space-y-5">
-          <h2 className="font-display text-sm font-semibold">
-            Políticas de Publicação, Validade & Segurança
-          </h2>
+          <h2 className="font-display text-sm font-semibold">{t('settings.policiesTitle')}</h2>
 
           <div className="space-y-2.5 text-xs">
             <label className="flex items-center justify-between gap-3 p-3 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10">
               <span>
-                <span className="font-medium block">PUBLISHING_ENABLED (Switch Global)</span>
+                <span className="font-medium block">{t('settings.publishingLabel')}</span>
                 <span className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                  Desligado por padrão em modo seguro (bloqueia Check #6 pré-envio)
+                  {t('settings.publishingDesc')}
                 </span>
               </span>
               <input
                 type="checkbox"
                 checked={state.systemControl.publishingEnabled}
-                onChange={(e) =>
-                  toggleSystemFlags({ publishingEnabled: e.target.checked })
-                }
+                onChange={(e) => toggleSystemFlags({ publishingEnabled: e.target.checked })}
                 className="accent-[#315FEA]"
               />
             </label>
 
             <label className="flex items-center justify-between gap-3 p-3 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10">
               <span>
-                <span className="font-medium block">Permitir Visibilidade Pública (Fase B)</span>
+                <span className="font-medium block">{t('settings.publicAllowedLabel')}</span>
                 <span className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                  Na Fase A, apenas peças private/unlisted passam no Check #6
+                  {t('settings.publicAllowedDesc')}
                 </span>
               </span>
               <input
                 type="checkbox"
                 checked={state.systemControl.phaseBPublicAllowed}
-                onChange={(e) =>
-                  toggleSystemFlags({ phaseBPublicAllowed: e.target.checked })
-                }
+                onChange={(e) => toggleSystemFlags({ phaseBPublicAllowed: e.target.checked })}
                 className="accent-[#315FEA]"
               />
             </label>
@@ -239,7 +240,7 @@ export const SettingsView: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               <div>
                 <label htmlFor="auth-validity-hours" className="block font-medium mb-1">
-                  Validade Padrão Hash (h)
+                  {t('settings.authValidityLabel')}
                 </label>
                 <input
                   id="auth-validity-hours"
@@ -258,7 +259,7 @@ export const SettingsView: React.FC = () => {
 
               <div>
                 <label htmlFor="evidence-freshness-hours" className="block font-medium mb-1">
-                  Frescor de Evidência (h)
+                  {t('settings.evidenceFreshnessLabel')}
                 </label>
                 <input
                   id="evidence-freshness-hours"
@@ -277,7 +278,7 @@ export const SettingsView: React.FC = () => {
 
               <div>
                 <label htmlFor="max-daily-spend" className="block font-medium mb-1">
-                  Teto Diário Global (BRL)
+                  {t('settings.maxDailySpendLabel')}
                 </label>
                 <input
                   id="max-daily-spend"
@@ -312,13 +313,13 @@ export const SettingsView: React.FC = () => {
                     const count = reconcileJobsDemo();
                     setControlFeedback({
                       ok: true,
-                      message: `${count} job(s) órfão(s) reconciliado(s). Retomada desbloqueada.`,
+                      message: t('settings.reconciledNotice', { count }),
                     });
                   }}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-amber-600 text-white font-medium hover:bg-amber-700"
                 >
                   <RefreshCw className="w-3 h-3" aria-hidden="true" />
-                  <span>Executar jobs reconcile</span>
+                  <span>{t('settings.reconcileNow')}</span>
                 </button>
               )}
             </div>
@@ -327,11 +328,12 @@ export const SettingsView: React.FC = () => {
           <div className="pt-3 border-t border-black/10 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div>
               <div className="font-semibold text-rose-700 dark:text-rose-400">
-                Controle de Emergência (system_controls = {state.systemControl.state})
+                {t('settings.emergencyTitle', {
+                  controls: t('automations.kpi.controls'),
+                  state: labelSystemControlState(state.systemControl.state, lang),
+                })}
               </div>
-              <p className="text-[#525B68] dark:text-[#AEB7C2]">
-                Interrompe agentes e bloqueia --commit / envios até reconciliação limpa.
-              </p>
+              <p className="text-[#525B68] dark:text-[#AEB7C2]">{t('settings.emergencyDesc')}</p>
             </div>
             {isHalted ? (
               <button
@@ -339,7 +341,7 @@ export const SettingsView: React.FC = () => {
                 onClick={handleResume}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-emerald-600 text-white font-medium hover:bg-emerald-700 whitespace-nowrap"
               >
-                Liberar Autonomia (ACTIVE)
+                {t('settings.releaseAutonomy')}
               </button>
             ) : (
               <button
@@ -348,31 +350,29 @@ export const SettingsView: React.FC = () => {
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-rose-600 text-white font-medium hover:bg-rose-700 whitespace-nowrap"
               >
                 <OctagonAlert className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Acionar Stop All</span>
+                <span>{t('settings.triggerStopAll')}</span>
               </button>
             )}
           </div>
         </SurfacePanel>
       </div>
 
-      {/* Roadmap de Blocos 0-12 & Fases A/B */}
+      {/* Architecture Roadmap */}
       <SurfacePanel className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 className="font-display text-sm font-semibold">
-              Roadmap de Arquitetura (Blocos 0–12 & Fases A/B)
-            </h2>
-            <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
-              Separação explícita entre núcleo implementado em <span className="font-mono">main</span>, módulos em integração e ciclos futuros.
-            </p>
+            <h2 className="font-display text-sm font-semibold">{t('settings.arch.title')}</h2>
+            <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">{t('settings.arch.subtitle')}</p>
           </div>
           <span className="font-mono text-[11px] text-[#315FEA] dark:text-[#7FA0FF]">
-            {state.systemControl.phaseBPublicAllowed ? 'Fase B · Pública' : 'Fase A · Não Pública'}
+            {state.systemControl.phaseBPublicAllowed
+              ? t('settings.arch.phaseB')
+              : t('settings.arch.phaseA')}
           </span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {ARCHITECTURE_BLOCKS.map((blk) => (
+          {architectureBlocks.map((blk) => (
             <div
               key={blk.group}
               className="p-4 rounded-md bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 space-y-2.5 text-xs"
@@ -381,7 +381,7 @@ export const SettingsView: React.FC = () => {
                 <span className="font-semibold text-[#101216] dark:text-[#F1F2F3]">
                   {blk.group}
                 </span>
-                <StatusLabel status={blk.status} />
+                <StatusLabel status={blk.statusLabel} statusKey={blk.statusKey} />
               </div>
               <ul className="space-y-2 text-[#525B68] dark:text-[#AEB7C2] leading-relaxed">
                 {blk.items.map((line) => (
@@ -393,73 +393,193 @@ export const SettingsView: React.FC = () => {
         </div>
       </SurfacePanel>
 
-      {/* RISK_REGISTER Matrix */}
+      {/* Risk Register Matrix */}
       <SurfacePanel className="space-y-3">
         <div>
-          <h2 className="font-display text-sm font-semibold">
-            Matriz de Riscos (RISK_REGISTER) & Controles Pendentes
-          </h2>
-          <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
-            Itens P0, P1 e P2 auditados para governança de publicação, dados financeiros, atribuição e infraestrutura.
-          </p>
+          <h2 className="font-display text-sm font-semibold">{t('settings.risks.title')}</h2>
+          <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">{t('settings.risks.subtitle')}</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-black/10 dark:border-white/10 text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                <th className="py-2 pr-4">ID</th>
-                <th className="py-2 pr-4">Prioridade</th>
-                <th className="py-2 pr-4">Risco</th>
-                <th className="py-2 pr-4">Controle / Mitigação</th>
-                <th className="py-2 text-right">Status</th>
+                <th className="py-2 pr-4">{t('settings.risks.colId')}</th>
+                <th className="py-2 pr-4">{t('settings.risks.colPriority')}</th>
+                <th className="py-2 pr-4">{t('settings.risks.colRisk')}</th>
+                <th className="py-2 pr-4">{t('settings.risks.colControl')}</th>
+                <th className="py-2 text-right">{t('common.status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
-              {state.risks.map((risk) => (
-                <tr key={risk.id}>
-                  <td className="py-2.5 pr-4 font-mono text-[11px] whitespace-nowrap">{risk.id}</td>
-                  <td className="py-2.5 pr-4 font-mono font-semibold">
-                    <span
-                      className={
-                        risk.priority === 'P0'
-                          ? 'text-rose-600 dark:text-rose-400'
-                          : risk.priority === 'P1'
-                          ? 'text-amber-700 dark:text-amber-400'
-                          : 'text-[#525B68] dark:text-[#AEB7C2]'
-                      }
-                    >
-                      {risk.priority}
-                    </span>
-                  </td>
-                  <td className="py-2.5 pr-4 font-medium">{risk.title}</td>
-                  <td className="py-2.5 pr-4 text-[#525B68] dark:text-[#AEB7C2]">
-                    {risk.controlSummary}
-                  </td>
-                  <td className="py-2.5 text-right">
-                    <StatusLabel status={risk.status} />
-                  </td>
-                </tr>
-              ))}
+              {state.risks.map((rawRisk) => {
+                const risk = localizeRisk(rawRisk, lang);
+                return (
+                  <tr key={risk.id}>
+                    <td className="py-2.5 pr-4 font-mono text-[11px] whitespace-nowrap">{risk.id}</td>
+                    <td className="py-2.5 pr-4 font-mono font-semibold">
+                      <span
+                        className={
+                          risk.priority === 'P0'
+                            ? 'text-rose-600 dark:text-rose-400'
+                            : risk.priority === 'P1'
+                            ? 'text-amber-700 dark:text-amber-400'
+                            : 'text-[#525B68] dark:text-[#AEB7C2]'
+                        }
+                      >
+                        {risk.priority}
+                      </span>
+                    </td>
+                    <td className="py-2.5 pr-4 font-medium">{risk.title}</td>
+                    <td className="py-2.5 pr-4 text-[#525B68] dark:text-[#AEB7C2]">
+                      {risk.controlSummary}
+                    </td>
+                    <td className="py-2.5 text-right">
+                      <StatusLabel
+                        status={labelRiskStatus(risk.status, lang)}
+                        statusKey={risk.status}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
+        </div>
+      </SurfacePanel>
+
+      {/* Vyron Access & Session Security (Independent from Stop All) */}
+      <SurfacePanel className="space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="font-display text-sm font-semibold">{t('settings.access.title')}</h2>
+            <p className="text-xs text-[#525B68] dark:text-[#AEB7C2] mt-0.5">
+              {t('settings.access.subtitle', { name: s.ownerName })}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => lock('manual')}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-md border border-black/15 dark:border-white/15 hover:border-[#315FEA] whitespace-nowrap"
+            >
+              <Lock className="w-3.5 h-3.5 text-[#315FEA]" aria-hidden="true" />
+              <span>{t('nav.lockVyron')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={logout}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-md border border-rose-500/35 text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 whitespace-nowrap"
+            >
+              <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>{t('nav.logout')}</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2 border-t border-black/10 dark:border-white/10 text-xs">
+          <div className="lg:col-span-5 space-y-2">
+            <label htmlFor="idle-timeout-select" className="block font-medium">
+              {t('settings.access.autoLockLabel')}
+            </label>
+            <select
+              id="idle-timeout-select"
+              value={session.idleTimeoutMinutes}
+              onChange={(e) => setIdleTimeoutMinutes(Number(e.target.value))}
+              className="w-full h-9 px-3 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
+            >
+              {IDLE_TIMEOUT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {t(`access.timeout.${opt.value}` as Parameters<typeof t>[0])}
+                </option>
+              ))}
+            </select>
+            <p className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+              {t('settings.access.autoLockDesc')}
+            </p>
+          </div>
+
+          <form
+            className="lg:col-span-7 space-y-2.5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const res = updateAccessPassword(currentPwd, newPwd);
+              if (!res.ok) {
+                setPwdFeedback({
+                  ok: false,
+                  message: res.errorCode
+                    ? t(`access.error.${res.errorCode}`)
+                    : res.error ?? t('settings.access.pwdErrorFallback'),
+                });
+                return;
+              }
+              setCurrentPwd('');
+              setNewPwd('');
+              setPwdFeedback({
+                ok: true,
+                message: t('settings.access.pwdUpdated'),
+              });
+            }}
+          >
+            <div className="font-medium">{t('settings.access.updatePwdTitle')}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input
+                type="password"
+                value={currentPwd}
+                onChange={(e) => {
+                  setCurrentPwd(e.target.value);
+                  setPwdFeedback(null);
+                }}
+                placeholder={t('settings.access.currentPwdPlaceholder')}
+                aria-label={t('settings.access.currentPwdAria')}
+                className="h-9 px-3 rounded border border-black/15 dark:border-white/15 bg-transparent"
+              />
+              <input
+                type="password"
+                value={newPwd}
+                onChange={(e) => {
+                  setNewPwd(e.target.value);
+                  setPwdFeedback(null);
+                }}
+                placeholder={t('settings.access.newPwdPlaceholder')}
+                aria-label={t('settings.access.newPwdAria')}
+                className="h-9 px-3 rounded border border-black/15 dark:border-white/15 bg-transparent"
+              />
+              <button
+                type="submit"
+                className="h-9 px-4 rounded bg-[#315FEA] hover:bg-[#274FC9] text-white font-medium whitespace-nowrap"
+              >
+                {t('settings.access.savePwd')}
+              </button>
+            </div>
+            {pwdFeedback && (
+              <p
+                role="status"
+                className={
+                  pwdFeedback.ok
+                    ? 'text-[11px] text-emerald-700 dark:text-emerald-400'
+                    : 'text-[11px] text-rose-600 dark:text-rose-400'
+                }
+              >
+                {pwdFeedback.message}
+              </p>
+            )}
+          </form>
         </div>
       </SurfacePanel>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Notification Preferences */}
         <SurfacePanel className="lg:col-span-5 space-y-3">
-          <h2 className="font-display text-sm font-semibold">
-            Preferências de Notificação
-          </h2>
+          <h2 className="font-display text-sm font-semibold">{t('settings.notifPrefs.title')}</h2>
           <div className="space-y-2 text-xs">
             {(
               [
-                ['financialAlerts', 'Alertas financeiros e divergências'],
-                ['commissionsReceived', 'Comissões recebidas em caixa'],
-                ['opportunities', 'Novas oportunidades detectadas'],
-                ['pendingApprovals', 'Aprovações pendentes'],
-                ['automationFailures', 'Falhas de automação'],
-                ['operationalEvents', 'Eventos operacionais gerais'],
+                ['financialAlerts', t('settings.notifPrefs.financialAlerts')],
+                ['commissionsReceived', t('settings.notifPrefs.commissionsReceived')],
+                ['opportunities', t('settings.notifPrefs.opportunities')],
+                ['pendingApprovals', t('settings.notifPrefs.pendingApprovals')],
+                ['automationFailures', t('settings.notifPrefs.automationFailures')],
+                ['operationalEvents', t('settings.notifPrefs.operationalEvents')],
               ] as const
             ).map(([key, label]) => (
               <label
@@ -488,36 +608,42 @@ export const SettingsView: React.FC = () => {
         {/* Integrations Registry (Demo State) */}
         <SurfacePanel className="lg:col-span-7">
           <h2 className="font-display text-sm font-semibold mb-1">
-            Registro de Integrações (Estado Demonstrativo)
+            {t('settings.integrations.title')}
           </h2>
           <p className="text-xs text-[#525B68] dark:text-[#AEB7C2] mb-4">
-            Nenhuma credencial real ou chamada externa está ativa nesta fase de protótipo.
+            {t('settings.integrations.subtitle')}
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-black/10 dark:border-white/10 text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                  <th className="py-2 pr-4">Integração</th>
-                  <th className="py-2 pr-4">Categoria</th>
-                  <th className="py-2 pr-4">Última Verificação</th>
-                  <th className="py-2 text-right">Status</th>
+                  <th className="py-2 pr-4">{t('settings.integrations.colName')}</th>
+                  <th className="py-2 pr-4">{t('settings.integrations.colCategory')}</th>
+                  <th className="py-2 pr-4">{t('settings.integrations.colChecked')}</th>
+                  <th className="py-2 text-right">{t('common.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
-                {s.integrations.map((int) => (
-                  <tr key={int.id}>
-                    <td className="py-2.5 pr-4 font-medium">{int.name}</td>
-                    <td className="py-2.5 pr-4 text-[#525B68] dark:text-[#AEB7C2]">
-                      {int.category}
-                    </td>
-                    <td className="py-2.5 pr-4 font-mono text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                      {int.lastChecked}
-                    </td>
-                    <td className="py-2.5 text-right">
-                      <StatusLabel status={int.status} />
-                    </td>
-                  </tr>
-                ))}
+                {s.integrations.map((rawInt) => {
+                  const int = localizeIntegration(rawInt, lang);
+                  return (
+                    <tr key={int.id}>
+                      <td className="py-2.5 pr-4 font-medium">{int.name}</td>
+                      <td className="py-2.5 pr-4 text-[#525B68] dark:text-[#AEB7C2]">
+                        {int.category}
+                      </td>
+                      <td className="py-2.5 pr-4 font-mono text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                        {int.lastChecked}
+                      </td>
+                      <td className="py-2.5 text-right">
+                        <StatusLabel
+                          status={labelIntegrationConfigStatus(int.status, lang)}
+                          statusKey={int.status}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -526,3 +652,4 @@ export const SettingsView: React.FC = () => {
     </div>
   );
 };
+

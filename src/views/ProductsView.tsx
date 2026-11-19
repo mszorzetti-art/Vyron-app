@@ -7,8 +7,19 @@ import {
   ProductQualityGrade,
   ProductStatus,
 } from '../types/vyron';
+import { useI18n } from '../i18n/useI18n';
 import {
-  formatCurrency,
+  labelCompetitionLevel,
+  labelComplianceMarket,
+  labelComplianceState,
+  labelContentFormat,
+  labelDataConfidence,
+  labelProductGradeBadge,
+  labelProductModel,
+  labelProductStatus,
+} from '../i18n/domainLabels';
+import { localizeProduct } from '../i18n/seedTranslations';
+import {
   groupProductsByCurrency,
   scoreProductV61,
 } from '../utils/vyronRules';
@@ -35,6 +46,7 @@ export const ProductsView: React.FC = () => {
     updateProductGovernance,
     generateContentFromProduct,
   } = useVyron();
+  const { lang, t, fmtCurrency, fmtDate, fmtNumber } = useI18n();
 
   const [statusFilter, setStatusFilter] = useState<'all' | ProductStatus>('all');
   const [viewMode, setViewMode] = useState<'by_currency' | 'catalog'>('by_currency');
@@ -63,30 +75,31 @@ export const ProductsView: React.FC = () => {
 
   // SUBPAGE: Product Detail & Analysis
   if (selectedProductId) {
-    const product = state.products.find((p) => p.id === selectedProductId);
-    if (!product) {
+    const rawProduct = state.products.find((p) => p.id === selectedProductId);
+    if (!rawProduct) {
       return (
         <EmptyState
-          title="Produto não encontrado"
-          description="O item selecionado não está disponível no catálogo."
-          actionLabel="Voltar para Produtos"
+          title={t('products.detail.notFoundTitle')}
+          description={t('products.detail.notFoundDesc')}
+          actionLabel={t('products.detail.back')}
           onAction={() => navigate('products', { productId: null })}
         />
       );
     }
 
+    const product = localizeProduct(rawProduct, lang);
     const brand = state.brands.find((b) => b.id === product.brandId);
     const brandChannels = state.channels.filter(
       (c) => c.brandId === product.brandId || product.linkedBrandIds.includes(c.brandId)
     );
     const linkedContents = state.contents.filter((c) => c.productId === product.id);
-    const scoreEval = scoreProductV61(product);
+    const scoreEval = scoreProductV61(product, lang);
 
     const handleConfirmDecision = (e: React.FormEvent) => {
       e.preventDefault();
       if (!decisionTargetStatus) return;
       if (!justification.trim()) {
-        setDecisionError('Informe uma justificativa objetiva para registrar no histórico.');
+        setDecisionError(t('products.modal.justificationError'));
         return;
       }
       changeProductStatus(product.id, decisionTargetStatus, justification.trim());
@@ -113,21 +126,29 @@ export const ProductsView: React.FC = () => {
             className="inline-flex items-center gap-1.5 text-xs font-medium text-[#525B68] dark:text-[#AEB7C2] hover:text-[#101216] dark:hover:text-[#F1F2F3]"
           >
             <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Voltar para Lista de Produtos</span>
+            <span>{t('products.detail.back')}</span>
           </button>
           <div className="flex items-center gap-3">
             {product.isTest && (
               <span className="font-mono text-[11px] text-amber-600 dark:text-amber-400">
-                is_test=true
+                {t('products.table.testTag')}
               </span>
             )}
-            <StatusLabel status={product.status} />
+            <StatusLabel
+              status={labelProductStatus(product.status, lang)}
+              statusKey={product.status}
+            />
           </div>
         </div>
 
         <PageHeader
           title={product.name}
-          subtitle={`Catálogo Compartilhado (${product.platform} · ${product.externalId}) · Moeda nativa ${product.currency} · Mercado ${product.complianceMarket}`}
+          subtitle={t('products.detail.subtitle', {
+            platform: product.platform,
+            externalId: product.externalId,
+            currency: product.currency,
+            market: labelComplianceMarket(product.complianceMarket, lang),
+          })}
           actions={
             <>
               {product.status !== 'Approved' && (
@@ -139,7 +160,7 @@ export const ProductsView: React.FC = () => {
                   }}
                   className="px-4 py-2 text-xs font-medium rounded-md bg-emerald-600 text-white hover:bg-emerald-700 whitespace-nowrap"
                 >
-                  Aprovar Produto
+                  {t('products.detail.approve')}
                 </button>
               )}
               {product.status !== 'Rejected' && (
@@ -151,7 +172,7 @@ export const ProductsView: React.FC = () => {
                   }}
                   className="px-3.5 py-2 text-xs font-medium rounded-md border border-rose-500/40 text-rose-700 dark:text-rose-400 hover:bg-rose-500/10 whitespace-nowrap"
                 >
-                  Rejeitar
+                  {t('products.detail.reject')}
                 </button>
               )}
               {product.status !== 'Archived' && (
@@ -163,54 +184,58 @@ export const ProductsView: React.FC = () => {
                   }}
                   className="px-3.5 py-2 text-xs font-medium rounded-md border border-black/15 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/5 whitespace-nowrap"
                 >
-                  Arquivar
+                  {t('products.detail.archive')}
                 </button>
               )}
             </>
           }
         />
 
-        {/* Commercial Indicators (preserving null unknowns) */}
+        {/* Commercial Indicators (preserving missing unknowns) */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <MetricBlock
-            label="Score-6.1 (v0-hipotese)"
+            label={t('products.detail.kpi.score')}
             value={
-              product.opportunityScore !== null ? `${product.opportunityScore}/100` : 'Desconhecido'
+              product.opportunityScore !== null ? `${product.opportunityScore}/100` : t('common.unknown')
             }
             helper={scoreEval.explanation}
             tone="cobalt"
           />
           <MetricBlock
-            label="Preço de Referência"
-            value={product.price !== null ? formatCurrency(product.price, product.currency) : 'Desconhecido (null)'}
-            helper={`Comissão: ${product.commissionRatePct !== null ? `${product.commissionRatePct}%` : 'Desconhecida'}`}
+            label={t('products.detail.kpi.price')}
+            value={product.price !== null ? fmtCurrency(product.price, product.currency) : t('products.unknownNull')}
+            helper={t('products.detail.kpi.comm', {
+              val: product.commissionRatePct !== null ? `${fmtNumber(product.commissionRatePct, 1)}%` : t('common.unknown'),
+            })}
           />
           <MetricBlock
-            label="EPC Estimado"
+            label={t('products.detail.kpi.epc')}
             value={
               product.epcValue !== null
-                ? formatCurrency(product.epcValue, product.currency)
-                : 'Desconhecido (null)'
+                ? fmtCurrency(product.epcValue, product.currency)
+                : t('products.unknownNull')
             }
             helper={
               product.cpaValue !== null
-                ? `CPA fixo: ${formatCurrency(product.cpaValue, product.currency)}`
-                : `Confiança: ${product.dataConfidence}`
+                ? t('products.detail.kpi.cpa', { val: fmtCurrency(product.cpaValue, product.currency) })
+                : t('products.detail.kpi.confidence', { val: labelDataConfidence(product.dataConfidence, lang) })
             }
           />
           <MetricBlock
-            label="Janela de Cookies"
+            label={t('products.detail.kpi.cookie')}
             value={
               product.cookieWindowDays !== null
-                ? `${product.cookieWindowDays} dias`
-                : 'Desconhecido (null)'
+                ? t('products.detail.kpi.days', { days: product.cookieWindowDays })
+                : t('products.unknownNull')
             }
-            helper={`Competição: ${product.competitionLevel}`}
+            helper={t('products.detail.kpi.competition', {
+              val: labelCompetitionLevel(product.competitionLevel, lang),
+            })}
           />
           <MetricBlock
-            label="Qualidade & Compliance"
-            value={`Nota ${product.qualityGrade ?? 'N/D'} · ${product.complianceState}`}
-            helper={`${linkedContents.length} conteúdo(s) vinculado(s)`}
+            label={t('products.detail.kpi.qualityCompliance')}
+            value={`${labelProductGradeBadge(product.qualityGrade, lang)} · ${labelComplianceState(product.complianceState, lang)}`}
+            helper={t('products.detail.kpi.linkedContents', { count: linkedContents.length })}
           />
         </div>
 
@@ -218,13 +243,13 @@ export const ProductsView: React.FC = () => {
         <SurfacePanel className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
           <div>
             <label className="block font-semibold mb-1.5">
-              Qualidade Conceitual (A / B / C)
+              {t('products.detail.gov.qualityTitle')}
             </label>
             <p className="text-[11px] text-[#525B68] dark:text-[#AEB7C2] mb-2">
-              Separado do estado comercial e de compliance.
+              {t('products.detail.gov.qualityDesc')}
             </p>
             <select
-              aria-label="Qualidade do produto"
+              aria-label={t('products.detail.gov.qualityAria')}
               value={product.qualityGrade ?? ''}
               onChange={(e) =>
                 updateProductGovernance(product.id, {
@@ -233,42 +258,44 @@ export const ProductsView: React.FC = () => {
               }
               className="w-full h-9 px-2.5 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
             >
-              <option value="A">Nota A — Recomendado sem ressalvas</option>
-              <option value="B">Nota B — Bom com limitações claras</option>
-              <option value="C">Nota C — Baixa durabilidade/retorno</option>
+              <option value="A">{t('products.detail.gov.gradeA')}</option>
+              <option value="B">{t('products.detail.gov.gradeB')}</option>
+              <option value="C">{t('products.detail.gov.gradeC')}</option>
             </select>
           </div>
 
           <div>
             <label className="block font-semibold mb-1.5">
-              Compliance Intelligence ({product.complianceMarket})
+              {t('products.detail.gov.complianceTitle', {
+                market: labelComplianceMarket(product.complianceMarket, lang),
+              })}
             </label>
             <p className="text-[11px] text-[#525B68] dark:text-[#AEB7C2] mb-2">
-              Estado regulatório independente da pontuação.
+              {t('products.detail.gov.complianceDesc')}
             </p>
             <select
-              aria-label="Compliance do produto"
+              aria-label={t('products.detail.gov.complianceAria')}
               value={product.complianceState}
               onChange={(e) =>
                 updateProductGovernance(product.id, {
                   complianceState: e.target.value as ComplianceState,
                 })
               }
-              className="w-full h-9 px-2.5 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20] font-mono"
+              className="w-full h-9 px-2.5 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
             >
-              <option value="APPROVED">APPROVED</option>
-              <option value="PENDING">PENDING</option>
-              <option value="BLOCKED">BLOCKED</option>
-              <option value="NOT_APPLICABLE">NOT_APPLICABLE</option>
+              <option value="APPROVED">{labelComplianceState('APPROVED', lang)}</option>
+              <option value="PENDING">{labelComplianceState('PENDING', lang)}</option>
+              <option value="BLOCKED">{labelComplianceState('BLOCKED', lang)}</option>
+              <option value="NOT_APPLICABLE">{labelComplianceState('NOT_APPLICABLE', lang)}</option>
             </select>
           </div>
 
           <div>
             <div className="font-semibold mb-1.5">
-              Vínculo em Marcas (Catálogo Compartilhado)
+              {t('products.detail.gov.brandsTitle')}
             </div>
             <p className="text-[11px] text-[#525B68] dark:text-[#AEB7C2] mb-2">
-              Deduplicado por ({product.platform}, {product.externalId}); sem brand_id único no schema.
+              {t('products.detail.gov.brandsDesc')}
             </p>
             <div className="flex flex-wrap gap-2">
               {state.brands.map((b) => {
@@ -295,11 +322,11 @@ export const ProductsView: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           <SurfacePanel className="lg:col-span-7 space-y-4">
             <h2 className="font-display text-sm font-semibold">
-              Fontes, Evidências & Inteligência Comercial
+              {t('products.detail.evidenceTitle')}
             </h2>
             {product.evidence.length === 0 ? (
               <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
-                Nenhuma evidência externa anexada ainda.
+                {t('products.detail.evidenceEmpty')}
               </p>
             ) : (
               <ul className="divide-y divide-black/10 dark:divide-white/10">
@@ -311,7 +338,7 @@ export const ProductsView: React.FC = () => {
                         <ExternalLink className="w-3 h-3 text-[#AEB7C2]" aria-hidden="true" />
                       </span>
                       <span className="font-mono text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                        Verificado {ev.verifiedAt}
+                        {t('products.detail.verifiedAt', { date: fmtDate(ev.verifiedAt) })}
                       </span>
                     </div>
                     <p className="text-xs text-[#525B68] dark:text-[#AEB7C2] leading-relaxed">
@@ -324,11 +351,11 @@ export const ProductsView: React.FC = () => {
 
             <div className="pt-4 border-t border-black/10 dark:border-white/10">
               <h3 className="font-display text-xs font-semibold mb-2">
-                Originar Pauta no Content Studio ({brand?.name})
+                {t('products.detail.createContentTitle', { brand: brand?.name ?? '-' })}
               </h3>
               <div className="flex flex-wrap items-center gap-2.5">
                 <select
-                  aria-label="Selecionar canal para pauta"
+                  aria-label={t('products.detail.selectChannelAria')}
                   value={
                     brandChannels.some((c) => c.id === contentChannelId)
                       ? contentChannelId
@@ -344,13 +371,13 @@ export const ProductsView: React.FC = () => {
                   ))}
                 </select>
                 <select
-                  aria-label="Formato do conteúdo"
+                  aria-label={t('products.detail.selectFormatAria')}
                   value={contentFormat}
                   onChange={(e) => setContentFormat(e.target.value as 'Long-form' | 'Shorts')}
                   className="h-8 px-2.5 text-xs rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
                 >
-                  <option value="Long-form">Long-form</option>
-                  <option value="Shorts">Shorts</option>
+                  <option value="Long-form">{labelContentFormat('Long-form', lang)}</option>
+                  <option value="Shorts">{labelContentFormat('Shorts', lang)}</option>
                 </select>
                 <button
                   type="button"
@@ -371,7 +398,7 @@ export const ProductsView: React.FC = () => {
                   }}
                   className="h-8 px-3.5 text-xs font-medium rounded bg-[#315FEA] text-white hover:bg-[#274FC9] whitespace-nowrap"
                 >
-                  Gerar Pauta no Studio
+                  {t('products.detail.createContentBtn')}
                 </button>
               </div>
             </div>
@@ -379,11 +406,11 @@ export const ProductsView: React.FC = () => {
 
           <SurfacePanel className="lg:col-span-5">
             <h2 className="font-display text-sm font-semibold mb-3">
-              Histórico e Justificativas de Decisão
+              {t('products.detail.decisionsTitle')}
             </h2>
             {product.decisions.length === 0 ? (
               <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
-                Nenhuma decisão registrada ainda. Produto em fila de análise inicial.
+                {t('products.detail.decisionsEmpty')}
               </p>
             ) : (
               <ul className="space-y-3">
@@ -394,15 +421,16 @@ export const ProductsView: React.FC = () => {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-medium">
-                        {d.previousStatus} → {d.newStatus}
+                        {labelProductStatus(d.previousStatus, lang)} →{' '}
+                        {labelProductStatus(d.newStatus, lang)}
                       </span>
                       <span className="font-mono text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                        {d.timestamp.slice(0, 10)}
+                        {fmtDate(d.timestamp)}
                       </span>
                     </div>
                     <p className="text-[#525B68] dark:text-[#AEB7C2]">{d.justification}</p>
                     <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                      Por {d.actor}
+                      {t('products.detail.byActor', { actor: d.actor })}
                     </div>
                   </li>
                 ))}
@@ -413,13 +441,17 @@ export const ProductsView: React.FC = () => {
 
         <ModalDialog
           open={Boolean(decisionTargetStatus)}
-          title={`Alterar status para ${decisionTargetStatus}`}
-          subtitle="Toda decisão comercial exige justificativa registrada para auditoria."
+          title={t('products.modal.decisionTitle', {
+            status: decisionTargetStatus ? labelProductStatus(decisionTargetStatus, lang) : '',
+          })}
+          subtitle={t('products.modal.decisionSubtitle')}
           onClose={() => setDecisionTargetStatus(null)}
         >
           <form onSubmit={handleConfirmDecision} className="space-y-4 text-xs">
             <div>
-              <label className="block font-medium mb-1">Justificativa da Decisão *</label>
+              <label className="block font-medium mb-1">
+                {t('products.modal.justificationLabel')}
+              </label>
               <textarea
                 required
                 rows={3}
@@ -428,7 +460,7 @@ export const ProductsView: React.FC = () => {
                   setJustification(e.target.value);
                   setDecisionError('');
                 }}
-                placeholder="Ex.: EPC validado acima do piso operacional e janela de cookie favorável..."
+                placeholder={t('products.modal.justificationPlaceholder')}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent"
               />
               {decisionError && (
@@ -441,13 +473,13 @@ export const ProductsView: React.FC = () => {
                 onClick={() => setDecisionTargetStatus(null)}
                 className="px-3.5 py-2 rounded border border-black/15 dark:border-white/15"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 rounded bg-[#315FEA] text-white font-medium hover:bg-[#274FC9]"
               >
-                Confirmar Decisão
+                {t('products.modal.confirmDecision')}
               </button>
             </div>
           </form>
@@ -457,7 +489,9 @@ export const ProductsView: React.FC = () => {
   }
 
   // LIST VIEW
-  const visibleProducts = state.products.filter((p) => {
+  const localizedProducts = state.products.map((p) => localizeProduct(p, lang));
+
+  const visibleProducts = localizedProducts.filter((p) => {
     if (excludeTestData && p.isTest) return false;
     if (
       globalBrandFilter !== 'all' &&
@@ -481,7 +515,7 @@ export const ProductsView: React.FC = () => {
     return true;
   });
 
-  const comparedProducts = state.products.filter((p) => compareIds.includes(p.id));
+  const comparedProducts = localizedProducts.filter((p) => compareIds.includes(p.id));
   const currencyGroups = groupProductsByCurrency(visibleProducts);
 
   const toggleCompare = (id: string) => {
@@ -500,16 +534,18 @@ export const ProductsView: React.FC = () => {
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="border-b border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] text-[11px] font-medium text-[#525B68] dark:text-[#AEB7C2]">
-              <th className="py-3 pl-4 pr-2 w-8">Comp.</th>
-              <th className="py-3 px-3">Produto / Catálogo</th>
-              <th className="py-3 px-3">Marcas</th>
-              <th className="py-3 px-3">Qualidade & Compliance</th>
-              <th className="py-3 px-3 text-right">Preço ({items[0]?.currency})</th>
-              <th className="py-3 px-3 text-right">Comissão / EPC</th>
-              <th className="py-3 px-3 text-right">Cookie</th>
-              <th className="py-3 px-3 text-right">score-6.1</th>
-              <th className="py-3 px-3">Estado</th>
-              <th className="py-3 pl-3 pr-4 text-right">Ação</th>
+              <th className="py-3 pl-4 pr-2 w-8">{t('products.table.compareShort')}</th>
+              <th className="py-3 px-3">{t('products.table.productCatalog')}</th>
+              <th className="py-3 px-3">{t('products.table.brands')}</th>
+              <th className="py-3 px-3">{t('products.table.qualityCompliance')}</th>
+              <th className="py-3 px-3 text-right">
+                {t('products.table.price', { currency: items[0]?.currency ?? 'BRL' })}
+              </th>
+              <th className="py-3 px-3 text-right">{t('products.table.commEpc')}</th>
+              <th className="py-3 px-3 text-right">{t('products.table.cookie')}</th>
+              <th className="py-3 px-3 text-right">{t('products.table.score')}</th>
+              <th className="py-3 px-3">{t('products.table.state')}</th>
+              <th className="py-3 pl-3 pr-4 text-right">{t('products.table.action')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
@@ -526,7 +562,7 @@ export const ProductsView: React.FC = () => {
                       type="checkbox"
                       checked={isCompared}
                       onChange={() => toggleCompare(p.id)}
-                      aria-label={`Comparar ${p.name}`}
+                      aria-label={t('products.table.compareAria', { name: p.name })}
                       className="rounded border-black/25 dark:border-white/25 accent-[#315FEA]"
                     />
                   </td>
@@ -540,7 +576,7 @@ export const ProductsView: React.FC = () => {
                     </button>
                     <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2] font-mono">
                       {p.platform} · {p.externalId}
-                      {p.isTest ? ' · is_test' : ''}
+                      {p.isTest ? ` · ${t('products.table.testTag')}` : ''}
                     </div>
                   </td>
                   <td className="py-3 px-3 text-[#525B68] dark:text-[#AEB7C2] max-w-[160px] truncate">
@@ -548,27 +584,40 @@ export const ProductsView: React.FC = () => {
                   </td>
                   <td className="py-3 px-3">
                     <div className="font-mono text-[11px]">
-                      Nota {p.qualityGrade ?? 'N/D'} · {p.complianceMarket}
+                      {labelProductGradeBadge(p.qualityGrade, lang)} ·{' '}
+                      {labelComplianceMarket(p.complianceMarket, lang)}
                     </div>
-                    <StatusLabel status={p.complianceState} />
+                    <StatusLabel
+                      status={labelComplianceState(p.complianceState, lang)}
+                      statusKey={p.complianceState}
+                    />
                   </td>
                   <td className="py-3 px-3 text-right font-mono tabular-nums whitespace-nowrap">
-                    {p.price !== null ? formatCurrency(p.price, p.currency) : 'null'}
+                    {p.price !== null ? fmtCurrency(p.price, p.currency) : t('products.notInformed')}
                   </td>
                   <td className="py-3 px-3 text-right font-mono tabular-nums whitespace-nowrap">
-                    <div>{p.commissionRatePct !== null ? `${p.commissionRatePct}%` : 'null'}</div>
+                    <div>
+                      {p.commissionRatePct !== null
+                        ? `${fmtNumber(p.commissionRatePct, 1)}%`
+                        : t('products.notInformed')}
+                    </div>
                     <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                      EPC {p.epcValue !== null ? formatCurrency(p.epcValue, p.currency) : 'Desconhecido'}
+                      EPC {p.epcValue !== null ? fmtCurrency(p.epcValue, p.currency) : t('common.unknown')}
                     </div>
                   </td>
                   <td className="py-3 px-3 text-right font-mono tabular-nums whitespace-nowrap">
-                    {p.cookieWindowDays !== null ? `${p.cookieWindowDays}d` : 'null'}
+                    {p.cookieWindowDays !== null
+                      ? t('common.daysShort', { days: p.cookieWindowDays })
+                      : t('products.notInformed')}
                   </td>
                   <td className="py-3 px-3 text-right font-mono tabular-nums font-semibold text-[#315FEA] dark:text-[#7FA0FF]">
-                    {p.opportunityScore !== null ? p.opportunityScore : 'null'}
+                    {p.opportunityScore !== null ? p.opportunityScore : t('products.notInformed')}
                   </td>
                   <td className="py-3 px-3">
-                    <StatusLabel status={p.status} />
+                    <StatusLabel
+                      status={labelProductStatus(p.status, lang)}
+                      statusKey={p.status}
+                    />
                   </td>
                   <td className="py-3 pl-3 pr-4 text-right whitespace-nowrap">
                     <button
@@ -576,7 +625,7 @@ export const ProductsView: React.FC = () => {
                       onClick={() => navigate('products', { productId: p.id })}
                       className="text-xs font-medium text-[#315FEA] dark:text-[#7FA0FF] hover:underline"
                     >
-                      Analisar
+                      {t('products.table.analyze')}
                     </button>
                   </td>
                 </tr>
@@ -591,8 +640,8 @@ export const ProductsView: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Products & Intelligence"
-        subtitle="Catálogo compartilhado (platform, external_id), score-6.1 (v0-hipotese) por moeda nativa e preservação explícita de campos null."
+        title={t('products.title')}
+        subtitle={t('products.subtitle')}
         actions={
           <div className="flex flex-wrap items-center gap-2.5">
             <label className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-md border border-black/10 dark:border-white/10 bg-white dark:bg-[#171A20]">
@@ -602,7 +651,7 @@ export const ProductsView: React.FC = () => {
                 onChange={(e) => setExcludeTestData(!e.target.checked)}
                 className="accent-[#315FEA]"
               />
-              <span>Exibir registros is_test</span>
+              <span>{t('products.showTestData')}</span>
             </label>
             <button
               type="button"
@@ -610,7 +659,7 @@ export const ProductsView: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-md bg-[#315FEA] text-white hover:bg-[#274FC9] whitespace-nowrap"
             >
               <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Cadastrar Produto</span>
+              <span>{t('products.addProduct')}</span>
             </button>
           </div>
         }
@@ -620,24 +669,24 @@ export const ProductsView: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <SegmentedControl
-            ariaLabel="Modo de exibição do ranking"
+            ariaLabel={t('products.viewModeAria')}
             value={viewMode}
             onChange={(v) => setViewMode(v as 'by_currency' | 'catalog')}
             options={[
-              { value: 'by_currency', label: 'Ranking por Moeda (score-6.1)' },
-              { value: 'catalog', label: 'Lista Única' },
+              { value: 'by_currency', label: t('products.viewByCurrency') },
+              { value: 'catalog', label: t('products.viewCatalog') },
             ]}
           />
           <SegmentedControl
-            ariaLabel="Filtrar produtos por estado"
+            ariaLabel={t('products.statusFilterAria')}
             value={statusFilter}
             onChange={(v) => setStatusFilter(v as 'all' | ProductStatus)}
             options={[
-              { value: 'all', label: 'Todos' },
-              { value: 'Candidate', label: 'Candidate' },
-              { value: 'Approved', label: 'Approved' },
-              { value: 'Rejected', label: 'Rejected' },
-              { value: 'Archived', label: 'Archived' },
+              { value: 'all', label: t('common.all') },
+              { value: 'Candidate', label: labelProductStatus('Candidate', lang) },
+              { value: 'Approved', label: labelProductStatus('Approved', lang) },
+              { value: 'Rejected', label: labelProductStatus('Rejected', lang) },
+              { value: 'Archived', label: labelProductStatus('Archived', lang) },
             ]}
           />
         </div>
@@ -648,8 +697,8 @@ export const ProductsView: React.FC = () => {
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar nome, plataforma ou external_id..."
-            aria-label="Buscar produto ou plataforma"
+            placeholder={t('products.searchPlaceholder')}
+            aria-label={t('products.searchAria')}
             className="w-full h-9 pl-8 pr-3 text-xs rounded-md bg-white dark:bg-[#171A20] border border-black/10 dark:border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#315FEA]"
           />
         </div>
@@ -660,21 +709,21 @@ export const ProductsView: React.FC = () => {
         <SurfacePanel>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display text-sm font-semibold">
-              Comparação Lado a Lado ({comparedProducts.length} produtos)
+              {t('products.comparePanelTitle', { count: comparedProducts.length })}
             </h2>
             <button
               type="button"
               onClick={() => setCompareIds([])}
               className="text-xs text-[#525B68] dark:text-[#AEB7C2] hover:underline"
             >
-              Limpar comparação
+              {t('products.compareClear')}
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-black/10 dark:border-white/10 text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                  <th className="py-2 pr-4">Critério</th>
+                  <th className="py-2 pr-4">{t('products.compareCriterion')}</th>
                   {comparedProducts.map((cp) => (
                     <th key={cp.id} className="py-2 pr-4 font-semibold text-[#101216] dark:text-[#F1F2F3]">
                       {cp.name} ({cp.currency})
@@ -684,28 +733,40 @@ export const ProductsView: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
                 <tr>
-                  <td className="py-2 pr-4 text-[#525B68] dark:text-[#AEB7C2]">score-6.1</td>
+                  <td className="py-2 pr-4 text-[#525B68] dark:text-[#AEB7C2]">
+                    {t('products.compareScore')}
+                  </td>
                   {comparedProducts.map((cp) => (
                     <td key={cp.id} className="py-2 pr-4 font-mono tabular-nums font-semibold text-[#315FEA] dark:text-[#7FA0FF]">
-                      {cp.opportunityScore !== null ? `${cp.opportunityScore}/100` : 'Desconhecido (null)'}
+                      {cp.opportunityScore !== null ? `${cp.opportunityScore}/100` : t('products.unknownNull')}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="py-2 pr-4 text-[#525B68] dark:text-[#AEB7C2]">Preço / Comissão</td>
+                  <td className="py-2 pr-4 text-[#525B68] dark:text-[#AEB7C2]">
+                    {t('products.comparePriceComm')}
+                  </td>
                   {comparedProducts.map((cp) => (
                     <td key={cp.id} className="py-2 pr-4 font-mono tabular-nums">
-                      {cp.price !== null ? formatCurrency(cp.price, cp.currency) : 'null'} (
-                      {cp.commissionRatePct !== null ? `${cp.commissionRatePct}%` : 'null'})
+                      {cp.price !== null ? fmtCurrency(cp.price, cp.currency) : t('products.notInformed')} (
+                      {cp.commissionRatePct !== null
+                        ? `${fmtNumber(cp.commissionRatePct, 1)}%`
+                        : t('products.notInformed')}
+                      )
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="py-2 pr-4 text-[#525B68] dark:text-[#AEB7C2]">EPC / Cookie / Nota</td>
+                  <td className="py-2 pr-4 text-[#525B68] dark:text-[#AEB7C2]">
+                    {t('products.compareEpcCookieGrade')}
+                  </td>
                   {comparedProducts.map((cp) => (
                     <td key={cp.id} className="py-2 pr-4 font-mono tabular-nums">
-                      {cp.epcValue !== null ? formatCurrency(cp.epcValue, cp.currency) : 'null'} ·{' '}
-                      {cp.cookieWindowDays !== null ? `${cp.cookieWindowDays}d` : 'null'} · Nota {cp.qualityGrade ?? 'N/D'}
+                      {cp.epcValue !== null ? fmtCurrency(cp.epcValue, cp.currency) : t('products.notInformed')} ·{' '}
+                      {cp.cookieWindowDays !== null
+                        ? t('common.daysShort', { days: cp.cookieWindowDays })
+                        : t('products.notInformed')}{' '}
+                      · {labelProductGradeBadge(cp.qualityGrade, lang)}
                     </td>
                   ))}
                 </tr>
@@ -718,9 +779,9 @@ export const ProductsView: React.FC = () => {
       {/* Products Data Grid */}
       {visibleProducts.length === 0 ? (
         <EmptyState
-          title="Nenhum produto encontrado"
-          description="Ajuste os filtros ou cadastre um novo produto para análise."
-          actionLabel="Cadastrar Produto"
+          title={t('products.emptyTitle')}
+          description={t('products.emptyDesc')}
+          actionLabel={t('products.addProduct')}
           onAction={() => setCreateOpen(true)}
         />
       ) : viewMode === 'by_currency' ? (
@@ -729,10 +790,13 @@ export const ProductsView: React.FC = () => {
             <div key={group.currency} className="space-y-2">
               <div className="flex items-center justify-between text-xs px-1">
                 <h2 className="font-display font-semibold text-[#101216] dark:text-[#F1F2F3]">
-                  Ranking Nativo · Moeda {group.currency} ({group.items.length})
+                  {t('products.currencyGroupTitle', {
+                    currency: group.currency,
+                    count: group.items.length,
+                  })}
                 </h2>
                 <span className="font-mono text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                  Sem conversão cambial no ranking score-6.1
+                  {t('products.currencyGroupHint')}
                 </span>
               </div>
               {renderProductTable(group.items)}
@@ -746,8 +810,8 @@ export const ProductsView: React.FC = () => {
       {/* Create Product Modal */}
       <ModalDialog
         open={createOpen}
-        title="Cadastrar Produto no Catálogo Compartilhado"
-        subtitle="O score-6.1 (v0-hipotese) preserva campos vazios como null (nunca 0)."
+        title={t('products.modal.createTitle')}
+        subtitle={t('products.modal.createSubtitle')}
         onClose={() => setCreateOpen(false)}
       >
         <form
@@ -780,18 +844,18 @@ export const ProductsView: React.FC = () => {
           }}
         >
           <div>
-            <label className="block font-medium mb-1">Nome do Produto *</label>
+            <label className="block font-medium mb-1">{t('products.modal.nameReq')}</label>
             <input
               required
               value={prodName}
               onChange={(e) => setProdName(e.target.value)}
-              placeholder="Ex.: Logitech MX Master 4"
+              placeholder={t('products.modal.namePlaceholder')}
               className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium mb-1">Marca Principal</label>
+              <label className="block font-medium mb-1">{t('products.modal.mainBrand')}</label>
               <select
                 value={prodBrandId}
                 onChange={(e) => setProdBrandId(e.target.value)}
@@ -805,18 +869,18 @@ export const ProductsView: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block font-medium mb-1">Categoria</label>
+              <label className="block font-medium mb-1">{t('products.modal.category')}</label>
               <input
                 value={prodCategory}
                 onChange={(e) => setProdCategory(e.target.value)}
-                placeholder="Ex.: Periféricos"
+                placeholder={t('products.modal.categoryPlaceholder')}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent"
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium mb-1">Plataforma</label>
+              <label className="block font-medium mb-1">{t('products.modal.platform')}</label>
               <input
                 value={prodPlatform}
                 onChange={(e) => setProdPlatform(e.target.value)}
@@ -824,7 +888,7 @@ export const ProductsView: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block font-medium mb-1">Modelo de Remuneração</label>
+              <label className="block font-medium mb-1">{t('products.modal.remunerationModel')}</label>
               <select
                 value={prodModel}
                 onChange={(e) =>
@@ -832,16 +896,16 @@ export const ProductsView: React.FC = () => {
                 }
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
               >
-                <option value="RevShare">RevShare</option>
-                <option value="CPA">CPA</option>
-                <option value="Híbrido">Híbrido</option>
-                <option value="Direto">Direto</option>
+                <option value="RevShare">{labelProductModel('RevShare', lang)}</option>
+                <option value="CPA">{labelProductModel('CPA', lang)}</option>
+                <option value="Híbrido">{labelProductModel('Híbrido', lang)}</option>
+                <option value="Direto">{labelProductModel('Direto', lang)}</option>
               </select>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2.5">
             <div>
-              <label className="block font-medium mb-1">Preço</label>
+              <label className="block font-medium mb-1">{t('products.modal.price')}</label>
               <input
                 type="number"
                 step="0.01"
@@ -851,7 +915,7 @@ export const ProductsView: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block font-medium mb-1">Moeda</label>
+              <label className="block font-medium mb-1">{t('products.modal.currency')}</label>
               <select
                 value={prodCurrency}
                 onChange={(e) => setProdCurrency(e.target.value as CurrencyCode)}
@@ -863,7 +927,7 @@ export const ProductsView: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block font-medium mb-1">Comissão %</label>
+              <label className="block font-medium mb-1">{t('products.modal.commPct')}</label>
               <input
                 type="number"
                 step="0.1"
@@ -875,23 +939,23 @@ export const ProductsView: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium mb-1">EPC Estimado (vazio = null)</label>
+              <label className="block font-medium mb-1">{t('products.modal.epcLabel')}</label>
               <input
                 type="number"
                 step="0.01"
                 value={prodEpc}
                 onChange={(e) => setProdEpc(e.target.value)}
-                placeholder="Deixe vazio se desconhecido"
+                placeholder={t('products.modal.epcPlaceholder')}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent font-mono"
               />
             </div>
             <div>
-              <label className="block font-medium mb-1">Cookie Window dias (vazio = null)</label>
+              <label className="block font-medium mb-1">{t('products.modal.cookieLabel')}</label>
               <input
                 type="number"
                 value={prodCookie}
                 onChange={(e) => setProdCookie(e.target.value)}
-                placeholder="Deixe vazio se desconhecido"
+                placeholder={t('products.modal.epcPlaceholder')}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent font-mono"
               />
             </div>
@@ -903,7 +967,7 @@ export const ProductsView: React.FC = () => {
               onChange={(e) => setProdIsTest(e.target.checked)}
               className="accent-[#315FEA]"
             />
-            <span>Marcar como registro de teste (is_test=true)</span>
+            <span>{t('products.modal.isTestCheckbox')}</span>
           </label>
           <div className="flex justify-end gap-2 pt-2">
             <button
@@ -911,13 +975,13 @@ export const ProductsView: React.FC = () => {
               onClick={() => setCreateOpen(false)}
               className="px-3.5 py-2 rounded border border-black/15 dark:border-white/15"
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               className="px-4 py-2 rounded bg-[#315FEA] text-white font-medium hover:bg-[#274FC9]"
             >
-              Calcular score-6.1 & Salvar
+              {t('products.modal.saveBtn')}
             </button>
           </div>
         </form>

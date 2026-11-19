@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useI18n } from '../i18n/useI18n';
 
 export interface SeriesPoint {
   label: string;
@@ -22,6 +23,7 @@ export const DualLineChart: React.FC<{
   formatValue,
   height = 220,
 }) => {
+  const { t } = useI18n();
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
 
   if (data.length === 0) return null;
@@ -102,7 +104,9 @@ export const DualLineChart: React.FC<{
             {hovered.label}
             {hovered.primary !== null && hovered.primary !== undefined && `: ${formatValue(hovered.primary)}`}
             {hovered.secondary !== null && hovered.secondary !== undefined && ` · ${formatValue(hovered.secondary)}`}
-            {hovered.tertiary !== null && hovered.tertiary !== undefined && ` · Proj. ${formatValue(hovered.tertiary)}`}
+            {hovered.tertiary !== null &&
+              hovered.tertiary !== undefined &&
+              ` · ${t('charts.projectionPrefix')} ${formatValue(hovered.tertiary)}`}
           </div>
         )}
       </div>
@@ -111,7 +115,7 @@ export const DualLineChart: React.FC<{
         viewBox={`0 0 ${width} ${height}`}
         className="w-full h-auto overflow-visible select-none"
         role="img"
-        aria-label={`Gráfico temporal: ${primaryLabel}`}
+        aria-label={t('charts.timeSeriesAria', { label: primaryLabel })}
       >
         <defs>
           <linearGradient id="vyronAreaGrad" x1="0" y1="0" x2="0" y2="1">

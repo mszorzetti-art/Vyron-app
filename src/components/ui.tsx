@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle2, AlertTriangle, XCircle, Clock, PauseCircle, PlayCircle, Archive } from 'lucide-react';
+import { useI18n } from '../i18n/useI18n';
 
 export const PageHeader: React.FC<{
   title: string;
@@ -86,60 +87,91 @@ export const MetricBlock: React.FC<{
 
 export const StatusLabel: React.FC<{
   status: string;
-}> = ({ status }) => {
-  const s = status.toLowerCase();
+  statusKey?: string;
+}> = ({ status, statusKey }) => {
+  const s = (statusKey ?? status).toLowerCase();
   let Icon = Clock;
   let colorClass = 'text-[#525B68] dark:text-[#AEB7C2]';
 
   if (
     s.includes('approved') ||
+    s.includes('aprovado') ||
     s.includes('published') ||
+    s.includes('publicado') ||
     s.includes('received') ||
+    s.includes('recebido') ||
     s.includes('active') ||
+    s.includes('ativo') ||
     s.includes('success') ||
     s.includes('succeeded') ||
+    s.includes('concluído') ||
     s.includes('mitigado') ||
+    s.includes('mitigated') ||
     s.includes('configurado') ||
-    s.includes('pronto')
+    s.includes('configured') ||
+    s.includes('pronto') ||
+    s.includes('ready')
   ) {
     Icon = CheckCircle2;
     colorClass = 'text-emerald-700 dark:text-emerald-400';
-  } else if (s.includes('running')) {
+  } else if (s.includes('running') || s.includes('em execução')) {
     Icon = PlayCircle;
     colorClass = 'text-[#315FEA] dark:text-[#6B8FFF]';
   } else if (
     s.includes('confirmed') ||
+    s.includes('confirmado') ||
     s.includes('in review') ||
+    s.includes('em revisão') ||
     s.includes('waiting') ||
+    s.includes('aguardando') ||
     s.includes('atenção') ||
+    s.includes('attention') ||
     s.includes('pendente') ||
     s.includes('pending') ||
+    s.includes('infraestrutura') ||
+    s.includes('infrastructure') ||
     s.includes('candidate') ||
+    s.includes('candidato') ||
     s.includes('unknown') ||
-    s.includes('aberto')
+    s.includes('desconhecido') ||
+    s.includes('aberto') ||
+    s === 'open'
   ) {
     Icon = Clock;
     colorClass = 'text-amber-700 dark:text-amber-400';
   } else if (
     s.includes('paused') ||
+    s.includes('pausado') ||
     s.includes('idle') ||
+    s.includes('em espera') ||
     s.includes('brief') ||
+    s.includes('content plan') ||
+    s.includes('planejamento') ||
     s.includes('draft') ||
+    s.includes('rascunho') ||
     s.includes('not_applicable') ||
-    s.includes('desativado')
+    s === 'n/a' ||
+    s.includes('desativado') ||
+    s.includes('disabled')
   ) {
     Icon = PauseCircle;
     colorClass = 'text-[#525B68] dark:text-[#AEB7C2]';
-  } else if (s.includes('archived')) {
+  } else if (s.includes('archived') || s.includes('arquivado')) {
     Icon = Archive;
     colorClass = 'text-[#525B68] dark:text-[#AEB7C2]';
   } else if (
     s.includes('rejected') ||
+    s.includes('rejeitado') ||
     s.includes('error') ||
+    s.includes('falh') ||
     s.includes('failed') ||
     s.includes('halted') ||
+    s.includes('interrompido') ||
+    s.includes('parado') ||
     s.includes('blocked') ||
-    s.includes('desconectado')
+    s.includes('bloqueado') ||
+    s.includes('desconectado') ||
+    s.includes('disconnected')
   ) {
     Icon = XCircle;
     colorClass = 'text-rose-700 dark:text-rose-400';
@@ -219,6 +251,7 @@ export const ModalDialog: React.FC<{
   onClose: () => void;
   children: React.ReactNode;
 }> = ({ open, title, subtitle, onClose, children }) => {
+  const { t } = useI18n();
   if (!open) return null;
   return (
     <div
@@ -242,10 +275,10 @@ export const ModalDialog: React.FC<{
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fechar janela"
+            aria-label={t('common.closeWindow')}
             className="text-xs px-2.5 py-1.5 rounded border border-black/10 dark:border-white/10 text-[#525B68] dark:text-[#AEB7C2] hover:text-[#101216] dark:hover:text-[#F1F2F3]"
           >
-            Fechar
+            {t('common.close')}
           </button>
         </div>
         <div className="p-6 overflow-y-auto">{children}</div>

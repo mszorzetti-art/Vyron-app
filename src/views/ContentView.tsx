@@ -21,11 +21,20 @@ import {
   ContentVisibility,
   SensitiveTopic,
 } from '../types/vyron';
+import { useI18n } from '../i18n/useI18n';
 import {
-  evaluateContentPreSendChecks,
-  formatCompactNumber,
-  formatCurrency,
-} from '../utils/vyronRules';
+  labelAnalysisMethod,
+  labelAttributionStatus,
+  labelContentCategory,
+  labelContentFormat,
+  labelContentStatus,
+  labelContentVisibility,
+  labelFeedbackCategory,
+  labelSensitiveTopic,
+  labelSystemControlState,
+} from '../i18n/domainLabels';
+import { localizeActor, localizeContentDisplay } from '../i18n/seedTranslations';
+import { evaluateContentPreSendChecks } from '../utils/vyronRules';
 import {
   EmptyState,
   ModalDialog,
@@ -68,6 +77,7 @@ export const ContentView: React.FC = () => {
     revalidateContentEvidence,
     rejectContentWithFeedback,
   } = useVyron();
+  const { lang, t, fmtCurrency, fmtCompact, fmtNumber, fmtDate, fmtDateTime } = useI18n();
 
   const [statusFilter, setStatusFilter] = useState<'all' | ContentStatus>('all');
   const [formatFilter, setFormatFilter] = useState<'all' | ContentFormat>('all');
@@ -111,29 +121,31 @@ export const ContentView: React.FC = () => {
   const activeContent =
     state.contents.find((c) => c.id === selectedContentId) ?? visibleContents[0] ?? null;
 
+  const localizedActive = activeContent ? localizeContentDisplay(activeContent, lang) : null;
+
   const preSendEval = activeContent
     ? evaluateContentPreSendChecks(
         activeContent,
         state.systemControl,
         new Date().toISOString(),
-        { evidenceFreshnessMaxHours: state.settings.evidenceFreshnessMaxHours }
+        { evidenceFreshnessMaxHours: state.settings.evidenceFreshnessMaxHours, language: lang }
       )
     : null;
 
   // Calendar helpers
-  const monthNames = [
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro',
+  const rawMonthName = new Intl.DateTimeFormat(lang === 'EN-US' ? 'en-US' : 'pt-BR', {
+    month: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(calYear, calMonth, 1)));
+  const monthLabel = rawMonthName.charAt(0).toUpperCase() + rawMonthName.slice(1);
+  const weekdays = [
+    t('content.calendar.sun'),
+    t('content.calendar.mon'),
+    t('content.calendar.tue'),
+    t('content.calendar.wed'),
+    t('content.calendar.thu'),
+    t('content.calendar.fri'),
+    t('content.calendar.sat'),
   ];
   const firstWeekday = new Date(Date.UTC(calYear, calMonth, 1)).getUTCDay();
   const daysInMonth = new Date(Date.UTC(calYear, calMonth + 1, 0)).getUTCDate();
@@ -149,17 +161,17 @@ export const ContentView: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={contentSubView === 'studio' ? 'Content Studio & Aprovação Hash' : 'Calendário Editorial'}
-        subtitle="Briefings, dossiês de fontes (níveis 1–4), manifesto SHA-256 com herança zero e 6 verificações obrigatórias pré-envio."
+        title={contentSubView === 'studio' ? t('content.titleStudio') : t('content.titleCalendar')}
+        subtitle={t('content.subtitle')}
         actions={
           <>
             <SegmentedControl
-              ariaLabel="Alternar entre Content Studio e Calendário Editorial"
+              ariaLabel={t('content.switchAria')}
               value={contentSubView}
               onChange={(v) => setContentSubView(v as 'studio' | 'calendar')}
               options={[
-                { value: 'studio', label: 'Studio & Hash' },
-                { value: 'calendar', label: 'Calendário Editorial' },
+                { value: 'studio', label: t('content.tabStudio') },
+                { value: 'calendar', label: t('content.tabCalendar') },
               ]}
             />
             <button
@@ -168,7 +180,7 @@ export const ContentView: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-md bg-[#315FEA] text-white hover:bg-[#274FC9] whitespace-nowrap"
             >
               <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Nova Pauta / Briefing</span>
+              <span>{t('content.newContent')}</span>
             </button>
           </>
         }
@@ -177,41 +189,41 @@ export const ContentView: React.FC = () => {
       {/* Filter Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <SegmentedControl
-          ariaLabel="Filtrar conteúdo por estado"
+          ariaLabel={t('content.statusFilterAria')}
           value={statusFilter}
           onChange={(v) => setStatusFilter(v as 'all' | ContentStatus)}
           options={[
-            { value: 'all', label: 'Todos' },
-            ...CONTENT_STATUSES.map((s) => ({ value: s, label: s })),
+            { value: 'all', label: t('common.all') },
+            ...CONTENT_STATUSES.map((s) => ({ value: s, label: labelContentStatus(s, lang) })),
           ]}
         />
         <SegmentedControl
-          ariaLabel="Filtrar por formato"
+          ariaLabel={t('content.formatFilterAria')}
           value={formatFilter}
           onChange={(v) => setFormatFilter(v as 'all' | ContentFormat)}
           options={[
-            { value: 'all', label: 'Todos Formatos' },
-            { value: 'Long-form', label: 'Long-form' },
-            { value: 'Shorts', label: 'Shorts' },
-            { value: 'Article', label: 'Article' },
+            { value: 'all', label: t('content.allFormats') },
+            { value: 'Long-form', label: labelContentFormat('Long-form', lang) },
+            { value: 'Shorts', label: labelContentFormat('Shorts', lang) },
+            { value: 'Article', label: labelContentFormat('Article', lang) },
           ]}
         />
       </div>
 
-      {/* SUBPAGE: CALENDÁRIO EDITORIAL */}
+      {/* SUBPAGE: EDITORIAL CALENDAR */}
       {contentSubView === 'calendar' ? (
         <SurfacePanel>
           <div className="flex items-center justify-between gap-4 mb-4">
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-4 h-4 text-[#315FEA]" aria-hidden="true" />
               <h2 className="font-display text-base font-semibold">
-                {monthNames[calMonth]} {calYear}
+                {monthLabel} {calYear}
               </h2>
             </div>
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                aria-label="Mês anterior"
+                aria-label={t('content.calendar.prevMonthAria')}
                 onClick={() => {
                   if (calMonth === 0) {
                     setCalMonth(11);
@@ -232,11 +244,11 @@ export const ContentView: React.FC = () => {
                 }}
                 className="px-2.5 py-1 text-xs rounded border border-black/10 dark:border-white/10 hover:border-[#315FEA]"
               >
-                Nov 2026
+                {t('content.calendar.refMonth')}
               </button>
               <button
                 type="button"
-                aria-label="Próximo mês"
+                aria-label={t('content.calendar.nextMonthAria')}
                 onClick={() => {
                   if (calMonth === 11) {
                     setCalMonth(0);
@@ -253,7 +265,7 @@ export const ContentView: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-7 gap-px bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-md overflow-hidden">
-            {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((d) => (
+            {weekdays.map((d) => (
               <div
                 key={d}
                 className="bg-[#F1F2F3] dark:bg-[#14171C] py-2 px-2 text-[11px] font-medium text-[#525B68] dark:text-[#AEB7C2] text-center"
@@ -282,7 +294,7 @@ export const ContentView: React.FC = () => {
                     </span>
                     <button
                       type="button"
-                      aria-label={`Agendar pauta em ${cell.iso}`}
+                      aria-label={t('content.calendar.scheduleAria', { date: fmtDate(cell.iso) })}
                       onClick={() => {
                         setNewDate(cell.iso!);
                         setCreateOpen(true);
@@ -295,6 +307,7 @@ export const ContentView: React.FC = () => {
                   <div className="space-y-1">
                     {dayItems.map((item) => {
                       const brand = state.brands.find((b) => b.id === item.brandId);
+                      const loc = localizeContentDisplay(item, lang);
                       return (
                         <button
                           key={item.id}
@@ -312,12 +325,12 @@ export const ContentView: React.FC = () => {
                               className="w-1.5 h-1.5 rounded-xs shrink-0"
                               style={{ backgroundColor: brand?.accentColor ?? '#315FEA' }}
                             />
-                            <span className="truncate">{item.format}</span>
+                            <span className="truncate">{labelContentFormat(item.format, lang)}</span>
                             <span>·</span>
-                            <span className="truncate">{item.visibility}</span>
+                            <span className="truncate">{labelContentVisibility(item.visibility, lang)}</span>
                           </div>
                           <div className="mt-0.5 text-[11px] font-medium truncate text-[#101216] dark:text-[#F1F2F3]">
-                            {item.title}
+                            {loc.title}
                           </div>
                         </button>
                       );
@@ -334,20 +347,21 @@ export const ContentView: React.FC = () => {
           {/* Left Queue */}
           <SurfacePanel padding="none" className="lg:col-span-4 overflow-hidden">
             <div className="px-4 py-3 border-b border-black/10 dark:border-white/10 flex items-center justify-between text-xs font-medium">
-              <span>Fila Editorial ({visibleContents.length})</span>
+              <span>{t('content.queueTitle', { count: visibleContents.length })}</span>
               <span className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                Mobile-ready review
+                {t('content.queueHint')}
               </span>
             </div>
             {visibleContents.length === 0 ? (
               <div className="p-6 text-center text-xs text-[#525B68] dark:text-[#AEB7C2]">
-                Nenhum conteúdo neste filtro.
+                {t('content.queueEmpty')}
               </div>
             ) : (
               <ul className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
                 {visibleContents.map((c) => {
                   const brand = state.brands.find((b) => b.id === c.brandId);
                   const ch = state.channels.find((x) => x.id === c.channelId);
+                  const loc = localizeContentDisplay(c, lang);
                   const isSelected = activeContent?.id === c.id;
                   const hashAuthOk =
                     c.authorization &&
@@ -366,17 +380,24 @@ export const ContentView: React.FC = () => {
                       >
                         <div className="flex items-center justify-between gap-2 text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
                           <span className="truncate">
-                            {brand?.name} · {ch?.platform} · {c.visibility}
+                            {brand?.name} · {ch?.platform} · {labelContentVisibility(c.visibility, lang)}
                           </span>
-                          <span className="font-mono shrink-0">{c.scheduledDate}</span>
+                          <span className="font-mono shrink-0">{fmtDate(c.scheduledDate)}</span>
                         </div>
                         <div className="mt-1 text-xs font-semibold text-[#101216] dark:text-[#F1F2F3] line-clamp-2">
-                          {c.title}
+                          {loc.title}
                         </div>
                         <div className="mt-2 flex items-center justify-between gap-2">
-                          <StatusLabel status={c.status} />
+                          <StatusLabel
+                            status={labelContentStatus(c.status, lang)}
+                            statusKey={c.status}
+                          />
                           <span className="font-mono text-[10px] text-[#525B68] dark:text-[#AEB7C2]">
-                            {hashAuthOk ? 'Hash OK' : c.authorization ? 'Hash Inválido' : 'Sem Hash'}
+                            {hashAuthOk
+                              ? t('content.hashOk')
+                              : c.authorization
+                              ? t('content.hashInvalid')
+                              : t('content.noHash')}
                           </span>
                         </div>
                       </button>
@@ -389,11 +410,11 @@ export const ContentView: React.FC = () => {
 
           {/* Right Workspace Editor, Manifest Hash & 6 Mandatory Pre-Send Checks */}
           <div className="lg:col-span-8 space-y-5">
-            {!activeContent || !preSendEval ? (
+            {!activeContent || !localizedActive || !preSendEval ? (
               <EmptyState
-                title="Selecione ou crie uma pauta"
-                description="Escolha um item na fila editorial ou abra uma nova pauta vinculada a uma marca e canal."
-                actionLabel="Nova Pauta"
+                title={t('content.emptyTitle')}
+                description={t('content.emptyDesc')}
+                actionLabel={t('content.emptyCta')}
                 onAction={() => setCreateOpen(true)}
               />
             ) : (
@@ -407,21 +428,25 @@ export const ContentView: React.FC = () => {
                         <span>
                           {state.brands.find((b) => b.id === activeContent.brandId)?.name} ·{' '}
                           {state.channels.find((ch) => ch.id === activeContent.channelId)?.name} ·{' '}
-                          {activeContent.format} · {activeContent.category}
+                          {labelContentFormat(activeContent.format, lang)} ·{' '}
+                          {labelContentCategory(activeContent.category, lang)}
                         </span>
                       </div>
                       <h2 className="mt-1 font-display text-lg font-semibold">
-                        {activeContent.title}
+                        {localizedActive.title}
                       </h2>
                     </div>
-                    <StatusLabel status={activeContent.status} />
+                    <StatusLabel
+                      status={labelContentStatus(activeContent.status, lang)}
+                      statusKey={activeContent.status}
+                    />
                   </div>
 
                   {/* Operational & Governance Parameters */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                     <div>
                       <label className="block font-medium mb-1 text-[#525B68] dark:text-[#AEB7C2]">
-                        Data Agendada (Fora do Hash)
+                        {t('content.field.scheduledDate')}
                       </label>
                       <input
                         type="date"
@@ -430,7 +455,7 @@ export const ContentView: React.FC = () => {
                           updateContent(
                             activeContent.id,
                             { scheduledDate: e.target.value },
-                            `Reagendado para ${e.target.value} (manifesto intacto)`
+                            t('content.field.rescheduledNote', { date: fmtDate(e.target.value) })
                           )
                         }
                         className="w-full h-9 px-2.5 rounded border border-black/15 dark:border-white/15 bg-transparent font-mono"
@@ -438,29 +463,31 @@ export const ContentView: React.FC = () => {
                     </div>
                     <div>
                       <label className="block font-medium mb-1 text-[#525B68] dark:text-[#AEB7C2]">
-                        Visibilidade Explícita
+                        {t('content.field.visibility')}
                       </label>
                       <select
-                        aria-label="Visibilidade explícita"
+                        aria-label={t('content.field.visibility')}
                         value={activeContent.visibility}
                         onChange={(e) =>
                           updateContent(activeContent.id, {
                             visibility: e.target.value as ContentVisibility,
                           })
                         }
-                        className="w-full h-9 px-2.5 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20] font-mono"
+                        className="w-full h-9 px-2.5 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
                       >
-                        <option value="private">private (Fase A)</option>
-                        <option value="unlisted">unlisted (Fase A)</option>
-                        <option value="public">public (Fase B)</option>
+                        <option value="private">
+                          {labelContentVisibility('private', lang)} ({t('common.privateEnv')})
+                        </option>
+                        <option value="unlisted">{labelContentVisibility('unlisted', lang)}</option>
+                        <option value="public">{labelContentVisibility('public', lang)}</option>
                       </select>
                     </div>
                     <div>
                       <label className="block font-medium mb-1 text-[#525B68] dark:text-[#AEB7C2]">
-                        Método de Análise
+                        {t('content.field.analysisMethod')}
                       </label>
                       <select
-                        aria-label="Método de análise"
+                        aria-label={t('content.field.analysisMethod')}
                         value={activeContent.analysisMethod}
                         onChange={(e) =>
                           updateContent(activeContent.id, {
@@ -469,18 +496,18 @@ export const ContentView: React.FC = () => {
                         }
                         className="w-full h-9 px-2.5 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
                       >
-                        <option value="Teste próprio">Teste próprio</option>
-                        <option value="Análise documental">Análise documental</option>
-                        <option value="Comparativo de critérios">Comparativo de critérios</option>
+                        <option value="Teste próprio">{labelAnalysisMethod('Teste próprio', lang)}</option>
+                        <option value="Análise documental">{labelAnalysisMethod('Análise documental', lang)}</option>
+                        <option value="Comparativo de critérios">{labelAnalysisMethod('Comparativo de critérios', lang)}</option>
                       </select>
                     </div>
                     <div>
                       <label className="block font-medium mb-1 text-[#525B68] dark:text-[#AEB7C2]">
-                        Tema Sensível & Horas
+                        {t('content.field.sensitiveHours')}
                       </label>
                       <div className="flex gap-1.5">
                         <select
-                          aria-label="Tema sensível"
+                          aria-label={t('content.field.sensitiveHours')}
                           value={activeContent.sensitiveTopic}
                           onChange={(e) =>
                             updateContent(activeContent.id, {
@@ -489,18 +516,18 @@ export const ContentView: React.FC = () => {
                           }
                           className="flex-1 h-9 px-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
                         >
-                          <option value="Nenhum">Nenhum</option>
-                          <option value="Saúde">Saúde</option>
-                          <option value="Finanças">Finanças</option>
-                          <option value="Apostas">Apostas</option>
-                          <option value="Infantil">Infantil</option>
-                          <option value="Segurança">Segurança</option>
+                          <option value="Nenhum">{labelSensitiveTopic('Nenhum', lang)}</option>
+                          <option value="Saúde">{labelSensitiveTopic('Saúde', lang)}</option>
+                          <option value="Finanças">{labelSensitiveTopic('Finanças', lang)}</option>
+                          <option value="Apostas">{labelSensitiveTopic('Apostas', lang)}</option>
+                          <option value="Infantil">{labelSensitiveTopic('Infantil', lang)}</option>
+                          <option value="Segurança">{labelSensitiveTopic('Segurança', lang)}</option>
                         </select>
                         <input
                           type="number"
                           step="0.5"
                           min="0"
-                          aria-label="Horas humanas"
+                          aria-label={t('content.field.humanHoursAria')}
                           value={activeContent.humanHoursLogged}
                           onChange={(e) =>
                             updateContent(activeContent.id, {
@@ -508,7 +535,7 @@ export const ContentView: React.FC = () => {
                             })
                           }
                           className="w-16 h-9 px-2 rounded border border-black/15 dark:border-white/15 bg-transparent font-mono text-right"
-                          title="Horas humanas investidas (Dimensão 2)"
+                          title={t('content.field.humanHoursTitle')}
                         />
                       </div>
                     </div>
@@ -517,7 +544,7 @@ export const ContentView: React.FC = () => {
                   {/* Editorial Copy & Script (Manifest-hashed fields) */}
                   <div className="space-y-3.5 text-xs">
                     <div>
-                      <label className="block font-medium mb-1">Descrição Pública / Metadata</label>
+                      <label className="block font-medium mb-1">{t('content.field.description')}</label>
                       <textarea
                         rows={2}
                         value={activeContent.description}
@@ -529,7 +556,7 @@ export const ContentView: React.FC = () => {
                     </div>
                     <div>
                       <label className="block font-medium mb-1">
-                        Roteiro Estruturado (Qualquer edição recalcula SHA-256 e revoga aprovação anterior)
+                        {t('content.field.script')}
                       </label>
                       <textarea
                         rows={4}
@@ -542,7 +569,7 @@ export const ContentView: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-medium mb-1">Link de Afiliado / Destino</label>
+                        <label className="block font-medium mb-1">{t('content.field.affiliateLink')}</label>
                         <input
                           value={activeContent.affiliateLinkUrl}
                           onChange={(e) =>
@@ -552,7 +579,7 @@ export const ContentView: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="block font-medium mb-1">Divulgação Comercial (CDC/CONAR/UE)</label>
+                        <label className="block font-medium mb-1">{t('content.field.disclosure')}</label>
                         <input
                           value={activeContent.affiliateDisclosure}
                           onChange={(e) =>
@@ -576,7 +603,7 @@ export const ContentView: React.FC = () => {
                           }
                           className="accent-[#315FEA]"
                         />
-                        <span>Teste Relevância (7 pts)</span>
+                        <span>{t('content.field.relevanceCheck')}</span>
                       </label>
                       <label className="flex items-center gap-2 p-2.5 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10">
                         <input
@@ -589,7 +616,7 @@ export const ContentView: React.FC = () => {
                           }
                           className="accent-[#315FEA]"
                         />
-                        <span>Checklist Editorial (9 pts)</span>
+                        <span>{t('content.field.editorialCheck')}</span>
                       </label>
                       <label className="flex items-center gap-2 p-2.5 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10">
                         <input
@@ -602,28 +629,30 @@ export const ContentView: React.FC = () => {
                           }
                           className="accent-[#315FEA]"
                         />
-                        <span>Risco Não Classificado</span>
+                        <span>{t('content.field.unclassifiedRisk')}</span>
                       </label>
                     </div>
                   </div>
                 </SurfacePanel>
 
-                {/* PAINEL DE APROVAÇÃO POR HASH & 6 VERIFICAÇÕES OBRIGATÓRIAS */}
+                {/* HASH APPROVAL PANEL & 6 MANDATORY PRE-SEND CHECKS */}
                 <SurfacePanel className="space-y-4">
                   <div className="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-black/10 dark:border-white/10">
                     <div>
                       <div className="flex items-center gap-2">
                         <Lock className="w-4 h-4 text-[#315FEA]" aria-hidden="true" />
                         <h3 className="font-display text-sm font-semibold">
-                          Autorização por Hash SHA-256 & 6 Travas Pré-Envio
+                          {t('content.hashPanel.title')}
                         </h3>
                       </div>
                       <p className="mt-1 text-xs text-[#525B68] dark:text-[#AEB7C2]">
-                        Herança zero: editar título, descrição, roteiro, link, divulgação ou visibilidade invalida a autorização anterior.
+                        {t('content.hashPanel.subtitle')}
                       </p>
                     </div>
                     <div className="text-right font-mono text-[11px]">
-                      <div className="text-[#525B68] dark:text-[#AEB7C2]">Manifesto Atual</div>
+                      <div className="text-[#525B68] dark:text-[#AEB7C2]">
+                        {t('content.hashPanel.currentManifest')}
+                      </div>
                       <div className="font-semibold text-[#101216] dark:text-[#F1F2F3]">
                         {preSendEval.recalculatedHash.slice(0, 16)}...
                       </div>
@@ -634,40 +663,53 @@ export const ContentView: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                     <div className="p-3 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 space-y-1">
                       <div className="text-[#525B68] dark:text-[#AEB7C2] font-medium">
-                        Autorização Vinculada
+                        {t('content.hashPanel.linkedAuth')}
                       </div>
                       {activeContent.authorization ? (
                         <>
                           <div className="font-mono text-[11px]">
-                            Hash: {activeContent.authorization.authorizedHash.slice(0, 16)}...
+                            {t('content.hashPanel.hashPrefix', {
+                              hash: activeContent.authorization.authorizedHash.slice(0, 16),
+                            })}
                           </div>
                           <div className="font-mono text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                            Por {activeContent.authorization.actor} · Expira{' '}
-                            {activeContent.authorization.expiresAt.slice(0, 16).replace('T', ' ')}
+                            {t('content.hashPanel.byActorExpires', {
+                              actor: localizeActor(activeContent.authorization.actor, lang),
+                              date: fmtDateTime(activeContent.authorization.expiresAt),
+                            })}
                           </div>
                         </>
                       ) : (
                         <div className="text-amber-700 dark:text-amber-400 font-medium">
-                          Sem autorização ativa nesta versão
+                          {t('content.hashPanel.noActiveAuth')}
                         </div>
                       )}
                     </div>
 
                     <div className="p-3 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 space-y-1">
                       <div className="text-[#525B68] dark:text-[#AEB7C2] font-medium">
-                        Resultado Gate Pré-Envio (Bloco 7)
+                        {t('content.hashPanel.gateResult')}
                       </div>
                       {preSendEval.canSend ? (
                         <div className="font-semibold text-emerald-700 dark:text-emerald-400">
-                          APTO PARA ENVIO ({activeContent.visibility})
+                          {t('content.hashPanel.readyToSend', {
+                            visibility: labelContentVisibility(activeContent.visibility, lang),
+                          })}
                         </div>
                       ) : (
                         <div className="font-semibold text-rose-700 dark:text-rose-400">
-                          BLOQUEADO ({preSendEval.checks.filter((c) => !c.passed).length} trava(s) pendente(s))
+                          {t('content.hashPanel.blocked', {
+                            count: preSendEval.checks.filter((c) => !c.passed).length,
+                          })}
                         </div>
                       )}
                       <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                        system_controls={state.systemControl.state} · PUBLISHING_ENABLED={String(state.systemControl.publishingEnabled)}
+                        {t('content.hashPanel.controlsSummary', {
+                          state: labelSystemControlState(state.systemControl.state, lang),
+                          pub: state.systemControl.publishingEnabled
+                            ? t('content.hashPanel.pubEnabled')
+                            : t('content.hashPanel.pubDisabled'),
+                        })}
                       </div>
                     </div>
                   </div>
@@ -710,7 +752,7 @@ export const ContentView: React.FC = () => {
                       className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded border border-black/15 dark:border-white/15 hover:border-[#315FEA]"
                     >
                       <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span>Revalidar Link & Condições</span>
+                      <span>{t('content.action.revalidate')}</span>
                     </button>
 
                     <button
@@ -724,7 +766,7 @@ export const ContentView: React.FC = () => {
                       className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded bg-[#315FEA] text-white hover:bg-[#274FC9]"
                     >
                       <Lock className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span>Autorizar Hash Individual</span>
+                      <span>{t('content.action.authorize')}</span>
                     </button>
 
                     {activeContent.authorization && !activeContent.authorization.revoked && (
@@ -733,12 +775,12 @@ export const ContentView: React.FC = () => {
                         onClick={() =>
                           revokeContentAuthorization(
                             activeContent.id,
-                            'Revogada manualmente pelo proprietário.'
+                            t('content.action.revokeReason')
                           )
                         }
                         className="px-3 py-2 text-xs font-medium rounded border border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
                       >
-                        Revogar Autorização
+                        {t('content.action.revoke')}
                       </button>
                     )}
 
@@ -751,7 +793,7 @@ export const ContentView: React.FC = () => {
                       className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded border border-rose-500/40 text-rose-700 dark:text-rose-400 hover:bg-rose-500/10"
                     >
                       <ShieldAlert className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span>Rejeitar c/ Feedback</span>
+                      <span>{t('content.action.reject')}</span>
                     </button>
                   </div>
 
@@ -761,8 +803,8 @@ export const ContentView: React.FC = () => {
                       <input
                         value={statusNote}
                         onChange={(e) => setStatusNote(e.target.value)}
-                        placeholder="Nota da revisão ou versão..."
-                        aria-label="Nota da revisão ou versão"
+                        placeholder={t('content.versionNotePlaceholder')}
+                        aria-label={t('content.versionNoteAria')}
                         className="flex-1 min-w-[200px] h-8 px-3 text-xs rounded border border-black/15 dark:border-white/15 bg-transparent"
                       />
                       <button
@@ -771,13 +813,13 @@ export const ContentView: React.FC = () => {
                           updateContent(
                             activeContent.id,
                             {},
-                            statusNote.trim() || 'Snapshot manual salvo no Studio.'
+                            statusNote.trim() || t('content.versionNoteDefault')
                           );
                           setStatusNote('');
                         }}
                         className="h-8 px-3 text-xs font-medium rounded border border-black/15 dark:border-white/15 hover:border-[#315FEA]"
                       >
-                        Salvar Versão
+                        {t('content.saveVersion')}
                       </button>
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -792,7 +834,10 @@ export const ContentView: React.FC = () => {
                               changeContentStatus(
                                 activeContent.id,
                                 st,
-                                statusNote.trim() || `Movido para ${st}`
+                                statusNote.trim() ||
+                                  t('content.movedToNote', {
+                                    status: labelContentStatus(st, lang),
+                                  })
                               );
                               setStatusNote('');
                             }}
@@ -802,7 +847,7 @@ export const ContentView: React.FC = () => {
                                 : 'border border-black/10 dark:border-white/10 hover:border-[#315FEA]/60'
                             }`}
                           >
-                            {st}
+                            {labelContentStatus(st, lang)}
                           </button>
                         );
                       })}
@@ -814,17 +859,20 @@ export const ContentView: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <SurfacePanel className="space-y-3">
                     <h3 className="font-display text-sm font-semibold">
-                      Dossiê de Fontes (Níveis 1–4) & Atribuição
+                      {t('content.dossierTitle')}
                     </h3>
-                    {activeContent.dossier.length > 0 ? (
+                    {localizedActive.dossier.length > 0 ? (
                       <ul className="space-y-2 text-xs">
-                        {activeContent.dossier.map((d) => (
+                        {localizedActive.dossier.map((d) => (
                           <li
                             key={d.id}
                             className="p-2.5 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10"
                           >
                             <div className="font-mono text-[10px] text-[#315FEA] dark:text-[#7FA0FF]">
-                              Nível {d.level} · Consultado {d.consultedAt}
+                              {t('content.dossierLevelDate', {
+                                level: d.level,
+                                date: fmtDate(d.consultedAt),
+                              })}
                             </div>
                             <div className="font-medium mt-0.5">{d.claim}</div>
                             <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
@@ -835,42 +883,50 @@ export const ContentView: React.FC = () => {
                       </ul>
                     ) : (
                       <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
-                        Nenhuma fonte estruturada no dossiê ainda.
+                        {t('content.dossierEmpty')}
                       </p>
                     )}
 
                     {activeContent.metrics && (
                       <div className="pt-3 border-t border-black/10 dark:border-white/10 space-y-2 text-xs">
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold">Métricas Pós-Publicação</span>
+                          <span className="font-semibold">{t('content.metrics.title')}</span>
                           <span className="font-mono text-[11px] text-amber-700 dark:text-amber-400">
-                            {activeContent.metrics.attributionStatus}
+                            {labelAttributionStatus(activeContent.metrics.attributionStatus, lang)}
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-2.5">
                           <div>
-                            <div className="text-[#525B68] dark:text-[#AEB7C2]">Views / Ret. 30s</div>
+                            <div className="text-[#525B68] dark:text-[#AEB7C2]">
+                              {t('content.metrics.viewsRet')}
+                            </div>
                             <div className="font-mono font-semibold">
-                              {formatCompactNumber(activeContent.metrics.views)} ·{' '}
-                              {activeContent.metrics.retention30sPct}%
+                              {fmtCompact(activeContent.metrics.views)} ·{' '}
+                              {fmtNumber(activeContent.metrics.retention30sPct, 1)}%
                             </div>
                           </div>
                           <div>
-                            <div className="text-[#525B68] dark:text-[#AEB7C2]">Cliques / Tracking</div>
+                            <div className="text-[#525B68] dark:text-[#AEB7C2]">
+                              {t('content.metrics.clicksTracking')}
+                            </div>
                             <div className="font-mono font-semibold">
-                              {formatCompactNumber(activeContent.metrics.clicks)} ({activeContent.metrics.trackingSrc})
+                              {fmtCompact(activeContent.metrics.clicks)} ({activeContent.metrics.trackingSrc})
                             </div>
                           </div>
                           <div>
-                            <div className="text-[#525B68] dark:text-[#AEB7C2]">Conv. (Estimativa)</div>
+                            <div className="text-[#525B68] dark:text-[#AEB7C2]">
+                              {t('content.metrics.conversions')}
+                            </div>
                             <div className="font-mono font-semibold">
                               {activeContent.metrics.conversions}
                             </div>
                           </div>
                           <div>
-                            <div className="text-[#525B68] dark:text-[#AEB7C2]">Receita Est.</div>
+                            <div className="text-[#525B68] dark:text-[#AEB7C2]">
+                              {t('content.metrics.revenue')}
+                            </div>
                             <div className="font-mono font-semibold text-emerald-700 dark:text-emerald-400">
-                              {formatCurrency(
+                              {fmtCurrency(
                                 activeContent.metrics.revenueGenerated,
                                 activeContent.metrics.currency
                               )}
@@ -883,10 +939,10 @@ export const ContentView: React.FC = () => {
 
                   <SurfacePanel>
                     <h3 className="font-display text-sm font-semibold mb-3">
-                      Histórico de Versões ({activeContent.versions.length})
+                      {t('content.versionsTitle', { count: localizedActive.versions.length })}
                     </h3>
                     <ul className="space-y-2.5 text-xs max-h-64 overflow-y-auto">
-                      {activeContent.versions.map((v) => (
+                      {localizedActive.versions.map((v) => (
                         <li
                           key={v.version + v.timestamp}
                           className="pb-2 border-b border-black/[0.06] dark:border-white/[0.06] last:border-0"
@@ -894,10 +950,12 @@ export const ContentView: React.FC = () => {
                           <div className="flex items-center justify-between font-mono text-[11px]">
                             <span className="font-semibold text-[#315FEA] dark:text-[#7FA0FF]">
                               {v.version} · {v.author}
-                              {v.feedbackCategory ? ` [${v.feedbackCategory}]` : ''}
+                              {v.feedbackCategory
+                                ? ` [${labelFeedbackCategory(v.feedbackCategory, lang)}]`
+                                : ''}
                             </span>
                             <span className="text-[#525B68] dark:text-[#AEB7C2]">
-                              {v.timestamp.slice(0, 10)}
+                              {fmtDate(v.timestamp)}
                             </span>
                           </div>
                           <div className="font-mono text-[10px] text-[#525B68] dark:text-[#AEB7C2]">
@@ -918,8 +976,8 @@ export const ContentView: React.FC = () => {
       {/* Hash Authorization Modal */}
       <ModalDialog
         open={authModalOpen && Boolean(activeContent)}
-        title="Emitir Autorização Individual por Hash SHA-256"
-        subtitle="Vincula aprovação humana exatamente ao manifesto atual com prazo explícito de expiração."
+        title={t('content.modal.authTitle')}
+        subtitle={t('content.modal.authSubtitle')}
         onClose={() => setAuthModalOpen(false)}
       >
         {activeContent && (
@@ -936,13 +994,21 @@ export const ContentView: React.FC = () => {
             }}
           >
             <div className="p-3 rounded bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 font-mono text-[11px] space-y-1">
-              <div>Manifesto SHA-256: {preSendEval?.recalculatedHash}</div>
-              <div>Visibilidade: {activeContent.visibility}</div>
-              <div>Regras: v1.0 · Tipo: individual</div>
+              <div>
+                {t('content.modal.manifestHash', {
+                  hash: preSendEval?.recalculatedHash ?? '',
+                })}
+              </div>
+              <div>
+                {t('content.modal.visibility', {
+                  visibility: labelContentVisibility(activeContent.visibility, lang),
+                })}
+              </div>
+              <div>{t('content.modal.rulesType')}</div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium mb-1">Autorizador</label>
+                <label className="block font-medium mb-1">{t('content.modal.authorizer')}</label>
                 <input
                   required
                   value={authActor}
@@ -951,7 +1017,7 @@ export const ContentView: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block font-medium mb-1">Validade (horas)</label>
+                <label className="block font-medium mb-1">{t('content.modal.validityHours')}</label>
                 <input
                   type="number"
                   min="1"
@@ -964,11 +1030,11 @@ export const ContentView: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="block font-medium mb-1">Observação no Audit Log</label>
+              <label className="block font-medium mb-1">{t('content.modal.auditNote')}</label>
               <input
                 value={authNote}
                 onChange={(e) => setAuthNote(e.target.value)}
-                placeholder="Ex.: Links e divulgações conferidos manualmente."
+                placeholder={t('content.modal.auditNotePlaceholder')}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent"
               />
             </div>
@@ -978,13 +1044,13 @@ export const ContentView: React.FC = () => {
                 onClick={() => setAuthModalOpen(false)}
                 className="px-3.5 py-2 rounded border border-black/15 dark:border-white/15"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 rounded bg-[#315FEA] text-white font-medium hover:bg-[#274FC9]"
               >
-                Confirmar Autorização
+                {t('content.modal.confirmAuth')}
               </button>
             </div>
           </form>
@@ -994,8 +1060,8 @@ export const ContentView: React.FC = () => {
       {/* Structured Rejection Feedback Modal */}
       <ModalDialog
         open={rejectModalOpen && Boolean(activeContent)}
-        title="Rejeitar com Feedback Estruturado"
-        subtitle="Registra categoria e justificativa para aprendizado adaptativo do Content Studio."
+        title={t('content.modal.rejectTitle')}
+        subtitle={t('content.modal.rejectSubtitle')}
         onClose={() => setRejectModalOpen(false)}
       >
         {activeContent && (
@@ -1012,7 +1078,7 @@ export const ContentView: React.FC = () => {
             }}
           >
             <div>
-              <label className="block font-medium mb-1">Categoria do Feedback</label>
+              <label className="block font-medium mb-1">{t('content.modal.rejectCategory')}</label>
               <select
                 value={rejectCategory}
                 onChange={(e) =>
@@ -1024,19 +1090,19 @@ export const ContentView: React.FC = () => {
               >
                 {FEEDBACK_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat}
+                    {labelFeedbackCategory(cat, lang)}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block font-medium mb-1">Motivo Detalhado *</label>
+              <label className="block font-medium mb-1">{t('content.modal.rejectReason')}</label>
               <textarea
                 required
                 rows={3}
                 value={rejectNote}
                 onChange={(e) => setRejectNote(e.target.value)}
-                placeholder="Ex.: Promessa implícita sem fonte nível 1 no dossiê..."
+                placeholder={t('content.modal.rejectPlaceholder')}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent"
               />
             </div>
@@ -1046,13 +1112,13 @@ export const ContentView: React.FC = () => {
                 onClick={() => setRejectModalOpen(false)}
                 className="px-3.5 py-2 rounded border border-black/15 dark:border-white/15"
               >
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 rounded bg-rose-600 text-white font-medium hover:bg-rose-700"
               >
-                Registrar Rejeição
+                {t('content.modal.confirmReject')}
               </button>
             </div>
           </form>
@@ -1062,8 +1128,8 @@ export const ContentView: React.FC = () => {
       {/* Create Content Modal */}
       <ModalDialog
         open={createOpen}
-        title="Nova Pauta / Briefing"
-        subtitle="Inicia com visibilidade segura (private/unlisted) e hash SHA-256 calculado automaticamente."
+        title={t('content.modal.createTitle')}
+        subtitle={t('content.modal.createSubtitle')}
         onClose={() => setCreateOpen(false)}
       >
         <form
@@ -1081,7 +1147,7 @@ export const ContentView: React.FC = () => {
               visibility: newVisibility,
               status: 'Brief',
               scheduledDate: newDate,
-              brief: newBrief.trim() || 'Briefing estruturado no Content Studio.',
+              brief: newBrief.trim() || t('content.modal.createTitle'),
               angleIdea: 'Abordagem técnica e comparativa.',
               script: '1. Gancho técnico\n2. Evidência prática\n3. Recomendação final',
               references: [],
@@ -1093,18 +1159,18 @@ export const ContentView: React.FC = () => {
           }}
         >
           <div>
-            <label className="block font-medium mb-1">Título da Pauta *</label>
+            <label className="block font-medium mb-1">{t('content.modal.titleReq')}</label>
             <input
               required
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Ex.: Comparativo de interfaces USB-C para estúdios compactos"
+              placeholder={t('content.modal.titlePlaceholder')}
               className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium mb-1">Marca</label>
+              <label className="block font-medium mb-1">{t('content.modal.brand')}</label>
               <select
                 value={newBrandId}
                 onChange={(e) => setNewBrandId(e.target.value)}
@@ -1118,7 +1184,7 @@ export const ContentView: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block font-medium mb-1">Canal</label>
+              <label className="block font-medium mb-1">{t('content.modal.channel')}</label>
               <select
                 value={newChannelId}
                 onChange={(e) => setNewChannelId(e.target.value)}
@@ -1134,45 +1200,45 @@ export const ContentView: React.FC = () => {
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block font-medium mb-1">Formato</label>
+              <label className="block font-medium mb-1">{t('content.modal.format')}</label>
               <select
                 value={newFormat}
                 onChange={(e) => setNewFormat(e.target.value as ContentFormat)}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
               >
-                <option value="Long-form">Long-form</option>
-                <option value="Shorts">Shorts</option>
-                <option value="Article">Article</option>
+                <option value="Long-form">{labelContentFormat('Long-form', lang)}</option>
+                <option value="Shorts">{labelContentFormat('Shorts', lang)}</option>
+                <option value="Article">{labelContentFormat('Article', lang)}</option>
               </select>
             </div>
             <div>
-              <label className="block font-medium mb-1">Categoria</label>
+              <label className="block font-medium mb-1">{t('content.modal.category')}</label>
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value as ContentCategory)}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
               >
-                <option value="Comercial contextual">Comercial contextual</option>
-                <option value="Descoberta">Descoberta</option>
-                <option value="Conexão">Conexão</option>
+                <option value="Comercial contextual">{labelContentCategory('Comercial contextual', lang)}</option>
+                <option value="Descoberta">{labelContentCategory('Descoberta', lang)}</option>
+                <option value="Conexão">{labelContentCategory('Conexão', lang)}</option>
               </select>
             </div>
             <div>
-              <label className="block font-medium mb-1">Visibilidade</label>
+              <label className="block font-medium mb-1">{t('content.modal.visibilityLabel')}</label>
               <select
                 value={newVisibility}
                 onChange={(e) => setNewVisibility(e.target.value as ContentVisibility)}
-                className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20] font-mono"
+                className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
               >
-                <option value="private">private</option>
-                <option value="unlisted">unlisted</option>
-                <option value="public">public</option>
+                <option value="private">{labelContentVisibility('private', lang)}</option>
+                <option value="unlisted">{labelContentVisibility('unlisted', lang)}</option>
+                <option value="public">{labelContentVisibility('public', lang)}</option>
               </select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium mb-1">Data Prevista</label>
+              <label className="block font-medium mb-1">{t('content.modal.plannedDate')}</label>
               <input
                 type="date"
                 value={newDate}
@@ -1181,13 +1247,13 @@ export const ContentView: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block font-medium mb-1">Produto (Opcional)</label>
+              <label className="block font-medium mb-1">{t('content.modal.productOptional')}</label>
               <select
                 value={newProductId}
                 onChange={(e) => setNewProductId(e.target.value)}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
               >
-                <option value="">Nenhum</option>
+                <option value="">{t('common.none')}</option>
                 {state.products.filter((p) => !p.isTest).map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -1197,7 +1263,7 @@ export const ContentView: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="block font-medium mb-1">Briefing</label>
+            <label className="block font-medium mb-1">{t('content.modal.brief')}</label>
             <textarea
               rows={2}
               value={newBrief}
@@ -1211,13 +1277,13 @@ export const ContentView: React.FC = () => {
               onClick={() => setCreateOpen(false)}
               className="px-3.5 py-2 rounded border border-black/15 dark:border-white/15"
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               className="px-4 py-2 rounded bg-[#315FEA] text-white font-medium hover:bg-[#274FC9]"
             >
-              Criar Briefing
+              {t('content.modal.createBtn')}
             </button>
           </div>
         </form>

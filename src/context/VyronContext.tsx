@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { INITIAL_VYRON_STATE } from '../data/seedData';
+import { OWNER_PROFILE, normalizeOwnerName } from '../data/ownerProfile';
 import {
   ActivityCategory,
   ActivityEvent,
@@ -35,6 +36,8 @@ import {
   transitionContentStatus,
   transitionProductStatus,
 } from '../utils/vyronRules';
+import { translate } from '../i18n/translate';
+import { UiLanguage } from '../i18n/types';
 
 const STORAGE_KEY = 'vyron_prototype_state_v2';
 
@@ -242,7 +245,14 @@ function loadInitialState(): VyronState {
         parsed.systemControl &&
         parsed.settings
       ) {
-        return parsed;
+        return {
+          ...parsed,
+          settings: {
+            ...parsed.settings,
+            ownerName: normalizeOwnerName(parsed.settings.ownerName),
+            ownerEmail: parsed.settings.ownerEmail || OWNER_PROFILE.email,
+          },
+        };
       }
     }
   } catch {
@@ -273,12 +283,21 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [state.settings.theme]);
 
   useEffect(() => {
+    const lang: UiLanguage = state.settings.uiLanguage === 'EN-US' ? 'EN-US' : 'PT-BR';
+    document.documentElement.lang = lang === 'EN-US' ? 'en-US' : 'pt-BR';
+    document.title = translate(lang, 'app.title');
+  }, [state.settings.uiLanguage]);
+
+  useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
       // Ignore quota errors
     }
   }, [state]);
+
+  const langNow = (): UiLanguage =>
+    state.settings.uiLanguage === 'EN-US' ? 'EN-US' : 'PT-BR';
 
   const appendActivity = (
     prev: VyronState,
@@ -300,7 +319,8 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       action: payload.action,
       detail: payload.detail,
       justification: payload.justification,
-      actor: payload.actor ?? 'Proprietário',
+      actor:
+        payload.actor ?? (prev.settings.uiLanguage === 'EN-US' ? 'Owner' : 'Proprietário'),
       severity: payload.severity ?? 'info',
     };
     return [ev, ...prev.activities];
@@ -346,20 +366,29 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const updateSettings = (patch: Partial<OwnerSettings>) => {
-    setState((prev) => ({
-      ...prev,
-      settings: { ...prev.settings, ...patch },
-      activities: appendActivity(prev, {
-        category: 'Sistema',
-        action: 'Preferências atualizadas',
-        detail: 'Configurações operacionais ou políticas de autonomia alteradas pelo proprietário.',
-        severity: 'info',
-      }),
-    }));
+    setState((prev) => {
+      const nextLang: UiLanguage =
+        (patch.uiLanguage ?? prev.settings.uiLanguage) === 'EN-US' ? 'EN-US' : 'PT-BR';
+      const en = nextLang === 'EN-US';
+      return {
+        ...prev,
+        settings: { ...prev.settings, ...patch },
+        activities: appendActivity(prev, {
+          category: 'Sistema',
+          action: en ? 'Preferences updated' : 'Preferências atualizadas',
+          detail: en
+            ? 'Operational settings or autonomy policies updated by owner.'
+            : 'Configurações operacionais ou políticas de autonomia alteradas pelo proprietário.',
+          actor: en ? 'Owner' : 'Proprietário',
+          severity: 'info',
+        }),
+      };
+    });
   };
 
   const toggleSystemFlags: VyronContextValue['toggleSystemFlags'] = (patch) => {
     setState((prev) => {
+      const en = prev.settings.uiLanguage === 'EN-US';
       const nextControl = {
         ...prev.systemControl,
         ...patch,
@@ -370,8 +399,11 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         systemControl: nextControl,
         activities: appendActivity(prev, {
           category: 'Sistema',
-          action: 'Flags de publicação atualizadas',
-          detail: `PUBLISHING_ENABLED=${nextControl.publishingEnabled} · Fase B Pública=${nextControl.phaseBPublicAllowed}`,
+          action: en ? 'Publishing policies updated' : 'Políticas de publicação atualizadas',
+          detail: en
+            ? `Automated publishing=${nextControl.publishingEnabled ? 'On' : 'Off'} · Public operation=${nextControl.phaseBPublicAllowed ? 'Allowed' : 'Private'}`
+            : `Publicação automática=${nextControl.publishingEnabled ? 'Ativa' : 'Desligada'} · Operação pública=${nextControl.phaseBPublicAllowed ? 'Liberada' : 'Privada'}`,
+          actor: en ? 'Owner' : 'Proprietário',
           severity: 'warning',
         }),
       };
@@ -379,42 +411,59 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const createBrand: VyronContextValue['createBrand'] = (input) => {
+    const en = langNow() === 'EN-US';
     const newBrand: Brand = {
-      timezone: input.market.includes('França') || input.market.includes('Europa') ? 'Europe/Paris' : 'America/Sao_Paulo',
+      timezone:
+        input.market.includes('França') ||
+        input.market.includes('France') ||
+        input.market.includes('Europa') ||
+        input.market.includes('EU')
+          ? 'Europe/Paris'
+          : 'America/Sao_Paulo',
       publishWindow: '18:00-21:00',
       archetype: 'Híbrida',
       validationStage: '1. Exploração',
-      pillars: ['Diagnóstico Técnico', 'Comparativo Prático', 'Recomendação Transparente'],
+      pillars: en
+        ? ['Technical Diagnosis', 'Practical Comparison', 'Transparent Recommendation']
+        : ['Diagnóstico Técnico', 'Comparativo Prático', 'Recomendação Transparente'],
       ...input,
       id: `brand-${Date.now().toString(36)}`,
       createdAt: new Date().toISOString().slice(0, 10),
     };
-    setState((prev) => ({
-      ...prev,
-      brands: [newBrand, ...prev.brands],
-      activities: appendActivity(prev, {
-        brandId: newBrand.id,
-        category: 'Sistema',
-        action: `Marca criada: ${newBrand.name}`,
-        detail: `${newBrand.niche} (${newBrand.market} · ${newBrand.timezone})`,
-        severity: 'success',
-      }),
-    }));
+    setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
+      return {
+        ...prev,
+        brands: [newBrand, ...prev.brands],
+        activities: appendActivity(prev, {
+          brandId: newBrand.id,
+          category: 'Sistema',
+          action: isEn ? `Brand created: ${newBrand.name}` : `Marca criada: ${newBrand.name}`,
+          detail: `${newBrand.niche} (${newBrand.market} · ${newBrand.timezone})`,
+          severity: 'success',
+        }),
+      };
+    });
     return newBrand;
   };
 
   const updateBrand: VyronContextValue['updateBrand'] = (id, patch) => {
-    setState((prev) => ({
-      ...prev,
-      brands: prev.brands.map((b) => (b.id === id ? { ...b, ...patch } : b)),
-      activities: appendActivity(prev, {
-        brandId: id,
-        category: 'Sistema',
-        action: 'Dados da marca atualizados',
-        detail: 'Parâmetros de identidade, fuso IANA, estágio ou pilares atualizados.',
-        severity: 'info',
-      }),
-    }));
+    setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
+      return {
+        ...prev,
+        brands: prev.brands.map((b) => (b.id === id ? { ...b, ...patch } : b)),
+        activities: appendActivity(prev, {
+          brandId: id,
+          category: 'Sistema',
+          action: isEn ? 'Brand profile updated' : 'Dados da marca atualizados',
+          detail: isEn
+            ? 'Identity parameters, IANA timezone, validation stage, or editorial pillars updated.'
+            : 'Parâmetros de identidade, fuso IANA, estágio ou pilares atualizados.',
+          severity: 'info',
+        }),
+      };
+    });
   };
 
   const changeBrandStatus: VyronContextValue['changeBrandStatus'] = (
@@ -423,6 +472,7 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     justification
   ) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.brands.find((b) => b.id === id);
       return {
         ...prev,
@@ -430,8 +480,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activities: appendActivity(prev, {
           brandId: id,
           category: 'Decisão',
-          action: `Marca ${target?.name ?? id}: ${status}`,
-          detail: `Status operacional alterado para ${status}.`,
+          action: isEn
+            ? `Brand ${target?.name ?? id}: ${status}`
+            : `Marca ${target?.name ?? id}: ${status}`,
+          detail: isEn
+            ? `Operational status changed to ${status}.`
+            : `Status operacional alterado para ${status}.`,
           justification,
           severity: status === 'Archived' ? 'warning' : 'info',
         }),
@@ -440,6 +494,8 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const createProduct: VyronContextValue['createProduct'] = (input) => {
+    const lang = langNow();
+    const en = lang === 'EN-US';
     const tempProd: Product = {
       externalId: input.externalId ?? `CAT-${Date.now().toString(36).toUpperCase()}`,
       linkedBrandIds: input.linkedBrandIds ?? [input.brandId],
@@ -453,9 +509,11 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       evidence: [
         {
           id: `ev-${Date.now()}`,
-          sourceName: 'Cadastro Manual (Proprietário)',
+          sourceName: en ? 'Manual Entry (Owner)' : 'Cadastro Manual (Proprietário)',
           url: 'https://vyron.internal',
-          summary: `Produto registrado no catálogo compartilhado (${input.platform}).`,
+          summary: en
+            ? `Product registered in shared catalog (${input.platform}).`
+            : `Produto registrado no catálogo compartilhado (${input.platform}).`,
           verifiedAt: new Date().toISOString().slice(0, 10),
         },
       ],
@@ -463,24 +521,35 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updatedAt: new Date().toISOString(),
     };
 
-    const computed = scoreProductV61(tempProd);
+    const computed = scoreProductV61(tempProd, lang);
     const finalProd: Product = {
       ...tempProd,
       opportunityScore:
         input.opportunityScore !== undefined ? input.opportunityScore : computed.score,
     };
 
-    setState((prev) => ({
-      ...prev,
-      products: [finalProd, ...prev.products],
-      activities: appendActivity(prev, {
-        brandId: finalProd.brandId,
-        category: 'Produto',
-        action: `Produto cadastrado: ${finalProd.name}`,
-        detail: `Score ${finalProd.opportunityScore ?? 'Desconhecido (null)'} · ${finalProd.currency} · ${finalProd.platform}`,
-        severity: 'info',
-      }),
-    }));
+    setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
+      const scoreText =
+        finalProd.opportunityScore !== null
+          ? `${finalProd.opportunityScore}/100`
+          : isEn
+          ? 'Not provided'
+          : 'Sem dados';
+      return {
+        ...prev,
+        products: [finalProd, ...prev.products],
+        activities: appendActivity(prev, {
+          brandId: finalProd.brandId,
+          category: 'Produto',
+          action: isEn
+            ? `Product registered: ${finalProd.name}`
+            : `Produto cadastrado: ${finalProd.name}`,
+          detail: `${isEn ? 'Index' : 'Índice'} ${scoreText} · ${finalProd.currency} · ${finalProd.platform}`,
+          severity: 'info',
+        }),
+      };
+    });
     return finalProd;
   };
 
@@ -490,17 +559,27 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     justification
   ) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.products.find((p) => p.id === id);
       if (!target) return prev;
-      const updatedProd = transitionProductStatus(target, nextStatus, justification);
+      const updatedProd = transitionProductStatus(
+        target,
+        nextStatus,
+        justification,
+        isEn ? 'Owner' : 'Proprietário'
+      );
       return {
         ...prev,
         products: prev.products.map((p) => (p.id === id ? updatedProd : p)),
         activities: appendActivity(prev, {
           brandId: target.brandId,
           category: 'Decisão',
-          action: `Produto ${nextStatus}: ${target.name}`,
-          detail: `Status alterado de ${target.status} para ${nextStatus}.`,
+          action: isEn
+            ? `Product ${nextStatus}: ${target.name}`
+            : `Produto ${nextStatus}: ${target.name}`,
+          detail: isEn
+            ? `Status changed from ${target.status} to ${nextStatus}.`
+            : `Status alterado de ${target.status} para ${nextStatus}.`,
           justification,
           severity: nextStatus === 'Approved' ? 'success' : 'warning',
         }),
@@ -510,6 +589,7 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateProductGovernance: VyronContextValue['updateProductGovernance'] = (id, patch) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.products.find((p) => p.id === id);
       if (!target) return prev;
       return {
@@ -526,8 +606,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activities: appendActivity(prev, {
           brandId: target.brandId,
           category: 'Produto',
-          action: `Governança atualizada: ${target.name}`,
-          detail: `Qualidade=${patch.qualityGrade ?? target.qualityGrade ?? 'N/D'} · Compliance=${patch.complianceState ?? target.complianceState}`,
+          action: isEn
+            ? `Governance updated: ${target.name}`
+            : `Governança atualizada: ${target.name}`,
+          detail: isEn
+            ? `Quality=${patch.qualityGrade ?? target.qualityGrade ?? 'N/A'} · Compliance=${patch.complianceState ?? target.complianceState}`
+            : `Qualidade=${patch.qualityGrade ?? target.qualityGrade ?? 'N/D'} · Conformidade=${patch.complianceState ?? target.complianceState}`,
           severity: 'info',
         }),
       };
@@ -539,15 +623,26 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     channelId,
     format
   ) => {
+    const en = langNow() === 'EN-US';
     const prod = state.products.find((p) => p.id === productId);
-    const title = prod ? `Análise Técnica: ${prod.name}` : 'Nova Pauta de Produto';
+    const title = prod
+      ? en
+        ? `Technical Review: ${prod.name}`
+        : `Análise Técnica: ${prod.name}`
+      : en
+      ? 'New Product Content Plan'
+      : 'Nova Pauta de Produto';
     return createContent({
       brandId: prod?.brandId ?? state.brands[0].id,
       channelId,
       productId,
       title,
       description: prod
-        ? `Avaliação criteriosa de ${prod.name} com evidências de mercado e divulgação transparente.`
+        ? en
+          ? `Rigorous evaluation of ${prod.name} with market evidence and transparent disclosure.`
+          : `Avaliação criteriosa de ${prod.name} com evidências de mercado e divulgação transparente.`
+        : en
+        ? 'Content plan generated from catalog.'
         : 'Pauta gerada a partir do catálogo.',
       format,
       category: 'Comercial contextual',
@@ -556,20 +651,31 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       status: 'Brief',
       scheduledDate: '2026-11-26',
       brief: prod
-        ? `Explorar proposta de valor de ${prod.name} (${prod.platform}, comissão ${prod.commissionRatePct ?? 'N/D'}%).`
-        : 'Briefing criado a partir do catálogo.',
-      angleIdea: 'Demonstrativo técnico com evidências reais e comparação objetiva.',
-      script: '1. Problema real do usuário\n2. Análise de especificações e limites\n3. Custo-benefício e recomendação transparente.',
+        ? en
+          ? `Explore the value proposition of ${prod.name} (${prod.platform}, commission ${prod.commissionRatePct ?? 'N/A'}%).`
+          : `Explorar proposta de valor de ${prod.name} (${prod.platform}, comissão ${prod.commissionRatePct ?? 'N/D'}%).`
+        : en
+        ? 'Content plan created from catalog.'
+        : 'Planejamento criado a partir do catálogo.',
+      angleIdea: en
+        ? 'Technical demonstration with verified evidence and objective comparison.'
+        : 'Demonstrativo técnico com evidências reais e comparação objetiva.',
+      script: en
+        ? '1. Real user problem\n2. Specs and boundaries review\n3. Cost-benefit and transparent recommendation.'
+        : '1. Problema real do usuário\n2. Análise de especificações e limites\n3. Custo-benefício e recomendação transparente.',
       affiliateLinkUrl: prod ? `https://vyron.link/${prod.externalId.toLowerCase()}` : '',
       verifiedDestinationUrl: prod?.evidence[0]?.url ?? '',
       linkVerifiedAt: prod?.evidence[0] ? new Date().toISOString() : '',
       commercialConditionsVerifiedAt: prod ? new Date().toISOString() : '',
-      affiliateDisclosure: 'Publicidade / Links de afiliado: podemos receber comissão sem custo extra.',
+      affiliateDisclosure: en
+        ? 'Advertising / Affiliate links: we may earn a commission at no extra cost.'
+        : 'Publicidade / Links de afiliado: podemos receber comissão sem custo extra.',
       references: prod?.evidence.map((e) => e.sourceName) ?? [],
     });
   };
 
   const createContent: VyronContextValue['createContent'] = (input) => {
+    const en = langNow() === 'EN-US';
     const nowIso = new Date().toISOString();
     const baseWithoutHash: Omit<ContentItem, 'id' | 'versions' | 'currentManifestHash' | 'authorization'> = {
       description: input.description ?? input.brief,
@@ -585,7 +691,9 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       offerEndsAt: input.offerEndsAt,
       affiliateDisclosure:
         input.affiliateDisclosure ??
-        'Conteúdo com possível vínculo comercial. Transparência conforme CDC/CONAR.',
+        (en
+          ? 'Content with potential commercial relationship. Transparent disclosure applied.'
+          : 'Conteúdo com possível vínculo comercial. Transparência conforme CDC/CONAR.'),
       aiDisclosureRequired: input.aiDisclosureRequired ?? false,
       aiDisclosureText: input.aiDisclosureText ?? '',
       relevanceTestPassed: input.relevanceTestPassed ?? false,
@@ -605,30 +713,38 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         {
           version: 'v1.0',
           manifestHash: hash,
-          author: 'Proprietário',
-          note: 'Briefing criado no Content Studio.',
+          author: en ? 'Owner' : 'Proprietário',
+          note: en
+            ? 'Content plan created in Content Studio.'
+            : 'Planejamento criado no Content Studio.',
           timestamp: nowIso,
           scriptSnapshot: baseWithoutHash.script,
         },
       ],
     };
 
-    setState((prev) => ({
-      ...prev,
-      contents: [newItem, ...prev.contents],
-      activities: appendActivity(prev, {
-        brandId: newItem.brandId,
-        category: 'Conteúdo',
-        action: `Conteúdo criado: ${newItem.title}`,
-        detail: `${newItem.format} · ${newItem.visibility} · Hash ${hash.slice(0, 10)}...`,
-        severity: 'info',
-      }),
-    }));
+    setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
+      return {
+        ...prev,
+        contents: [newItem, ...prev.contents],
+        activities: appendActivity(prev, {
+          brandId: newItem.brandId,
+          category: 'Conteúdo',
+          action: isEn
+            ? `Content created: ${newItem.title}`
+            : `Conteúdo criado: ${newItem.title}`,
+          detail: `${newItem.format} · ${newItem.visibility} · Hash ${hash.slice(0, 10)}...`,
+          severity: 'info',
+        }),
+      };
+    });
     return newItem;
   };
 
   const updateContent: VyronContextValue['updateContent'] = (id, patch, versionNote) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.contents.find((c) => c.id === id);
       if (!target) return prev;
 
@@ -655,10 +771,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           {
             version: `v${target.versions.length + 1}.0`,
             manifestHash: newHash,
-            author: 'Proprietário',
+            author: isEn ? 'Owner' : 'Proprietário',
             note:
               versionNote ??
-              'Manifesto alterado: autorização anterior invalidada (herança zero).',
+              (isEn
+                ? 'Manifest modified: prior authorization invalidated (zero inheritance).'
+                : 'Manifesto alterado: autorização anterior invalidada (herança zero).'),
             timestamp: new Date().toISOString(),
             scriptSnapshot: updatedItem.script,
           },
@@ -674,8 +792,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             ? appendActivity(prev, {
                 brandId: target.brandId,
                 category: 'Autorização Hash',
-                action: `Hash invalidado por edição: ${target.title}`,
-                detail: `Novo hash ${newHash.slice(0, 12)}... exigirá nova autorização individual antes de envio.`,
+                action: isEn
+                  ? `Hash invalidated by edit: ${target.title}`
+                  : `Hash invalidado por edição: ${target.title}`,
+                detail: isEn
+                  ? `New hash ${newHash.slice(0, 12)}... will require a new individual authorization before delivery.`
+                  : `Novo hash ${newHash.slice(0, 12)}... exigirá nova autorização individual antes de envio.`,
                 severity: 'warning',
               })
             : prev.activities,
@@ -690,13 +812,14 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     feedbackCategory
   ) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.contents.find((c) => c.id === id);
       if (!target) return prev;
       const updated = transitionContentStatus(
         target,
         nextStatus,
         note,
-        'Proprietário',
+        isEn ? 'Owner' : 'Proprietário',
         new Date().toISOString(),
         feedbackCategory
       );
@@ -706,8 +829,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activities: appendActivity(prev, {
           brandId: target.brandId,
           category: 'Conteúdo',
-          action: `Conteúdo ${nextStatus}: ${target.title}`,
-          detail: `Movido de ${target.status} para ${nextStatus}.`,
+          action: isEn
+            ? `Content ${nextStatus}: ${target.title}`
+            : `Conteúdo ${nextStatus}: ${target.title}`,
+          detail: isEn
+            ? `Moved from ${target.status} to ${nextStatus}.`
+            : `Movido de ${target.status} para ${nextStatus}.`,
           justification: note,
           severity: nextStatus === 'Published' || nextStatus === 'Approved' ? 'success' : 'info',
         }),
@@ -720,6 +847,7 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     { actor, validHours, note }
   ) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.contents.find((c) => c.id === id);
       if (!target) return prev;
       const now = new Date();
@@ -736,7 +864,7 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const auth = {
         type: 'individual' as const,
         authorizedHash: hash,
-        actor: actor.trim() || 'Proprietário',
+        actor: actor.trim() || (isEn ? 'Owner' : 'Proprietário'),
         authorizedAt: now.toISOString(),
         expiresAt,
         rulesVersion: 'v1.0',
@@ -754,7 +882,11 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             version: `v${target.versions.length + 1}.0`,
             manifestHash: hash,
             author: auth.actor,
-            note: note?.trim() || `Autorização individual vinculada ao hash ${hash.slice(0, 12)}...`,
+            note:
+              note?.trim() ||
+              (isEn
+                ? `Individual authorization bound to hash ${hash.slice(0, 12)}...`
+                : `Autorização individual vinculada ao hash ${hash.slice(0, 12)}...`),
             feedbackCategory: 'Aprovação',
             timestamp: now.toISOString(),
             scriptSnapshot: target.script,
@@ -769,9 +901,17 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activities: appendActivity(prev, {
           brandId: target.brandId,
           category: 'Autorização Hash',
-          action: `Autorização emitida: ${target.title}`,
-          detail: `Hash ${hash.slice(0, 12)}... · Visibilidade '${target.visibility}' · Expira ${expiresAt.slice(0, 16).replace('T', ' ')}`,
-          justification: note || 'Verificação humana individual das 6 travas pré-envio.',
+          action: isEn
+            ? `Authorization issued: ${target.title}`
+            : `Autorização emitida: ${target.title}`,
+          detail: isEn
+            ? `Hash ${hash.slice(0, 12)}... · Visibility '${target.visibility}' · Expires ${expiresAt.slice(0, 16).replace('T', ' ')}`
+            : `Hash ${hash.slice(0, 12)}... · Visibilidade '${target.visibility}' · Expira ${expiresAt.slice(0, 16).replace('T', ' ')}`,
+          justification:
+            note ||
+            (isEn
+              ? 'Individual human verification across all 6 pre-send checks.'
+              : 'Verificação humana individual das 6 travas pré-envio.'),
           actor: auth.actor,
           severity: 'success',
         }),
@@ -784,6 +924,7 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     reason
   ) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.contents.find((c) => c.id === id);
       if (!target || !target.authorization) return prev;
       return {
@@ -796,7 +937,11 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 authorization: {
                   ...c.authorization!,
                   revoked: true,
-                  revokedReason: reason.trim() || 'Revogada manualmente pelo proprietário.',
+                  revokedReason:
+                    reason.trim() ||
+                    (isEn
+                      ? 'Manually revoked by owner.'
+                      : 'Revogada manualmente pelo proprietário.'),
                 },
               }
             : c
@@ -804,8 +949,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activities: appendActivity(prev, {
           brandId: target.brandId,
           category: 'Autorização Hash',
-          action: `Autorização revogada: ${target.title}`,
-          detail: 'Envio externo bloqueado até nova aprovação individual.',
+          action: isEn
+            ? `Authorization revoked: ${target.title}`
+            : `Autorização revogada: ${target.title}`,
+          detail: isEn
+            ? 'External delivery blocked until a new individual approval is granted.'
+            : 'Envio externo bloqueado até nova aprovação individual.',
           justification: reason,
           severity: 'warning',
         }),
@@ -816,6 +965,7 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const revalidateContentEvidence: VyronContextValue['revalidateContentEvidence'] = (id) => {
     const nowIso = new Date().toISOString();
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.contents.find((c) => c.id === id);
       if (!target) return prev;
       return {
@@ -834,8 +984,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activities: appendActivity(prev, {
           brandId: target.brandId,
           category: 'Conteúdo',
-          action: `Evidência e link revalidados: ${target.title}`,
-          detail: `Timestamp atualizado para ${nowIso.slice(0, 16).replace('T', ' ')}.`,
+          action: isEn
+            ? `Evidence & link revalidated: ${target.title}`
+            : `Evidência e link revalidados: ${target.title}`,
+          detail: isEn
+            ? `Timestamp updated to ${nowIso.slice(0, 16).replace('T', ' ')}.`
+            : `Timestamp atualizado para ${nowIso.slice(0, 16).replace('T', ' ')}.`,
           severity: 'info',
         }),
       };
@@ -847,13 +1001,14 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     { category, note }
   ) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.contents.find((c) => c.id === id);
       if (!target) return prev;
       const updated = transitionContentStatus(
         target,
         'Rejected',
         `[${category}] ${note}`,
-        'Proprietário',
+        isEn ? 'Owner' : 'Proprietário',
         new Date().toISOString(),
         category
       );
@@ -863,8 +1018,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activities: appendActivity(prev, {
           brandId: target.brandId,
           category: 'Decisão',
-          action: `Conteúdo rejeitado (${category}): ${target.title}`,
-          detail: 'Feedback estruturado gravado no histórico adaptativo.',
+          action: isEn
+            ? `Content rejected (${category}): ${target.title}`
+            : `Conteúdo rejeitado (${category}): ${target.title}`,
+          detail: isEn
+            ? 'Structured feedback recorded in adaptive history.'
+            : 'Feedback estruturado gravado no histórico adaptativo.',
           justification: note,
           severity: 'warning',
         }),
@@ -879,22 +1038,28 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: `ch-${Date.now().toString(36)}`,
       lastSyncAt: new Date().toISOString(),
     };
-    setState((prev) => ({
-      ...prev,
-      channels: [ch, ...prev.channels],
-      activities: appendActivity(prev, {
-        brandId: ch.brandId,
-        category: 'Sistema',
-        action: `Canal conectado (Demo): ${ch.name}`,
-        detail: `${ch.platform} · ${ch.handle}`,
-        severity: 'success',
-      }),
-    }));
+    setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
+      return {
+        ...prev,
+        channels: [ch, ...prev.channels],
+        activities: appendActivity(prev, {
+          brandId: ch.brandId,
+          category: 'Sistema',
+          action: isEn
+            ? `Channel connected (Demo): ${ch.name}`
+            : `Canal conectado (Demo): ${ch.name}`,
+          detail: `${ch.platform} · ${ch.handle}`,
+          severity: 'success',
+        }),
+      };
+    });
     return ch;
   };
 
   const syncChannelDemo: VyronContextValue['syncChannelDemo'] = (id) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.channels.find((c) => c.id === id);
       return {
         ...prev,
@@ -910,8 +1075,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activities: appendActivity(prev, {
           brandId: target?.brandId,
           category: 'Sistema',
-          action: `Sincronização demonstrativa: ${target?.name ?? id}`,
-          detail: 'Métricas de leitura atualizadas no ambiente de protótipo.',
+          action: isEn
+            ? `Demo sync completed: ${target?.name ?? id}`
+            : `Sincronização demonstrativa: ${target?.name ?? id}`,
+          detail: isEn
+            ? 'Read-only metrics updated in prototype environment.'
+            : 'Métricas de leitura atualizadas no ambiente de protótipo.',
           severity: 'info',
         }),
       };
@@ -923,21 +1092,27 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ...input,
       id: `fin-${Date.now().toString(36)}`,
     };
-    setState((prev) => ({
-      ...prev,
-      financeEntries: [entry, ...prev.financeEntries],
-      activities: appendActivity(prev, {
-        brandId: entry.brandId,
-        category: 'Finanças',
-        action: `Registro financeiro (${entry.stage}): ${entry.description}`,
-        detail: `${entry.type} · ${entry.amount.toFixed(2)} ${entry.currency}`,
-        severity: entry.stage === 'Received' ? 'success' : 'info',
-      }),
-    }));
+    setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
+      return {
+        ...prev,
+        financeEntries: [entry, ...prev.financeEntries],
+        activities: appendActivity(prev, {
+          brandId: entry.brandId,
+          category: 'Finanças',
+          action: isEn
+            ? `Financial entry (${entry.stage}): ${entry.description}`
+            : `Registro financeiro (${entry.stage}): ${entry.description}`,
+          detail: `${entry.type} · ${entry.amount.toFixed(2)} ${entry.currency}`,
+          severity: entry.stage === 'Received' ? 'success' : 'info',
+        }),
+      };
+    });
   };
 
   const toggleAgentRun: VyronContextValue['toggleAgentRun'] = (id) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       if (prev.systemControl.state === 'HALTED' || prev.settings.emergencyStopActive) return prev;
       const target = prev.automations.find((a) => a.id === id);
       if (!target) return prev;
@@ -958,7 +1133,11 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     durationSec: nextState === 'Running' ? 6 : 0,
                     summary:
                       nextState === 'Running'
-                        ? 'Execução demonstrativa iniciada respeitando políticas de limite.'
+                        ? isEn
+                          ? 'Demo execution started respecting policy limits.'
+                          : 'Execução demonstrativa iniciada respeitando políticas de limite.'
+                        : isEn
+                        ? 'Agent manually paused by owner.'
                         : 'Agente pausado manualmente pelo proprietário.',
                     recordsAffected: nextState === 'Running' ? 3 : 0,
                   },
@@ -969,8 +1148,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         ),
         activities: appendActivity(prev, {
           category: 'Automação',
-          action: `Agente ${nextState === 'Running' ? 'iniciado' : 'pausado'}: ${target.name}`,
-          detail: `Estado alterado de ${target.state} para ${nextState}.`,
+          action: isEn
+            ? `Agent ${nextState === 'Running' ? 'started' : 'paused'}: ${target.name}`
+            : `Agente ${nextState === 'Running' ? 'iniciado' : 'pausado'}: ${target.name}`,
+          detail: isEn
+            ? `State changed from ${target.state} to ${nextState}.`
+            : `Estado alterado de ${target.state} para ${nextState}.`,
           severity: 'info',
         }),
       };
@@ -978,20 +1161,28 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const updateAgentLimits: VyronContextValue['updateAgentLimits'] = (id, limits) => {
-    setState((prev) => ({
-      ...prev,
-      automations: prev.automations.map((a) => (a.id === id ? { ...a, limits } : a)),
-      activities: appendActivity(prev, {
-        category: 'Automação',
-        action: 'Política e limites de agente atualizados',
-        detail: `Aprovação humana: ${limits.requireHumanApproval ? 'Obrigatória' : 'Dispensada'} · Limite diário: ${limits.maxActionsPerDay} ações.`,
-        severity: 'info',
-      }),
-    }));
+    setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
+      return {
+        ...prev,
+        automations: prev.automations.map((a) => (a.id === id ? { ...a, limits } : a)),
+        activities: appendActivity(prev, {
+          category: 'Automação',
+          action: isEn
+            ? 'Agent policy and limits updated'
+            : 'Política e limites de agente atualizados',
+          detail: isEn
+            ? `Human approval: ${limits.requireHumanApproval ? 'Required' : 'Waived'} · Daily limit: ${limits.maxActionsPerDay} actions.`
+            : `Aprovação humana: ${limits.requireHumanApproval ? 'Obrigatória' : 'Dispensada'} · Limite diário: ${limits.maxActionsPerDay} ações.`,
+          severity: 'info',
+        }),
+      };
+    });
   };
 
   const approveAgentPending: VyronContextValue['approveAgentPending'] = (id) => {
     setState((prev) => {
+      const isEn = prev.settings.uiLanguage === 'EN-US';
       const target = prev.automations.find((a) => a.id === id);
       if (!target) return prev;
       return {
@@ -1009,7 +1200,9 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     timestamp: new Date().toISOString(),
                     status: 'Success',
                     durationSec: 2,
-                    summary: 'Fila pendente autorizada pelo proprietário.',
+                    summary: isEn
+                      ? 'Pending queue authorized by owner.'
+                      : 'Fila pendente autorizada pelo proprietário.',
                     recordsAffected: target.pendingApprovalCount,
                   },
                   ...a.history,
@@ -1019,9 +1212,15 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         ),
         activities: appendActivity(prev, {
           category: 'Decisão',
-          action: `Aprovação de execução: ${target.name}`,
-          detail: `${target.pendingApprovalCount} ação(ões) pendente(s) autorizada(s).`,
-          justification: 'Validado manualmente nos limites da política operacional.',
+          action: isEn
+            ? `Execution approved: ${target.name}`
+            : `Aprovação de execução: ${target.name}`,
+          detail: isEn
+            ? `${target.pendingApprovalCount} pending action(s) authorized.`
+            : `${target.pendingApprovalCount} ação(ões) pendente(s) autorizada(s).`,
+          justification: isEn
+            ? 'Manually validated within operational policy bounds.'
+            : 'Validado manualmente nos limites da política operacional.',
           severity: 'success',
         }),
       };
@@ -1032,14 +1231,19 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     mode,
     taskName = 'pipeline.run'
   ) => {
+    const lang = langNow();
+    const en = lang === 'EN-US';
     if (mode === 'commit' && state.systemControl.state === 'HALTED') {
-      const msg =
-        'Execução --commit bloqueada (fail-closed): system_controls está em HALTED.';
+      const msg = en
+        ? 'Write execution blocked: system controls are currently halted.'
+        : 'Execução de gravação bloqueada: os controles do sistema estão interrompidos.';
       setState((prev) => ({
         ...prev,
         activities: appendActivity(prev, {
           category: 'Job Run',
-          action: `Bloqueio fail-closed em ${taskName} (--commit)`,
+          action: en
+            ? `Blocked write execution in ${taskName}`
+            : `Bloqueio de segurança em ${taskName}`,
           detail: msg,
           severity: 'error',
         }),
@@ -1060,8 +1264,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       recordsProcessed: realProducts.length,
       summary:
         mode === 'dry-run'
-          ? `Dry-run concluído sem gravação persistente (${realProducts.length} produtos avaliados por moeda).`
-          : `Commit executado com score-6.1 (v0-hipotese) em ${realProducts.length} produtos reais.`,
+          ? en
+            ? `Simulation completed without persistent writes (${realProducts.length} products evaluated per currency).`
+            : `Simulação concluída sem gravação persistente (${realProducts.length} produtos avaliados por moeda).`
+          : en
+          ? `Commit executed updating the evaluation index across ${realProducts.length} real products.`
+          : `Gravação executada recalculando o índice de avaliação em ${realProducts.length} produtos reais.`,
     };
 
     setState((prev) => ({
@@ -1069,14 +1277,16 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       products:
         mode === 'commit' && (taskName === 'products.score' || taskName === 'pipeline.run')
           ? prev.products.map((p) => {
-              const res = scoreProductV61(p);
+              const res = scoreProductV61(p, lang);
               return { ...p, opportunityScore: res.score };
             })
           : prev.products,
       jobRuns: [job, ...prev.jobRuns],
       activities: appendActivity(prev, {
         category: 'Job Run',
-        action: `autopilot ${taskName} (${mode})`,
+        action: en
+          ? `Batch task: ${taskName} (${mode === 'dry-run' ? 'simulation' : 'commit'})`
+          : `Tarefa em lote: ${taskName} (${mode === 'dry-run' ? 'simulação' : 'gravação'})`,
         detail: job.summary,
         actor: 'batch-executor',
         severity: 'success',
@@ -1087,10 +1297,12 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const reconcileJobsDemo = () => {
+    const lang = langNow();
+    const en = lang === 'EN-US';
     const nowIso = new Date().toISOString();
-    const res = reconcileOrphanedJobRuns(state.jobRuns, nowIso, 30);
+    const res = reconcileOrphanedJobRuns(state.jobRuns, nowIso, 30, lang);
     setState((prev) => {
-      const r = reconcileOrphanedJobRuns(prev.jobRuns, nowIso, 30);
+      const r = reconcileOrphanedJobRuns(prev.jobRuns, nowIso, 30, lang);
       const nextId = (r.updated[0]?.id ?? 100) + 1;
       const reconcileRun: JobRun = {
         id: nextId,
@@ -1102,17 +1314,21 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         recordsProcessed: r.reconciledIds.length,
         summary:
           r.reconciledIds.length > 0
-            ? `Reconciliados ${r.reconciledIds.length} job(s) órfão(s): #${r.reconciledIds.join(', #')}.`
-            : 'Nenhum job órfão pendente encontrado.',
+            ? en
+              ? `Reconciled ${r.reconciledIds.length} pending run(s): #${r.reconciledIds.join(', #')}.`
+              : `Reconciliadas ${r.reconciledIds.length} execução(ões) pendente(s): #${r.reconciledIds.join(', #')}.`
+            : en
+            ? 'No pending runs found.'
+            : 'Nenhuma execução pendente encontrada.',
       };
       return {
         ...prev,
         jobRuns: [reconcileRun, ...r.updated],
         activities: appendActivity(prev, {
           category: 'Job Run',
-          action: 'autopilot jobs reconcile',
+          action: en ? 'Runs reconciliation' : 'Reconciliação de execuções',
           detail: reconcileRun.summary,
-          actor: 'Proprietário',
+          actor: en ? 'Owner' : 'Proprietário',
           severity: r.reconciledIds.length > 0 ? 'warning' : 'info',
         }),
       };
@@ -1121,16 +1337,20 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const haltSystemControl: VyronContextValue['haltSystemControl'] = (actor, reason) => {
+    const lang = langNow();
+    const en = lang === 'EN-US';
     let stoppedCount = 0;
     const nowIso = new Date().toISOString();
     setState((prev) => {
-      const res = applyStopAllToAutomations(prev.automations, nowIso);
+      const res = applyStopAllToAutomations(prev.automations, nowIso, lang);
       stoppedCount = res.stoppedCount;
       const alertNotif: NotificationItem = {
         id: `not-stop-${Date.now()}`,
         type: 'operational',
-        title: 'Stop All acionado (system_controls = HALTED)',
-        message: `${res.stoppedCount} agente(s) pausado(s). Execuções --commit e publicações bloqueadas fail-closed.`,
+        title: en ? 'Stop All triggered (System Halted)' : 'Stop All acionado (Sistema Interrompido)',
+        message: en
+          ? `${res.stoppedCount} agent(s) paused. Automated writes and external deliveries blocked.`
+          : `${res.stoppedCount} agente(s) pausado(s). Execuções de gravação e envios externos bloqueados.`,
         timestamp: nowIso,
         read: false,
         targetModule: 'automations',
@@ -1143,8 +1363,10 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         systemControl: {
           ...prev.systemControl,
           state: 'HALTED',
-          actor: actor.trim() || 'Proprietário',
-          reason: reason.trim() || 'Interrupção imediata acionada.',
+          actor: actor.trim() || (en ? 'Owner' : 'Proprietário'),
+          reason:
+            reason.trim() ||
+            (en ? 'Immediate halt triggered.' : 'Interrupção imediata acionada.'),
           updatedAt: nowIso,
         },
         settings: {
@@ -1154,10 +1376,15 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         },
         activities: appendActivity(prev, {
           category: 'Stop All',
-          action: 'STOP ALL — system_controls = HALTED',
-          detail: `${res.stoppedCount} agente(s) interrompido(s). Bloqueio fail-closed ativo no audit_log.`,
-          justification: reason.trim() || 'Comando de emergência do proprietário.',
-          actor: actor.trim() || 'Proprietário',
+          action: en
+            ? 'STOP ALL — System controls halted'
+            : 'STOP ALL — Controles do sistema interrompidos',
+          detail: en
+            ? `${res.stoppedCount} agent(s) halted. Safety lock active in the audit log.`
+            : `${res.stoppedCount} agente(s) interrompido(s). Bloqueio de segurança ativo no registro de auditoria.`,
+          justification:
+            reason.trim() || (en ? 'Owner emergency command.' : 'Comando de emergência do proprietário.'),
+          actor: actor.trim() || (en ? 'Owner' : 'Proprietário'),
           severity: 'error',
         }),
       };
@@ -1166,15 +1393,19 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const resumeSystemControl: VyronContextValue['resumeSystemControl'] = (actor, reason) => {
-    const gate = canResumeSystemControl(state.jobRuns);
+    const lang = langNow();
+    const en = lang === 'EN-US';
+    const gate = canResumeSystemControl(state.jobRuns, lang);
     if (!gate.allowed) {
       setState((prev) => ({
         ...prev,
         activities: appendActivity(prev, {
           category: 'Stop All',
-          action: 'Tentativa de resume bloqueada',
-          detail: gate.reason ?? 'Existem job_runs pendentes.',
-          actor: actor.trim() || 'Proprietário',
+          action: en ? 'Resume attempt blocked' : 'Tentativa de retomada bloqueada',
+          detail:
+            gate.reason ??
+            (en ? 'Pending runs still exist.' : 'Existem execuções pendentes.'),
+          actor: actor.trim() || (en ? 'Owner' : 'Proprietário'),
           severity: 'warning',
         }),
       }));
@@ -1187,8 +1418,10 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       systemControl: {
         ...prev.systemControl,
         state: 'ACTIVE',
-        actor: actor.trim() || 'Proprietário',
-        reason: reason.trim() || 'Sistema retomado após verificação.',
+        actor: actor.trim() || (en ? 'Owner' : 'Proprietário'),
+        reason:
+          reason.trim() ||
+          (en ? 'System resumed after verification.' : 'Sistema retomado após verificação.'),
         updatedAt: nowIso,
       },
       settings: {
@@ -1198,10 +1431,16 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       },
       activities: appendActivity(prev, {
         category: 'Stop All',
-        action: 'SYSTEM RESUMED — system_controls = ACTIVE',
-        detail: 'Autonomia controlada e execuções --commit liberadas após reconciliação limpa.',
-        justification: reason.trim() || 'Retomada explícita pelo proprietário.',
-        actor: actor.trim() || 'Proprietário',
+        action: en
+          ? 'SYSTEM RESUMED — Controls active'
+          : 'SISTEMA RETOMADO — Controles ativos',
+        detail: en
+          ? 'Controlled autonomy and write executions restored after clean reconciliation.'
+          : 'Autonomia controlada e execuções liberadas após reconciliação limpa.',
+        justification:
+          reason.trim() ||
+          (en ? 'Explicit resume by owner.' : 'Retomada explícita pelo proprietário.'),
+        actor: actor.trim() || (en ? 'Owner' : 'Proprietário'),
         severity: 'success',
       }),
     }));
@@ -1209,10 +1448,20 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const triggerStopAll = () =>
-    haltSystemControl('Proprietário', 'Stop All acionado via comando rápido da barra global.');
+    haltSystemControl(
+      langNow() === 'EN-US' ? 'Owner' : 'Proprietário',
+      langNow() === 'EN-US'
+        ? 'Stop All triggered via global bar quick action.'
+        : 'Stop All acionado via comando rápido da barra global.'
+    );
 
   const clearEmergencyStop = () =>
-    resumeSystemControl('Proprietário', 'Liberação solicitada pelo proprietário.');
+    resumeSystemControl(
+      langNow() === 'EN-US' ? 'Owner' : 'Proprietário',
+      langNow() === 'EN-US'
+        ? 'Resume requested by owner.'
+        : 'Liberação solicitada pelo proprietário.'
+    );
 
   const markNotificationRead = (id: string) => {
     setState((prev) => ({
@@ -1229,31 +1478,58 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const simulateNotification = () => {
-    const samples: Array<Omit<NotificationItem, 'id' | 'timestamp' | 'read'>> = [
-      {
-        type: 'commission_received',
-        title: 'Nova liquidação recebida (Amazon BR)',
-        message: 'Repasse de R$ 1.840,00 confirmado no extrato demonstrativo da Apex Hardware Lab.',
-        targetModule: 'finance',
-        brandId: 'brand-apex',
-      },
-      {
-        type: 'opportunity',
-        title: 'Oportunidade detectada em Áudio DSP',
-        message: 'Subida de +21% em buscas por interfaces Thunderbolt compactas para criadores.',
-        targetModule: 'products',
-        brandId: 'brand-kinetix',
-      },
-      {
-        type: 'approval_pending',
-        title: 'Roteiro pronto para aprovação por hash SHA-256',
-        message: 'Monitor 4K para Código e Design aguarda autorização individual na Fase A.',
-        targetModule: 'content',
-        targetId: 'cnt-2',
-        brandId: 'brand-apex',
-        actionRequired: true,
-      },
-    ];
+    const en = langNow() === 'EN-US';
+    const samples: Array<Omit<NotificationItem, 'id' | 'timestamp' | 'read'>> = en
+      ? [
+          {
+            type: 'commission_received',
+            title: 'New settlement received (Amazon BR)',
+            message: 'Payout of R$ 1,840.00 confirmed in Apex Hardware Lab demo statement.',
+            targetModule: 'finance',
+            brandId: 'brand-apex',
+          },
+          {
+            type: 'opportunity',
+            title: 'Opportunity detected in DSP Audio',
+            message: '+21% surge in searches for compact Thunderbolt interfaces for creators.',
+            targetModule: 'products',
+            brandId: 'brand-kinetix',
+          },
+          {
+            type: 'approval_pending',
+            title: 'Script ready for SHA-256 hash approval',
+            message: '4K Monitor for Code & Design awaits individual authorization.',
+            targetModule: 'content',
+            targetId: 'cnt-2',
+            brandId: 'brand-apex',
+            actionRequired: true,
+          },
+        ]
+      : [
+          {
+            type: 'commission_received',
+            title: 'Nova liquidação recebida (Amazon BR)',
+            message: 'Repasse de R$ 1.840,00 confirmado no extrato demonstrativo da Apex Hardware Lab.',
+            targetModule: 'finance',
+            brandId: 'brand-apex',
+          },
+          {
+            type: 'opportunity',
+            title: 'Oportunidade detectada em Áudio DSP',
+            message: 'Subida de +21% em buscas por interfaces Thunderbolt compactas para criadores.',
+            targetModule: 'products',
+            brandId: 'brand-kinetix',
+          },
+          {
+            type: 'approval_pending',
+            title: 'Roteiro pronto para aprovação por hash SHA-256',
+            message: 'Monitor 4K para Código e Design aguarda autorização individual no ambiente privado.',
+            targetModule: 'content',
+            targetId: 'cnt-2',
+            brandId: 'brand-apex',
+            actionRequired: true,
+          },
+        ];
     const pick = samples[state.notifications.length % samples.length];
     const item: NotificationItem = {
       ...pick,
@@ -1267,7 +1543,7 @@ export const VyronProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       activities: appendActivity(prev, {
         brandId: item.brandId,
         category: 'Sistema',
-        action: `Notificação simulada: ${item.title}`,
+        action: en ? `Simulated notification: ${item.title}` : `Notificação simulada: ${item.title}`,
         detail: item.message,
         severity: 'info',
       }),

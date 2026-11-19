@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Plus, RefreshCw } from 'lucide-react';
 import { useVyron } from '../context/VyronContext';
 import { ChannelPlatform } from '../types/vyron';
-import { formatCompactNumber } from '../utils/vyronRules';
+import { useI18n } from '../i18n/useI18n';
+import { labelChannelIntegrationStatus } from '../i18n/domainLabels';
 import { HorizontalBarComparison } from '../components/Charts';
 import {
   EmptyState,
@@ -18,6 +19,7 @@ const PLATFORMS: ChannelPlatform[] = ['YouTube', 'Instagram', 'TikTok', 'Pintere
 
 export const ChannelsView: React.FC = () => {
   const { state, globalBrandFilter, createChannel, syncChannelDemo } = useVyron();
+  const { lang, t, fmtCompact, fmtPercent } = useI18n();
   const [platformFilter, setPlatformFilter] = useState<'all' | ChannelPlatform>('all');
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -50,8 +52,8 @@ export const ChannelsView: React.FC = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Gestão de Canais"
-        subtitle="Distribuição multicanal, elegibilidade de recursos avançados YouTube (links clicáveis/vídeo relacionado) e passagem Shorts → Longo."
+        title={t('channels.title')}
+        subtitle={t('channels.subtitle')}
         actions={
           <button
             type="button"
@@ -59,51 +61,51 @@ export const ChannelsView: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-md bg-[#315FEA] text-white hover:bg-[#274FC9] whitespace-nowrap"
           >
             <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Cadastrar Canal</span>
+            <span>{t('channels.add')}</span>
           </button>
         }
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricBlock
-          label="Audiência Total Agregada"
-          value={formatCompactNumber(totalFollowers)}
-          helper={`${visibleChannels.length} canais no filtro`}
+          label={t('channels.kpi.audience')}
+          value={fmtCompact(totalFollowers)}
+          helper={t('channels.kpi.audienceHelper', { count: visibleChannels.length })}
         />
         <MetricBlock
-          label="Visualizações (30d)"
-          value={formatCompactNumber(totalViews)}
-          helper={`Engajamento médio: ${avgEngagement.toFixed(1)}%`}
+          label={t('channels.kpi.views')}
+          value={fmtCompact(totalViews)}
+          helper={t('channels.kpi.viewsHelper', { pct: fmtPercent(avgEngagement, 1) })}
           tone="cobalt"
         />
         <MetricBlock
-          label="Recursos Avançados YT"
+          label={t('channels.kpi.ytAdvanced')}
           value={`${unlockedYtCount}/${ytChannels.length}`}
-          helper="Links clicáveis em descrição / cards"
+          helper={t('channels.kpi.ytAdvancedHelper')}
         />
         <MetricBlock
-          label="Passagem Shorts → Longo"
-          value={`${avgShortsBridge.toFixed(1)}%`}
-          helper="Taxa média de ponte nos canais YouTube"
+          label={t('channels.kpi.shortsBridge')}
+          value={fmtPercent(avgShortsBridge, 1)}
+          helper={t('channels.kpi.shortsBridgeHelper')}
           tone="emerald"
         />
       </div>
 
       <SegmentedControl
-        ariaLabel="Filtrar canais por plataforma"
+        ariaLabel={t('channels.filterAria')}
         value={platformFilter}
         onChange={(v) => setPlatformFilter(v as 'all' | ChannelPlatform)}
         options={[
-          { value: 'all', label: 'Todas Plataformas' },
+          { value: 'all', label: t('channels.allPlatforms') },
           ...PLATFORMS.map((p) => ({ value: p, label: p })),
         ]}
       />
 
       {visibleChannels.length === 0 ? (
         <EmptyState
-          title="Nenhum canal neste filtro"
-          description="Conecte um canal demonstrativo ou limpe o filtro de plataforma."
-          actionLabel="Cadastrar Canal"
+          title={t('channels.emptyTitle')}
+          description={t('channels.emptyDesc')}
+          actionLabel={t('channels.add')}
           onAction={() => setCreateOpen(true)}
         />
       ) : (
@@ -113,14 +115,14 @@ export const ChannelsView: React.FC = () => {
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] text-[11px] font-medium text-[#525B68] dark:text-[#AEB7C2]">
-                    <th className="py-3 pl-4 pr-3">Canal / Marca</th>
-                    <th className="py-3 px-3">Plataforma & Links</th>
-                    <th className="py-3 px-3 text-right">Publicações</th>
-                    <th className="py-3 px-3 text-right">Crescimento</th>
-                    <th className="py-3 px-3 text-right">Views 30d</th>
-                    <th className="py-3 px-3 text-right">Bridge S→L</th>
-                    <th className="py-3 px-3">Integração</th>
-                    <th className="py-3 pl-3 pr-4 text-right">Sync</th>
+                    <th className="py-3 pl-4 pr-3">{t('channels.table.channelBrand')}</th>
+                    <th className="py-3 px-3">{t('channels.table.platformLinks')}</th>
+                    <th className="py-3 px-3 text-right">{t('channels.table.publications')}</th>
+                    <th className="py-3 px-3 text-right">{t('channels.table.growth')}</th>
+                    <th className="py-3 px-3 text-right">{t('channels.table.views')}</th>
+                    <th className="py-3 px-3 text-right">{t('channels.table.bridge')}</th>
+                    <th className="py-3 px-3">{t('channels.table.integration')}</th>
+                    <th className="py-3 pl-3 pr-4 text-right">{t('channels.table.sync')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
@@ -137,9 +139,13 @@ export const ChannelsView: React.FC = () => {
                           </div>
                         </td>
                         <td className="py-3 px-3 text-[#525B68] dark:text-[#AEB7C2]">
-                          <div>{ch.platform} · {ch.language}</div>
+                          <div>
+                            {ch.platform} · {ch.language}
+                          </div>
                           <div className="font-mono text-[10px]">
-                            {ch.advancedFeaturesUnlocked ? 'Links avançados OK' : 'Sem links clicáveis'}
+                            {ch.advancedFeaturesUnlocked
+                              ? t('channels.linksOk')
+                              : t('channels.linksOff')}
                           </div>
                         </td>
                         <td className="py-3 px-3 text-right font-mono tabular-nums">
@@ -153,26 +159,31 @@ export const ChannelsView: React.FC = () => {
                           }`}
                         >
                           {ch.growthPct30d >= 0 ? '+' : ''}
-                          {ch.growthPct30d}%
+                          {fmtPercent(ch.growthPct30d, 1)}
                         </td>
                         <td className="py-3 px-3 text-right font-mono tabular-nums">
-                          {formatCompactNumber(ch.views30d)}
+                          {fmtCompact(ch.views30d)}
                         </td>
                         <td className="py-3 px-3 text-right font-mono tabular-nums">
-                          {ch.shortsToLongPct !== undefined ? `${ch.shortsToLongPct}%` : '-'}
+                          {ch.shortsToLongPct !== undefined
+                            ? fmtPercent(ch.shortsToLongPct, 1)
+                            : '-'}
                         </td>
                         <td className="py-3 px-3">
-                          <StatusLabel status={ch.integrationStatus} />
+                          <StatusLabel
+                            status={labelChannelIntegrationStatus(ch.integrationStatus, lang)}
+                            statusKey={ch.integrationStatus}
+                          />
                         </td>
                         <td className="py-3 pl-3 pr-4 text-right">
                           <button
                             type="button"
                             onClick={() => syncChannelDemo(ch.id)}
-                            aria-label={`Sincronizar canal ${ch.name}`}
+                            aria-label={t('channels.syncAria', { name: ch.name })}
                             className="inline-flex items-center gap-1 text-xs text-[#315FEA] dark:text-[#7FA0FF] hover:underline"
                           >
                             <RefreshCw className="w-3 h-3" aria-hidden="true" />
-                            <span>Testar</span>
+                            <span>{t('channels.testSync')}</span>
                           </button>
                         </td>
                       </tr>
@@ -185,10 +196,10 @@ export const ChannelsView: React.FC = () => {
 
           <SurfacePanel className="lg:col-span-4">
             <h2 className="font-display text-sm font-semibold mb-1">
-              Comparação de Desempenho (Views 30d)
+              {t('channels.chartTitle')}
             </h2>
             <p className="text-xs text-[#525B68] dark:text-[#AEB7C2] mb-4">
-              Contribuição relativa por canal cadastrado
+              {t('channels.chartSubtitle')}
             </p>
             <HorizontalBarComparison
               items={[...visibleChannels]
@@ -198,7 +209,7 @@ export const ChannelsView: React.FC = () => {
                   label: ch.name,
                   sublabel: ch.platform,
                   value: ch.views30d,
-                  formattedValue: formatCompactNumber(ch.views30d),
+                  formattedValue: fmtCompact(ch.views30d),
                 }))}
             />
           </SurfacePanel>
@@ -207,8 +218,8 @@ export const ChannelsView: React.FC = () => {
 
       <ModalDialog
         open={createOpen}
-        title="Cadastrar Canal (Modo Protótipo)"
-        subtitle="Integrações externas reais não são executadas nesta fase."
+        title={t('channels.modal.title')}
+        subtitle={t('channels.modal.subtitle')}
         onClose={() => setCreateOpen(false)}
       >
         <form
@@ -238,19 +249,25 @@ export const ChannelsView: React.FC = () => {
           }}
         >
           <div>
-            <label className="block font-medium mb-1">Nome do Canal *</label>
+            <label htmlFor="ch-name-input" className="block font-medium mb-1">
+              {t('channels.modal.nameReq')}
+            </label>
             <input
+              id="ch-name-input"
               required
               value={chName}
               onChange={(e) => setChName(e.target.value)}
-              placeholder="Ex.: Kinetix Shorts"
+              placeholder={t('channels.modal.namePlaceholder')}
               className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium mb-1">Plataforma</label>
+              <label htmlFor="ch-plat-select" className="block font-medium mb-1">
+                {t('channels.modal.platform')}
+              </label>
               <select
+                id="ch-plat-select"
                 value={chPlatform}
                 onChange={(e) => setChPlatform(e.target.value as ChannelPlatform)}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
@@ -263,8 +280,11 @@ export const ChannelsView: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block font-medium mb-1">Marca Associada</label>
+              <label htmlFor="ch-brand-select" className="block font-medium mb-1">
+                {t('channels.modal.brand')}
+              </label>
               <select
+                id="ch-brand-select"
                 value={chBrandId}
                 onChange={(e) => setChBrandId(e.target.value)}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
@@ -279,18 +299,24 @@ export const ChannelsView: React.FC = () => {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-medium mb-1">Handle / Domínio *</label>
+              <label htmlFor="ch-handle-input" className="block font-medium mb-1">
+                {t('channels.modal.handleReq')}
+              </label>
               <input
+                id="ch-handle-input"
                 required
                 value={chHandle}
                 onChange={(e) => setChHandle(e.target.value)}
-                placeholder="@canal ou dominio.com"
+                placeholder={t('channels.modal.handlePlaceholder')}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-transparent"
               />
             </div>
             <div>
-              <label className="block font-medium mb-1">Idioma</label>
+              <label htmlFor="ch-lang-select" className="block font-medium mb-1">
+                {t('channels.modal.language')}
+              </label>
               <select
+                id="ch-lang-select"
                 value={chLang}
                 onChange={(e) => setChLang(e.target.value)}
                 className="w-full px-3 py-2 rounded border border-black/15 dark:border-white/15 bg-white dark:bg-[#171A20]"
@@ -309,7 +335,7 @@ export const ChannelsView: React.FC = () => {
               onChange={(e) => setChAdvUnlocked(e.target.checked)}
               className="accent-[#315FEA]"
             />
-            <span>Recursos avançados liberados (links clicáveis / vídeo relacionado)</span>
+            <span>{t('channels.modal.advCheckbox')}</span>
           </label>
           <div className="flex justify-end gap-2 pt-2">
             <button
@@ -317,13 +343,13 @@ export const ChannelsView: React.FC = () => {
               onClick={() => setCreateOpen(false)}
               className="px-3.5 py-2 rounded border border-black/15 dark:border-white/15"
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               className="px-4 py-2 rounded bg-[#315FEA] text-white font-medium hover:bg-[#274FC9]"
             >
-              Registrar Canal
+              {t('channels.modal.submit')}
             </button>
           </div>
         </form>
@@ -331,3 +357,4 @@ export const ChannelsView: React.FC = () => {
     </div>
   );
 };
+

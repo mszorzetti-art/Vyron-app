@@ -1,5 +1,6 @@
 import { ContentItem, VyronState } from '../types/vyron';
 import { computeContentManifestHash } from '../utils/vyronRules';
+import { OWNER_PROFILE } from './ownerProfile';
 
 function hydrateContent(
   raw: Omit<ContentItem, 'currentManifestHash' | 'versions'> & {
@@ -1775,9 +1776,9 @@ export const INITIAL_VYRON_STATE: VyronState = {
     },
   ],
   settings: {
-    ownerName: 'Mateus Zorzetti',
-    ownerEmail: 'mszorzetti@gmail.com',
-    roleLabel: 'Proprietário & Operador Único',
+    ownerName: OWNER_PROFILE.name,
+    ownerEmail: OWNER_PROFILE.email,
+    roleLabel: OWNER_PROFILE.roleLabel,
     theme: 'dark',
     uiLanguage: 'PT-BR',
     baseCurrency: 'BRL',

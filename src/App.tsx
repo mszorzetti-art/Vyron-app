@@ -1,6 +1,8 @@
 import React from 'react';
+import { VyronAccessProvider, useVyronAccess } from './context/VyronAccessContext';
 import { VyronProvider, useVyron } from './context/VyronContext';
 import { Layout } from './components/Layout';
+import { AccessView } from './views/AccessView';
 import { OverviewView } from './views/OverviewView';
 import { BrandsView } from './views/BrandsView';
 import { ProductsView } from './views/ProductsView';
@@ -48,10 +50,34 @@ const VyronWorkspace: React.FC = () => {
   return <Layout>{renderModule()}</Layout>;
 };
 
+const VyronGate: React.FC = () => {
+  const { isAuthorized } = useVyronAccess();
+  const { navigate } = useVyron();
+
+  if (!isAuthorized) {
+    return (
+      <AccessView
+        onSuccess={({ wasLocked }) => {
+          if (!wasLocked) {
+            if (window.location.pathname !== '/') {
+              window.history.replaceState(null, '', '/');
+            }
+            navigate('overview');
+          }
+        }}
+      />
+    );
+  }
+
+  return <VyronWorkspace />;
+};
+
 export default function App() {
   return (
-    <VyronProvider>
-      <VyronWorkspace />
-    </VyronProvider>
+    <VyronAccessProvider>
+      <VyronProvider>
+        <VyronGate />
+      </VyronProvider>
+    </VyronAccessProvider>
   );
 }
