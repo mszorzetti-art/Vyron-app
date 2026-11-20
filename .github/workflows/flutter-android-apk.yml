@@ -1,3 +1,4 @@
+
 name: Build Vyron Flutter Android APK
 
 on:
@@ -38,7 +39,9 @@ jobs:
           java-version: '17'
 
       - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
 
       - name: Configurar Flutter SDK (stable)
         uses: subosito/flutter-action@v2
