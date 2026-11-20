@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'secure_access_storage.dart';
-import 'vyron_access_rules.dart';
+import '../../core/security/secure_access_storage.dart';
+import '../../core/security/vyron_access_rules.dart';
 
 @immutable
 class VyronAccessControllerState {

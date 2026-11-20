@@ -155,3 +155,19 @@ extension VyronThemeContext on BuildContext {
           ? VyronPaletteExtension.dark
           : VyronPaletteExtension.light);
 }
+
+/// Converts CSS hex color strings (`#RRGGBB` or `#AARRGGBB`) to Flutter [Color].
+Color parseVyronHexColor(
+  String hex, {
+  Color fallback = VyronColors.electricCobalt,
+}) {
+  final cleaned = hex.trim().replaceFirst('#', '');
+  if (cleaned.length == 6) {
+    final parsed = int.tryParse('FF$cleaned', radix: 16);
+    if (parsed != null) return Color(parsed);
+  } else if (cleaned.length == 8) {
+    final parsed = int.tryParse(cleaned, radix: 16);
+    if (parsed != null) return Color(parsed);
+  }
+  return fallback;
+}
