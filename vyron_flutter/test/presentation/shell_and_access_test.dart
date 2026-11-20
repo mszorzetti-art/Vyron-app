@@ -84,7 +84,7 @@ void main() {
 
         await tester.tap(find.byKey(const Key('vyron-nav-finance')));
         await tester.pumpAndSettle();
-        expect(find.text('FINANCE'), findsOneWidget);
+        expect(find.text('Financeiro & Conciliação'), findsOneWidget);
 
         await tester.tap(find.byKey(const Key('vyron-sidebar-lock-btn')));
         await tester.pumpAndSettle();
@@ -95,7 +95,7 @@ void main() {
         );
 
         await _submitPasswordAndSettle(tester, 'vyron2026');
-        expect(find.text('FINANCE'), findsOneWidget);
+        expect(find.text('Financeiro & Conciliação'), findsOneWidget);
       },
     );
 
@@ -121,7 +121,7 @@ void main() {
         await tester.tap(find.byKey(const Key('vyron-nav-settings')));
         await tester.pumpAndSettle();
 
-        expect(find.text('SETTINGS'), findsOneWidget);
+        expect(find.text('Settings & Governança'), findsOneWidget);
       },
     );
 

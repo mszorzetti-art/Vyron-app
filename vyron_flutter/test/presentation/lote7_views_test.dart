@@ -134,7 +134,7 @@ void main() {
         await tester.pumpWidget(_buildAuthorizedApp());
         await tester.pumpAndSettle();
 
-        await tester.tap(find.byIcon(Icons.menu_rounded));
+        await tester.tap(find.byKey(const Key('vyron-open-drawer-btn')));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('vyron-nav-content')));
         await tester.pumpAndSettle();

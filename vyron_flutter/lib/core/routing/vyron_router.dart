@@ -6,14 +6,18 @@ import '../../application/state/vyron_state_notifier.dart';
 import '../../core/security/vyron_access_rules.dart';
 import '../../domain/models/vyron_enums.dart';
 import '../../presentation/access/access_screen.dart';
+import '../../presentation/activity/activity_screen.dart';
 import '../../presentation/analytics/analytics_screen.dart';
+import '../../presentation/automations/automations_screen.dart';
 import '../../presentation/brands/brands_screen.dart';
 import '../../presentation/channels/channels_screen.dart';
 import '../../presentation/content/content_screen.dart';
+import '../../presentation/finance/finance_screen.dart';
+import '../../presentation/notifications/notifications_screen.dart';
 import '../../presentation/overview/overview_screen.dart';
 import '../../presentation/products/products_screen.dart';
+import '../../presentation/settings/settings_screen.dart';
 import '../../presentation/shell/adaptive_shell.dart';
-import '../../presentation/shell/module_placeholder_view.dart';
 
 abstract final class VyronRoutes {
   static const String access = '/access';
@@ -243,21 +247,23 @@ final vyronRouterProvider = Provider<GoRouter>((ref) {
             path: VyronRoutes.finance,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const ModulePlaceholderView(module: NavModule.finance),
+              child: const FinanceScreen(),
             ),
           ),
           GoRoute(
             path: VyronRoutes.automations,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const ModulePlaceholderView(module: NavModule.automations),
+              child: const AutomationsScreen(),
             ),
             routes: [
               GoRoute(
                 path: ':automationId',
-                builder: (context, state) => ModulePlaceholderView(
-                  module: NavModule.automations,
-                  selectedEntityId: state.pathParameters['automationId'],
+                pageBuilder: (context, state) => NoTransitionPage<void>(
+                  key: state.pageKey,
+                  child: AutomationsScreen(
+                    automationId: state.pathParameters['automationId'],
+                  ),
                 ),
               ),
             ],
@@ -266,23 +272,21 @@ final vyronRouterProvider = Provider<GoRouter>((ref) {
             path: VyronRoutes.activity,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const ModulePlaceholderView(module: NavModule.activity),
+              child: const ActivityScreen(),
             ),
           ),
           GoRoute(
             path: VyronRoutes.notifications,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const ModulePlaceholderView(
-                module: NavModule.notifications,
-              ),
+              child: const NotificationsScreen(),
             ),
           ),
           GoRoute(
             path: VyronRoutes.settings,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const ModulePlaceholderView(module: NavModule.settings),
+              child: const SettingsScreen(),
             ),
           ),
         ],

@@ -212,7 +212,7 @@ void main() {
         await tester.tap(generateBtn);
         await tester.pumpAndSettle();
 
-        expect(find.text('CONTENT'), findsOneWidget);
+        expect(find.text('Content Studio & Aprovação por Hash'), findsOneWidget);
       },
     );
   });
