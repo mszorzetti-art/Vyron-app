@@ -1,0 +1,132 @@
+name: Build Vyron Flutter Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: 'Tipo de build (release exige os 4 Secrets de keystore; preview-debug gera APK isolado de teste)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - release
+          - preview-debug
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'vyron_flutter/**'
+      - '.github/workflows/flutter-android-apk.yml'
+    tags:
+      - 'flutter-v*'
+
+jobs:
+  analyze-test-and-build-apk:
+    name: Analisar, Testar e Compilar APK Flutter (Vyron)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Configurar Flutter SDK (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Completar arquivos nativos do runner sem sobrescrever customizações Vyron
+        working-directory: vyron_flutter
+        run: |
+          if [ ! -f android/gradlew ] || [ ! -f android/settings.gradle.kts ] || [ ! -d ios/Runner.xcodeproj ]; then
+            SCAFFOLD_DIR="$RUNNER_TEMP/vyron_scaffold"
+            rm -rf "$SCAFFOLD_DIR"
+            flutter create --org com.marcuszorzetti --project-name vyron --platforms android,ios "$SCAFFOLD_DIR"
+            cp -rn "$SCAFFOLD_DIR/android/." android/
+            chmod +x android/gradlew || true
+            mkdir -p ios
+            cp -rn "$SCAFFOLD_DIR/ios/." ios/
+            rm -rf "$SCAFFOLD_DIR"
+          fi
+
+      - name: Instalar dependências Dart/Flutter
+        working-directory: vyron_flutter
+        run: flutter pub get
+
+      - name: Análise estática (flutter analyze)
+        working-directory: vyron_flutter
+        run: flutter analyze --fatal-infos
+
+      - name: Executar testes automatizados (flutter test)
+        working-directory: vyron_flutter
+        run: flutter test
+
+      - name: Compilar APK Android
+        id: build_apk
+        working-directory: vyron_flutter
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          VYRON_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          VYRON_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          VYRON_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          REQUESTED_VARIANT: ${{ github.event.inputs.variant || 'auto' }}
+        run: |
+          mkdir -p ../apk-flutter-output
+
+          HAS_KEYSTORE="false"
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$VYRON_KEYSTORE_PASSWORD" ] && [ -n "$VYRON_KEY_ALIAS" ] && [ -n "$VYRON_KEY_PASSWORD" ]; then
+            HAS_KEYSTORE="true"
+          fi
+
+          # Nunca permitir fallback silencioso de release para debug
+          if [ "$REQUESTED_VARIANT" = "release" ] && [ "$HAS_KEYSTORE" != "true" ]; then
+            echo "::error::Build 'release' solicitado, mas os Secrets ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS e ANDROID_KEY_PASSWORD não estão configurados."
+            exit 1
+          fi
+
+          if [ "$HAS_KEYSTORE" = "true" ] && [ "$REQUESTED_VARIANT" != "preview-debug" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > android/app/vyron-release.jks
+            export VYRON_KEYSTORE_PATH="$(pwd)/android/app/vyron-release.jks"
+            flutter build apk --release --flavor official
+            APK_SRC="build/app/outputs/flutter-apk/app-official-release.apk"
+            APK_OUT="../apk-flutter-output/Vyron-flutter-release-signed.apk"
+            cp "$APK_SRC" "$APK_OUT"
+            echo "build_mode=official-release-signed" >> "$GITHUB_OUTPUT"
+          else
+            if [ "$REQUESTED_VARIANT" = "auto" ]; then
+              echo "::notice::Secrets de release não encontrados em modo 'auto'. Compilando flavor isolado preview-debug (com.marcuszorzetti.vyron.preview)."
+            fi
+            flutter build apk --debug --flavor preview
+            APK_SRC="build/app/outputs/flutter-apk/app-preview-debug.apk"
+            APK_OUT="../apk-flutter-output/Vyron-flutter-preview-debug.apk"
+            cp "$APK_SRC" "$APK_OUT"
+            echo "build_mode=preview-debug" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Verificar assinatura pública do APK gerado (sem expor segredos)
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)
+          if [ -n "$APKSIGNER" ]; then
+            "$APKSIGNER" verify --print-certs "$APK_OUT"
+          fi
+
+      - name: Limpar keystore temporária do runner
+        if: always()
+        run: rm -f vyron_flutter/android/app/vyron-release.jks
+
+      - name: Publicar APK Flutter para download (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vyron-flutter-apk-${{ steps.build_apk.outputs.build_mode }}
+          path: apk-flutter-output/*.apk
+          retention-days: 30

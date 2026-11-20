@@ -1,23 +1,57 @@
-import React, { useState } from 'react';
-import { Download } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Download, X } from 'lucide-react';
 import { useVyron } from '../context/VyronContext';
+import { ContentCategory } from '../types/vyron';
 import {
   calculateFinanceSummary,
   computeBrandRollups,
   computeOperationalEfficiency,
   convertCurrency,
 } from '../utils/vyronRules';
+import {
+  AnalyticsMetricKey,
+  ChartTimeRange,
+  buildAnalyticsContentPoints,
+  buildChannelComparisonItems,
+} from '../utils/chartSeries';
 import { useI18n } from '../i18n/useI18n';
-import { labelAttributionStatus, labelValidationStage } from '../i18n/domainLabels';
+import {
+  labelAttributionStatus,
+  labelContentCategory,
+  labelValidationStage,
+} from '../i18n/domainLabels';
 import { localizeContentDisplay } from '../i18n/seedTranslations';
-import { DualLineChart, HorizontalBarComparison } from '../components/Charts';
+import {
+  ChartTimeframeToolbar,
+  InteractiveComparisonChart,
+  InteractiveSeriesConfig,
+  InteractiveTimeSeriesChart,
+  InteractiveTimeSeriesPoint,
+} from '../components/Charts';
 import { MetricBlock, PageHeader, SegmentedControl, SurfacePanel } from '../components/ui';
+
+const CATEGORIES: ContentCategory[] = ['Descoberta', 'Conexão', 'Comercial contextual'];
 
 export const AnalyticsView: React.FC = () => {
   const { state, globalBrandFilter, globalPeriodFilter, excludeTestData } = useVyron();
-  const { lang, t, fmtCurrency, fmtCompact, fmtNumber, fmtPercent } = useI18n();
+  const { lang, t, fmtCurrency, fmtCompact, fmtNumber, fmtPercent, fmtDate } = useI18n();
   const [geoTab, setGeoTab] = useState<'geo' | 'lang'>('geo');
   const [exportNotice, setExportNotice] = useState('');
+
+  const [chartRange, setChartRange] = useState<ChartTimeRange>(globalPeriodFilter);
+  const [customStart, setCustomStart] = useState('2026-10-28');
+  const [customEnd, setCustomEnd] = useState('2026-11-18');
+  const [comparePrev, setComparePrev] = useState(false);
+  const [metric, setMetric] = useState<AnalyticsMetricKey>('views');
+  const [channelFilter, setChannelFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | ContentCategory>('all');
+  const [selectedContentPointId, setSelectedContentPointId] = useState<string | null>(null);
+  const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+  const [selectedGeoId, setSelectedGeoId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setChartRange(globalPeriodFilter);
+  }, [globalPeriodFilter]);
 
   const currency = state.settings.baseCurrency;
 
@@ -54,12 +88,104 @@ export const AnalyticsView: React.FC = () => {
     { excludeTest: excludeTestData }
   );
 
-  const trafficSeries = [
-    { label: t('analytics.chart.week1'), primary: Math.round(totalTraffic * 0.19), secondary: Math.round(totalConversions * 0.18) * 100 },
-    { label: t('analytics.chart.week2'), primary: Math.round(totalTraffic * 0.23), secondary: Math.round(totalConversions * 0.22) * 100 },
-    { label: t('analytics.chart.week3'), primary: Math.round(totalTraffic * 0.27), secondary: Math.round(totalConversions * 0.28) * 100 },
-    { label: t('analytics.chart.week4'), primary: Math.round(totalTraffic * 0.31), secondary: Math.round(totalConversions * 0.32) * 100 },
-  ];
+  const analyticsSeriesRes = buildAnalyticsContentPoints(state.contents, currency, {
+    brandId: globalBrandFilter,
+    channelId: channelFilter,
+    category: categoryFilter,
+    range: chartRange,
+    customStart,
+    customEnd,
+  });
+
+  const channelComparisonRows = buildChannelComparisonItems(state.channels, state.brands, {
+    brandId: globalBrandFilter,
+    metric: 'views30d',
+  });
+  const selectedChannelRow = selectedChannelId
+    ? channelComparisonRows.find((r) => r.channel.id === selectedChannelId) ?? null
+    : null;
+
+  const formatShortDateLabel = (iso: string) => fmtDate(iso).slice(0, 5);
+
+  const metricSeriesConfig: InteractiveSeriesConfig[] = (() => {
+    if (metric === 'clicks') {
+      return [
+        { id: 'clicks', label: t('analytics.chart.metricClicks'), color: '#315FEA', areaFill: true },
+        { id: 'views', label: t('analytics.chart.metricViews'), color: '#AEB7C2', dashed: true, defaultHidden: true },
+      ];
+    }
+    if (metric === 'conversions') {
+      return [
+        {
+          id: 'conversions',
+          label: t('analytics.chart.metricConversions'),
+          color: '#D97706',
+          areaFill: true,
+          isEstimate: true,
+        },
+        { id: 'clicks', label: t('analytics.chart.metricClicks'), color: '#315FEA', defaultHidden: true },
+      ];
+    }
+    if (metric === 'ctr') {
+      return [
+        {
+          id: 'ctr',
+          label: t('analytics.chart.metricCtr'),
+          color: '#315FEA',
+          areaFill: true,
+          formatValue: (v) => fmtPercent(v, 2),
+        },
+      ];
+    }
+    if (metric === 'epc') {
+      return [
+        {
+          id: 'epc',
+          label: t('analytics.chart.metricEpc', { currency }),
+          color: '#10B981',
+          areaFill: true,
+          isEstimate: true,
+          formatValue: (v) => fmtCurrency(v, currency),
+        },
+      ];
+    }
+    return [
+      { id: 'views', label: t('analytics.chart.primary'), color: '#315FEA', areaFill: true },
+      { id: 'clicks', label: t('analytics.chart.secondary'), color: '#10B981' },
+    ];
+  })();
+
+  const analyticsPoints: InteractiveTimeSeriesPoint[] = analyticsSeriesRes.items.map((item) => {
+    const rawContent = state.contents.find((c) => c.id === item.contentId);
+    const title = rawContent ? localizeContentDisplay(rawContent, lang).title : item.title;
+    return {
+      id: item.id,
+      label: `${formatShortDateLabel(item.date)} · ${title.slice(0, 14)}`,
+      fullDateLabel: `${fmtDate(item.date)} · ${title}`,
+      isEstimate: item.isEstimate,
+      values: {
+        views: item.views,
+        clicks: item.clicks,
+        conversions: item.conversions,
+        ctr: item.ctrPct,
+        epc: item.epc,
+      },
+    };
+  });
+
+  const formatActiveAnalyticsVal = (v: number) => {
+    if (metric === 'ctr') return fmtPercent(v, 2);
+    if (metric === 'epc') return fmtCurrency(v, currency);
+    if (metric === 'conversions') return `${Math.round(v)}`;
+    return fmtCompact(v);
+  };
+
+  const selectedAnalyticsItem = selectedContentPointId
+    ? analyticsSeriesRes.items.find((i) => i.id === selectedContentPointId) ?? null
+    : null;
+  const selectedRawContent = selectedAnalyticsItem
+    ? state.contents.find((c) => c.id === selectedAnalyticsItem.contentId) ?? null
+    : null;
 
   const geoBreakdown = [
     { id: 'br', label: t('analytics.geo.br'), sublabel: t('analytics.geo.brSub'), value: 44, formattedValue: fmtPercent(44, 0) },
@@ -162,41 +288,212 @@ export const AnalyticsView: React.FC = () => {
         />
       </div>
 
-      {/* Trends + Geographic / Language */}
+      {/* Content Evolution + Channel Comparison */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <SurfacePanel className="lg:col-span-7">
-          <h2 className="font-display text-sm font-semibold mb-1">
-            {t('analytics.chart.title')}
-          </h2>
-          <p className="text-xs text-[#525B68] dark:text-[#AEB7C2] mb-4">
-            {t('analytics.chart.subtitle')}
-          </p>
-          <DualLineChart
-            data={trafficSeries}
-            primaryLabel={t('analytics.chart.primary')}
-            secondaryLabel={t('analytics.chart.secondary')}
-            formatValue={(v) => fmtCompact(v)}
+        <SurfacePanel className="lg:col-span-7 space-y-3">
+          <div>
+            <h2 className="font-display text-sm font-semibold mb-1">
+              {t('analytics.chart.title')}
+            </h2>
+            <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
+              {t('analytics.chart.subtitle')}
+            </p>
+          </div>
+
+          <ChartTimeframeToolbar
+            range={chartRange}
+            onRangeChange={(next) => {
+              setChartRange(next);
+              setSelectedContentPointId(null);
+            }}
+            customStart={customStart}
+            customEnd={customEnd}
+            onCustomStartChange={setCustomStart}
+            onCustomEndChange={setCustomEnd}
+            comparePrevious={comparePrev}
+            onToggleComparePrevious={() => setComparePrev((v) => !v)}
+            hasPreviousData={analyticsSeriesRes.previousCount > 0}
+            coverageNote={t('analytics.chart.coverageNotice')}
           />
+
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+            <SegmentedControl
+              ariaLabel={t('analytics.chart.metricAria')}
+              value={metric}
+              onChange={(v) => setMetric(v as AnalyticsMetricKey)}
+              options={[
+                { value: 'views', label: t('analytics.chart.metricViews') },
+                { value: 'clicks', label: t('analytics.chart.metricClicks') },
+                { value: 'conversions', label: t('analytics.chart.metricConversions') },
+                { value: 'ctr', label: t('analytics.chart.metricCtr') },
+                { value: 'epc', label: t('analytics.chart.metricEpc', { currency }) },
+              ]}
+            />
+
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                aria-label={t('analytics.chart.channelFilterAria')}
+                value={channelFilter}
+                onChange={(e) => {
+                  setChannelFilter(e.target.value);
+                  setSelectedContentPointId(null);
+                }}
+                className="h-8 px-2.5 text-xs rounded-md border border-black/10 dark:border-white/10 bg-[#F1F2F3]/70 dark:bg-[#101216] text-[#101216] dark:text-[#F1F2F3]"
+              >
+                <option value="all">{t('analytics.chart.allChannels')}</option>
+                {filteredChannels.map((ch) => (
+                  <option key={ch.id} value={ch.id}>
+                    {ch.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                aria-label={t('analytics.chart.categoryFilterAria')}
+                value={categoryFilter}
+                onChange={(e) => {
+                  setCategoryFilter(e.target.value as 'all' | ContentCategory);
+                  setSelectedContentPointId(null);
+                }}
+                className="h-8 px-2.5 text-xs rounded-md border border-black/10 dark:border-white/10 bg-[#F1F2F3]/70 dark:bg-[#101216] text-[#101216] dark:text-[#F1F2F3]"
+              >
+                <option value="all">{t('analytics.chart.allCategories')}</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {labelContentCategory(cat, lang)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <InteractiveTimeSeriesChart
+            points={analyticsPoints}
+            series={metricSeriesConfig}
+            formatValue={formatActiveAnalyticsVal}
+            ariaLabel={t('charts.timeSeriesAria', { label: t('analytics.chart.title') })}
+            selectedPointId={selectedContentPointId}
+            onSelectPoint={(pt) => setSelectedContentPointId(pt?.id ?? null)}
+          />
+
+          {selectedAnalyticsItem && selectedRawContent && (
+            <div className="p-3.5 rounded-md bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 text-xs space-y-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="font-semibold text-[#101216] dark:text-[#F1F2F3]">
+                    {t('analytics.chart.drillTitle', {
+                      date: fmtDate(selectedAnalyticsItem.date),
+                    })}
+                  </div>
+                  <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                    {localizeContentDisplay(selectedRawContent, lang).title} ·{' '}
+                    <span className="font-mono">{selectedAnalyticsItem.trackingSrc}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedContentPointId(null)}
+                  aria-label={t('charts.clearPin')}
+                  className="p-1 rounded text-[#525B68] dark:text-[#AEB7C2] hover:text-[#101216] dark:hover:text-[#F1F2F3]"
+                >
+                  <X className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+              </div>
+              <div className="font-mono tabular-nums text-[11px] text-[#101216] dark:text-[#F1F2F3]">
+                {t('analytics.chart.drillMetrics', {
+                  views: fmtCompact(selectedAnalyticsItem.views),
+                  clicks: fmtCompact(selectedAnalyticsItem.clicks),
+                  ctr: fmtPercent(selectedAnalyticsItem.ctrPct, 2),
+                  epc: fmtCurrency(selectedAnalyticsItem.epc, currency),
+                  conv: selectedAnalyticsItem.conversions,
+                  status: labelAttributionStatus(
+                    selectedRawContent.metrics?.attributionStatus ?? 'Estimativa [Em investigação]',
+                    lang
+                  ),
+                })}
+              </div>
+            </div>
+          )}
         </SurfacePanel>
 
         <SurfacePanel className="lg:col-span-5 space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="font-display text-sm font-semibold">
-              {t('analytics.geo.title')}
+          <div>
+            <h2 className="font-display text-sm font-semibold mb-1">
+              {t('analytics.channelChart.title')}
             </h2>
-            <SegmentedControl
-              ariaLabel={t('analytics.geo.switchAria')}
-              value={geoTab}
-              onChange={(v) => setGeoTab(v as 'geo' | 'lang')}
-              options={[
-                { value: 'geo', label: t('analytics.geo.tabRegion') },
-                { value: 'lang', label: t('analytics.geo.tabLang') },
-              ]}
-            />
+            <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
+              {t('analytics.channelChart.subtitle')}
+            </p>
           </div>
-          <HorizontalBarComparison items={geoTab === 'geo' ? geoBreakdown : langBreakdown} />
+          <InteractiveComparisonChart
+            selectedId={selectedChannelId}
+            onSelect={(item) => setSelectedChannelId(item?.id ?? null)}
+            items={channelComparisonRows.map((row) => ({
+              id: row.channel.id,
+              label: row.channel.name,
+              sublabel: `${row.brandName} · ${row.channel.platform}`,
+              value: row.rawValue,
+              formattedValue: fmtCompact(row.rawValue),
+              color: row.accentColor,
+            }))}
+          />
+          {selectedChannelRow && (
+            <div className="p-3 rounded-md bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 text-xs grid grid-cols-3 gap-2">
+              <div>
+                <div className="text-[10px] text-[#525B68] dark:text-[#AEB7C2]">
+                  {t('analytics.channelChart.viewsLabel')}
+                </div>
+                <div className="font-mono tabular-nums font-semibold">
+                  {fmtCompact(selectedChannelRow.channel.views30d)}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-[#525B68] dark:text-[#AEB7C2]">
+                  {t('analytics.channelChart.reachLabel')}
+                </div>
+                <div className="font-mono tabular-nums font-semibold">
+                  {fmtCompact(selectedChannelRow.channel.reach30d)}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] text-[#525B68] dark:text-[#AEB7C2]">
+                  {t('analytics.channelChart.growthLabel')}
+                </div>
+                <div className="font-mono tabular-nums font-semibold text-emerald-700 dark:text-emerald-400">
+                  {selectedChannelRow.channel.growthPct30d >= 0 ? '+' : ''}
+                  {fmtPercent(selectedChannelRow.channel.growthPct30d, 1)}
+                </div>
+              </div>
+            </div>
+          )}
         </SurfacePanel>
       </div>
+
+      {/* Geographic / Language */}
+      <SurfacePanel className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-sm font-semibold">
+            {t('analytics.geo.title')}
+          </h2>
+          <SegmentedControl
+            ariaLabel={t('analytics.geo.switchAria')}
+            value={geoTab}
+            onChange={(v) => {
+              setGeoTab(v as 'geo' | 'lang');
+              setSelectedGeoId(null);
+            }}
+            options={[
+              { value: 'geo', label: t('analytics.geo.tabRegion') },
+              { value: 'lang', label: t('analytics.geo.tabLang') },
+            ]}
+          />
+        </div>
+        <InteractiveComparisonChart
+          selectedId={selectedGeoId}
+          onSelect={(item) => setSelectedGeoId(item?.id ?? null)}
+          items={geoTab === 'geo' ? geoBreakdown : langBreakdown}
+        />
+      </SurfacePanel>
 
       {/* Content & Product Attribution Table */}
       <SurfacePanel>

@@ -4,7 +4,8 @@ import { useVyron } from '../context/VyronContext';
 import { ChannelPlatform } from '../types/vyron';
 import { useI18n } from '../i18n/useI18n';
 import { labelChannelIntegrationStatus } from '../i18n/domainLabels';
-import { HorizontalBarComparison } from '../components/Charts';
+import { ChannelChartMetric, buildChannelComparisonItems } from '../utils/chartSeries';
+import { InteractiveComparisonChart } from '../components/Charts';
 import {
   EmptyState,
   MetricBlock,
@@ -19,8 +20,10 @@ const PLATFORMS: ChannelPlatform[] = ['YouTube', 'Instagram', 'TikTok', 'Pintere
 
 export const ChannelsView: React.FC = () => {
   const { state, globalBrandFilter, createChannel, syncChannelDemo } = useVyron();
-  const { lang, t, fmtCompact, fmtPercent } = useI18n();
+  const { lang, t, fmtCompact, fmtPercent, fmtDateTime } = useI18n();
   const [platformFilter, setPlatformFilter] = useState<'all' | ChannelPlatform>('all');
+  const [chartMetric, setChartMetric] = useState<ChannelChartMetric>('views30d');
+  const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
   const [chName, setChName] = useState('');
@@ -194,24 +197,70 @@ export const ChannelsView: React.FC = () => {
             </div>
           </SurfacePanel>
 
-          <SurfacePanel className="lg:col-span-4">
-            <h2 className="font-display text-sm font-semibold mb-1">
-              {t('channels.chartTitle')}
-            </h2>
-            <p className="text-xs text-[#525B68] dark:text-[#AEB7C2] mb-4">
-              {t('channels.chartSubtitle')}
-            </p>
-            <HorizontalBarComparison
-              items={[...visibleChannels]
-                .sort((a, b) => b.views30d - a.views30d)
-                .map((ch) => ({
-                  id: ch.id,
-                  label: ch.name,
-                  sublabel: ch.platform,
-                  value: ch.views30d,
-                  formattedValue: fmtCompact(ch.views30d),
-                }))}
+          <SurfacePanel className="lg:col-span-4 space-y-4">
+            <div>
+              <h2 className="font-display text-sm font-semibold mb-1">
+                {t('channels.chartTitle')}
+              </h2>
+              <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
+                {t('channels.chartSubtitle')}
+              </p>
+            </div>
+
+            <select
+              aria-label={t('channels.chartMetricAria')}
+              value={chartMetric}
+              onChange={(e) => setChartMetric(e.target.value as ChannelChartMetric)}
+              className="w-full h-8 px-2.5 text-xs rounded-md border border-black/10 dark:border-white/10 bg-[#F1F2F3]/70 dark:bg-[#101216] text-[#101216] dark:text-[#F1F2F3]"
+            >
+              <option value="views30d">{t('channels.chartMetric.views')}</option>
+              <option value="reach30d">{t('channels.chartMetric.reach')}</option>
+              <option value="followers">{t('channels.chartMetric.followers')}</option>
+              <option value="engagementRatePct">{t('channels.chartMetric.engagement')}</option>
+              <option value="growthPct30d">{t('channels.chartMetric.growth')}</option>
+            </select>
+
+            <InteractiveComparisonChart
+              selectedId={selectedChannelId}
+              onSelect={(item) => setSelectedChannelId(item?.id ?? null)}
+              items={buildChannelComparisonItems(visibleChannels, state.brands, {
+                metric: chartMetric,
+              }).map((row) => {
+                const formattedValue =
+                  chartMetric === 'engagementRatePct'
+                    ? fmtPercent(row.rawValue, 1)
+                    : chartMetric === 'growthPct30d'
+                    ? `${row.rawValue >= 0 ? '+' : ''}${fmtPercent(row.rawValue, 1)}`
+                    : fmtCompact(row.rawValue);
+                return {
+                  id: row.channel.id,
+                  label: row.channel.name,
+                  sublabel: `${row.brandName} · ${row.channel.platform}`,
+                  value: row.rawValue,
+                  formattedValue,
+                  color: row.accentColor,
+                };
+              })}
             />
+
+            {(() => {
+              const selectedCh = visibleChannels.find((c) => c.id === selectedChannelId);
+              if (!selectedCh) return null;
+              return (
+                <div className="p-3 rounded-md bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 text-xs space-y-1">
+                  <div className="font-semibold text-[#101216] dark:text-[#F1F2F3]">
+                    {selectedCh.name} ({selectedCh.handle})
+                  </div>
+                  <div className="text-[11px] font-mono tabular-nums text-[#525B68] dark:text-[#AEB7C2]">
+                    {t('channels.chartSelectedDetail', {
+                      platform: selectedCh.platform,
+                      publications: selectedCh.publications30d,
+                      sync: fmtDateTime(selectedCh.lastSyncAt),
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </SurfacePanel>
         </div>
       )}

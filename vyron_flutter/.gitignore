@@ -1,0 +1,28 @@
+.DS_Store
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+coverage/
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Android signing secrets & local caches (never commit)
+*.jks
+*.keystore
+android/keystore.properties
+android/local.properties
+android/.gradle/
+android/app/vyron-release.jks
+
+# iOS Xcode user state / Pods build
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/ephemeral/
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/xcuserdata/

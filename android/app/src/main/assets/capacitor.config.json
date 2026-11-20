@@ -1,0 +1,13 @@
+{
+	"appId": "com.marcuszorzetti.vyron",
+	"appName": "Vyron",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	},
+	"android": {
+		"backgroundColor": "#101216",
+		"allowMixedContent": false,
+		"webContentsDebuggingEnabled": false
+	}
+}

@@ -1,17 +1,21 @@
-import React from 'react';
-import { ArrowRight, AlertTriangle, ShieldCheck } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowRight, AlertTriangle, ShieldCheck, X } from 'lucide-react';
 import { useVyron } from '../context/VyronContext';
 import {
   calculateFinanceSummary,
   computeBrandRollups,
   computeOperationalEfficiency,
+  convertCurrency,
 } from '../utils/vyronRules';
+import { ChartTimeRange, buildOverviewFinanceSeries } from '../utils/chartSeries';
 import { useI18n } from '../i18n/useI18n';
 import {
   labelActivityCategory,
+  labelCommissionStage,
   labelContentFormat,
   labelContentStatus,
   labelContentVisibility,
+  labelFinanceType,
   labelProductGradeBadge,
   labelSystemControlState,
   labelValidationStage,
@@ -19,11 +23,18 @@ import {
 import {
   localizeActivity,
   localizeContentDisplay,
+  localizeFinanceEntry,
   localizeNotification,
   localizeProduct,
 } from '../i18n/seedTranslations';
-import { DualLineChart, HorizontalBarComparison } from '../components/Charts';
-import { MetricBlock, PageHeader, StatusLabel, SurfacePanel } from '../components/ui';
+import {
+  ChartTimeframeToolbar,
+  InteractiveComparisonChart,
+  InteractiveSeriesConfig,
+  InteractiveTimeSeriesChart,
+  InteractiveTimeSeriesPoint,
+} from '../components/Charts';
+import { MetricBlock, PageHeader, SegmentedControl, StatusLabel, SurfacePanel } from '../components/ui';
 
 export const OverviewView: React.FC = () => {
   const {
@@ -89,28 +100,87 @@ export const OverviewView: React.FC = () => {
     0
   );
 
-  const baseConf = Math.max(finance.confirmedCommercialResult, 1000);
-  const baseRec = Math.max(finance.receivedCashIn, 800);
+  const [chartRange, setChartRange] = useState<ChartTimeRange>(globalPeriodFilter);
+  const [customStart, setCustomStart] = useState('2026-10-28');
+  const [customEnd, setCustomEnd] = useState('2026-11-18');
+  const [chartMode, setChartMode] = useState<'cumulative' | 'daily'>('cumulative');
+  const [comparePrev, setComparePrev] = useState(false);
+  const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
+  const [selectedBrandChartId, setSelectedBrandChartId] = useState<string | null>(null);
 
-  const cashFlowSeries = [
-    { label: t('overview.chart.monthJun'), primary: Math.round(baseConf * 0.58), secondary: Math.round(baseRec * 0.56), tertiary: null },
-    { label: t('overview.chart.monthJul'), primary: Math.round(baseConf * 0.67), secondary: Math.round(baseRec * 0.64), tertiary: null },
-    { label: t('overview.chart.monthAgo'), primary: Math.round(baseConf * 0.64), secondary: Math.round(baseRec * 0.69), tertiary: null },
-    { label: t('overview.chart.monthSet'), primary: Math.round(baseConf * 0.81), secondary: Math.round(baseRec * 0.78), tertiary: null },
-    { label: t('overview.chart.monthOut'), primary: Math.round(baseConf * 0.91), secondary: Math.round(baseRec * 0.88), tertiary: null },
-    {
-      label: t('overview.chart.monthNov'),
-      primary: Math.round(finance.confirmedCommercialResult),
-      secondary: Math.round(finance.receivedCashIn),
-      tertiary: Math.round(finance.confirmedCommercialResult),
+  useEffect(() => {
+    setChartRange(globalPeriodFilter);
+  }, [globalPeriodFilter]);
+
+  const financeSeriesRes = buildOverviewFinanceSeries(state.financeEntries, currency, {
+    brandId: globalBrandFilter,
+    range: chartRange,
+    customStart,
+    customEnd,
+    excludeTest: excludeTestData,
+    includeProjection: true,
+    mode: chartMode,
+  });
+
+  const formatShortDateLabel = (iso: string) => {
+    const full = fmtDate(iso);
+    return full.slice(0, 5);
+  };
+
+  const interactivePoints: InteractiveTimeSeriesPoint[] = financeSeriesRes.points.map((pt) => ({
+    id: pt.id,
+    label: pt.isProjection ? `${formatShortDateLabel(pt.date)} (${t('charts.projectionPrefix')})` : formatShortDateLabel(pt.date),
+    fullDateLabel: fmtDate(pt.date),
+    isProjection: pt.isProjection,
+    values: {
+      confirmed: pt.confirmedCommercial,
+      received: pt.receivedCash,
+      pending: pt.pendingCommissions,
+      projection: pt.projection,
+      ...(comparePrev && financeSeriesRes.hasPreviousData
+        ? { previousConfirmed: pt.previousConfirmed }
+        : {}),
     },
+  }));
+
+  const overviewSeriesConfig: InteractiveSeriesConfig[] = [
+    { id: 'confirmed', label: t('overview.chart.primary'), color: '#315FEA', areaFill: true },
+    { id: 'received', label: t('overview.chart.secondary'), color: '#10B981' },
+    { id: 'pending', label: t('overview.chart.pending'), color: '#D97706' },
     {
-      label: t('overview.chart.monthDecProj'),
-      primary: null,
-      secondary: null,
-      tertiary: Math.round(finance.confirmedCommercialResult + finance.projectedFutureRevenue * 0.35),
+      id: 'projection',
+      label: t('overview.chart.tertiary'),
+      color: '#AEB7C2',
+      dashed: true,
+      isProjection: true,
     },
+    ...(comparePrev && financeSeriesRes.hasPreviousData
+      ? [
+          {
+            id: 'previousConfirmed',
+            label: t('charts.prevPeriodSeries'),
+            color: '#7FA0FF',
+            dashed: true,
+          },
+        ]
+      : []),
   ];
+
+  const selectedOverviewPoint = selectedPointId
+    ? financeSeriesRes.points.find((p) => p.id === selectedPointId) ?? null
+    : null;
+
+  const selectedOverviewEntries = selectedOverviewPoint
+    ? state.financeEntries
+        .filter((e) => selectedOverviewPoint.entryIds.includes(e.id))
+        .map((e) => localizeFinanceEntry(e, lang))
+    : [];
+
+  const selectedBrandRollup = selectedBrandChartId
+    ? brandRollups.find((r) => r.brand.id === selectedBrandChartId) ?? null
+    : null;
+
+  const currPrefix = currency === 'BRL' ? 'R$' : currency === 'USD' ? '$' : '€';
 
   return (
     <div className="space-y-6">
@@ -263,13 +333,115 @@ export const OverviewView: React.FC = () => {
                 <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
             </div>
-            <DualLineChart
-              data={cashFlowSeries}
-              primaryLabel={t('overview.chart.primary')}
-              secondaryLabel={t('overview.chart.secondary')}
-              tertiaryLabel={t('overview.chart.tertiary')}
-              formatValue={(v) => fmtCurrency(v, currency)}
+            <ChartTimeframeToolbar
+              range={chartRange}
+              onRangeChange={(next) => {
+                setChartRange(next);
+                setSelectedPointId(null);
+              }}
+              customStart={customStart}
+              customEnd={customEnd}
+              onCustomStartChange={setCustomStart}
+              onCustomEndChange={setCustomEnd}
+              comparePrevious={comparePrev}
+              onToggleComparePrevious={() => setComparePrev((v) => !v)}
+              hasPreviousData={financeSeriesRes.hasPreviousData}
+              coverageNote={t('charts.coverageNote')}
+              extraControls={
+                <SegmentedControl
+                  ariaLabel={t('overview.chart.title')}
+                  value={chartMode}
+                  onChange={(v) => setChartMode(v as 'cumulative' | 'daily')}
+                  options={[
+                    { value: 'cumulative', label: t('overview.chart.modeCumulative') },
+                    { value: 'daily', label: t('overview.chart.modeDaily') },
+                  ]}
+                />
+              }
             />
+
+            <InteractiveTimeSeriesChart
+              points={interactivePoints}
+              series={overviewSeriesConfig}
+              formatValue={(v) => fmtCurrency(v, currency)}
+              formatYAxis={(v) => `${currPrefix} ${fmtCompact(v)}`}
+              ariaLabel={t('charts.timeSeriesAria', { label: t('overview.chart.title') })}
+              selectedPointId={selectedPointId}
+              onSelectPoint={(pt) => setSelectedPointId(pt?.id ?? null)}
+            />
+
+            {selectedOverviewPoint && (
+              <div className="mt-4 p-3.5 rounded-md bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 space-y-2.5 text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <div className="font-semibold text-[#101216] dark:text-[#F1F2F3]">
+                      {t('overview.chart.drillTitle', { date: fmtDate(selectedOverviewPoint.date) })}
+                    </div>
+                    <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                      {t('overview.chart.drillCount', { count: selectedOverviewEntries.length })}
+                      {selectedOverviewPoint.isProjection
+                        ? ` · ${t('overview.chart.drillProjectionNote')}`
+                        : ''}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPointId(null)}
+                    aria-label={t('charts.clearPin')}
+                    className="p-1 rounded text-[#525B68] dark:text-[#AEB7C2] hover:text-[#101216] dark:hover:text-[#F1F2F3]"
+                  >
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                </div>
+
+                {selectedOverviewEntries.length === 0 ? (
+                  <p className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                    {t('overview.chart.drillEmpty')}
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-black/10 dark:divide-white/10">
+                    {selectedOverviewEntries.map((entry) => {
+                      const brand = state.brands.find((b) => b.id === entry.brandId);
+                      const converted = convertCurrency(entry.amount, entry.currency, currency);
+                      const isOutflow = entry.type === 'Expense' || entry.type === 'Reinvestment';
+                      return (
+                        <li key={entry.id} className="py-2 first:pt-0 last:pb-0 flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="font-medium text-[#101216] dark:text-[#F1F2F3] truncate">
+                              {entry.description}
+                            </div>
+                            <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2] truncate">
+                              {brand?.name ?? entry.brandId} · {entry.platform} ·{' '}
+                              {labelFinanceType(entry.type, lang)} ·{' '}
+                              {entry.isProjection
+                                ? t('charts.projectionBadge')
+                                : labelCommissionStage(entry.stage, lang)}
+                            </div>
+                          </div>
+                          <div className="font-mono tabular-nums text-right shrink-0">
+                            <div
+                              className={
+                                isOutflow
+                                  ? 'text-rose-600 dark:text-rose-400 font-medium'
+                                  : 'font-semibold text-[#101216] dark:text-[#F1F2F3]'
+                              }
+                            >
+                              {isOutflow ? '-' : ''}
+                              {fmtCurrency(converted, currency)}
+                            </div>
+                            {entry.currency !== currency && (
+                              <div className="text-[10px] text-[#525B68] dark:text-[#AEB7C2]">
+                                {fmtCurrency(entry.amount, entry.currency)}
+                              </div>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         </SurfacePanel>
 
@@ -294,7 +466,9 @@ export const OverviewView: React.FC = () => {
               </button>
             </div>
 
-            <HorizontalBarComparison
+            <InteractiveComparisonChart
+              selectedId={selectedBrandChartId}
+              onSelect={(item) => setSelectedBrandChartId(item?.id ?? null)}
               items={brandRollups.map((r) => ({
                 id: r.brand.id,
                 label: r.brand.name,
@@ -304,6 +478,37 @@ export const OverviewView: React.FC = () => {
                 color: r.brand.accentColor,
               }))}
             />
+
+            {selectedBrandRollup && (
+              <div className="mt-4 p-3 rounded-md bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 text-xs space-y-2">
+                <div className="font-semibold text-[#101216] dark:text-[#F1F2F3]">
+                  {selectedBrandRollup.brand.name}
+                </div>
+                <div className="text-[11px] font-mono tabular-nums text-[#525B68] dark:text-[#AEB7C2]">
+                  {t('overview.brands.selectedSummary', {
+                    received: fmtCurrency(selectedBrandRollup.receivedCash, currency),
+                    pending: fmtCurrency(selectedBrandRollup.pendingCommissions, currency),
+                    products: selectedBrandRollup.approvedProductsCount,
+                  })}
+                </div>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setGlobalBrandFilter(selectedBrandRollup.brand.id)}
+                    className="px-2.5 py-1 rounded border border-[#315FEA]/40 text-[11px] font-medium text-[#315FEA] dark:text-[#7FA0FF] hover:bg-[#315FEA]/10"
+                  >
+                    {t('overview.brands.isolateBrand')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('brands', { brandId: selectedBrandRollup.brand.id })}
+                    className="px-2.5 py-1 rounded bg-[#315FEA] text-white text-[11px] font-medium hover:bg-[#274FC9]"
+                  >
+                    {t('overview.brands.openBrand')}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-5 pt-4 border-t border-black/10 dark:border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs text-[#525B68] dark:text-[#AEB7C2]">

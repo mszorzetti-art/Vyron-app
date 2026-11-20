@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Plus, X } from 'lucide-react';
 import { useVyron } from '../context/VyronContext';
 import { CommissionStage, CurrencyCode, FinanceEntryType } from '../types/vyron';
 import {
@@ -7,9 +7,17 @@ import {
   calculateFinanceSummary,
   convertCurrency,
 } from '../utils/vyronRules';
+import { ChartTimeRange, buildFinanceCashflowSeries } from '../utils/chartSeries';
 import { useI18n } from '../i18n/useI18n';
 import { labelCommissionStage, labelFinanceType } from '../i18n/domainLabels';
 import { localizeFinanceEntry } from '../i18n/seedTranslations';
+import {
+  ChartTimeframeToolbar,
+  InteractiveComparisonChart,
+  InteractiveSeriesConfig,
+  InteractiveTimeSeriesChart,
+  InteractiveTimeSeriesPoint,
+} from '../components/Charts';
 import {
   MetricBlock,
   ModalDialog,
@@ -29,10 +37,22 @@ export const FinanceView: React.FC = () => {
     setBaseCurrency,
     addFinanceEntry,
   } = useVyron();
-  const { lang, t, fmtCurrency, fmtDate } = useI18n();
+  const { lang, t, fmtCurrency, fmtCompact, fmtDate } = useI18n();
 
   const [stageFilter, setStageFilter] = useState<'all' | CommissionStage | 'Expenses' | 'Projections'>('all');
+  const [chartRange, setChartRange] = useState<ChartTimeRange>(globalPeriodFilter);
+  const [customStart, setCustomStart] = useState('2026-10-28');
+  const [customEnd, setCustomEnd] = useState('2026-11-18');
+  const [chartMode, setChartMode] = useState<'daily' | 'cumulative'>('daily');
+  const [comparePrev, setComparePrev] = useState(false);
+  const [selectedCashflowPointId, setSelectedCashflowPointId] = useState<string | null>(null);
+  const [platformViewMode, setPlatformViewMode] = useState<'table' | 'chart'>('table');
+  const [selectedPlatformId, setSelectedPlatformId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+
+  useEffect(() => {
+    setChartRange(globalPeriodFilter);
+  }, [globalPeriodFilter]);
 
   const [entryBrandId, setEntryBrandId] = useState(state.brands[0]?.id ?? '');
   const [entryPlatform, setEntryPlatform] = useState('Amazon Associates BR');
@@ -142,62 +162,283 @@ export const FinanceView: React.FC = () => {
         />
       </section>
 
+      {/* Interactive Cashflow Stage Chart */}
+      {(() => {
+        const cashflowRes = buildFinanceCashflowSeries(state.financeEntries, currency, {
+          brandId: globalBrandFilter,
+          range: chartRange,
+          customStart,
+          customEnd,
+          excludeTest: excludeTestData,
+          includeProjections: true,
+          mode: chartMode,
+        });
+        const currPrefix = currency === 'BRL' ? 'R$' : currency === 'USD' ? '$' : '€';
+        const formatShortDate = (iso: string) => fmtDate(iso).slice(0, 5);
+        const chartPoints: InteractiveTimeSeriesPoint[] = cashflowRes.points.map((pt) => ({
+          id: pt.id,
+          label: pt.isProjection
+            ? `${formatShortDate(pt.date)} (${t('charts.projectionPrefix')})`
+            : formatShortDate(pt.date),
+          fullDateLabel: fmtDate(pt.date),
+          isProjection: pt.isProjection,
+          values: {
+            received: pt.receivedInflow,
+            confirmed: pt.confirmedCommercial,
+            pending: pt.pendingCommissions,
+            outflows: pt.outflows,
+            projection: pt.projection,
+            ...(comparePrev && cashflowRes.hasPreviousData
+              ? { previousReceived: pt.previousReceived }
+              : {}),
+          },
+        }));
+
+        const chartSeries: InteractiveSeriesConfig[] = [
+          {
+            id: 'received',
+            label: t('finance.chart.seriesReceived'),
+            color: '#10B981',
+            areaFill: true,
+          },
+          {
+            id: 'confirmed',
+            label: t('finance.chart.seriesConfirmed'),
+            color: '#315FEA',
+          },
+          {
+            id: 'pending',
+            label: t('finance.chart.seriesPending'),
+            color: '#D97706',
+          },
+          {
+            id: 'outflows',
+            label: t('finance.chart.seriesOutflows'),
+            color: '#E11D48',
+          },
+          {
+            id: 'projection',
+            label: t('finance.chart.seriesProjection'),
+            color: '#AEB7C2',
+            dashed: true,
+            isProjection: true,
+          },
+          ...(comparePrev && cashflowRes.hasPreviousData
+            ? [
+                {
+                  id: 'previousReceived',
+                  label: t('charts.prevPeriodSeries'),
+                  color: '#7FA0FF',
+                  dashed: true,
+                },
+              ]
+            : []),
+        ];
+
+        const selectedPoint = selectedCashflowPointId
+          ? cashflowRes.points.find((p) => p.id === selectedCashflowPointId) ?? null
+          : null;
+        const selectedDateEntries = selectedPoint
+          ? state.financeEntries
+              .filter((e) => selectedPoint.entryIds.includes(e.id))
+              .map((e) => localizeFinanceEntry(e, lang))
+          : [];
+
+        return (
+          <SurfacePanel>
+            <div className="mb-3">
+              <h2 className="font-display text-base font-semibold text-[#101216] dark:text-[#F1F2F3]">
+                {t('finance.chart.title')}
+              </h2>
+              <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
+                {t('finance.chart.subtitle', { currency })}
+              </p>
+            </div>
+
+            <ChartTimeframeToolbar
+              range={chartRange}
+              onRangeChange={(next) => {
+                setChartRange(next);
+                setSelectedCashflowPointId(null);
+              }}
+              customStart={customStart}
+              customEnd={customEnd}
+              onCustomStartChange={setCustomStart}
+              onCustomEndChange={setCustomEnd}
+              comparePrevious={comparePrev}
+              onToggleComparePrevious={() => setComparePrev((v) => !v)}
+              hasPreviousData={cashflowRes.hasPreviousData}
+              coverageNote={t('charts.coverageNote')}
+              extraControls={
+                <SegmentedControl
+                  ariaLabel={t('finance.chart.title')}
+                  value={chartMode}
+                  onChange={(v) => setChartMode(v as 'daily' | 'cumulative')}
+                  options={[
+                    { value: 'daily', label: t('finance.chart.modeDaily') },
+                    { value: 'cumulative', label: t('finance.chart.modeCumulative') },
+                  ]}
+                />
+              }
+            />
+
+            <InteractiveTimeSeriesChart
+              points={chartPoints}
+              series={chartSeries}
+              formatValue={(v) => fmtCurrency(v, currency)}
+              formatYAxis={(v) => `${currPrefix} ${fmtCompact(v)}`}
+              ariaLabel={t('charts.timeSeriesAria', { label: t('finance.chart.title') })}
+              selectedPointId={selectedCashflowPointId}
+              onSelectPoint={(pt) => setSelectedCashflowPointId(pt?.id ?? null)}
+            />
+
+            {selectedPoint && (
+              <div className="mt-4 p-3.5 rounded-md bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 space-y-2 text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-semibold text-[#101216] dark:text-[#F1F2F3]">
+                    {t('finance.chart.drillTitle', { date: fmtDate(selectedPoint.date) })}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCashflowPointId(null)}
+                    aria-label={t('charts.clearPin')}
+                    className="p-1 rounded text-[#525B68] dark:text-[#AEB7C2] hover:text-[#101216] dark:hover:text-[#F1F2F3]"
+                  >
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                </div>
+                <ul className="divide-y divide-black/10 dark:divide-white/10">
+                  {selectedDateEntries.map((entry) => {
+                    const converted = convertCurrency(entry.amount, entry.currency, currency);
+                    const isOutflow = entry.type === 'Expense' || entry.type === 'Reinvestment';
+                    return (
+                      <li key={entry.id} className="py-2 first:pt-0 last:pb-0 flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-medium text-[#101216] dark:text-[#F1F2F3] truncate">
+                            {entry.description}
+                          </div>
+                          <div className="text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                            {entry.platform} · {labelFinanceType(entry.type, lang)} ·{' '}
+                            {entry.isProjection
+                              ? t('charts.projectionBadge')
+                              : labelCommissionStage(entry.stage, lang)}
+                          </div>
+                        </div>
+                        <span
+                          className={`font-mono tabular-nums font-semibold shrink-0 ${
+                            isOutflow
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : entry.stage === 'Received' && !entry.isProjection
+                              ? 'text-emerald-700 dark:text-emerald-400'
+                              : 'text-[#101216] dark:text-[#F1F2F3]'
+                          }`}
+                        >
+                          {isOutflow ? '-' : ''}
+                          {fmtCurrency(converted, currency)}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </SurfacePanel>
+        );
+      })()}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <SurfacePanel className="lg:col-span-7">
-          <h2 className="font-display text-sm font-semibold mb-3">
-            {t('finance.byPlatformTitle')}
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-black/10 dark:border-white/10 text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
-                  <th className="py-2 pr-4">{t('finance.col.platform')}</th>
-                  <th className="py-2 pr-4 text-right">{t('finance.col.pending')}</th>
-                  <th className="py-2 pr-4 text-right">{t('finance.col.confirmed')}</th>
-                  <th className="py-2 text-right">{t('finance.col.received')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
-                {platforms.map((plat) => {
-                  const rows = state.financeEntries.filter(
-                    (e) =>
-                      !e.isProjection &&
-                      (!excludeTestData || !e.isTest) &&
-                      localizeFinanceEntry(e, lang).platform === plat &&
-                      (globalBrandFilter === 'all' || e.brandId === globalBrandFilter)
-                  );
-                  const sumStage = (st: CommissionStage) =>
-                    rows
-                      .filter(
-                        (r) =>
-                          (r.type === 'Commission' || r.type === 'DirectRevenue') &&
-                          r.stage === st
-                      )
-                      .reduce((acc, r) => acc + convertCurrency(r.amount, r.currency, currency), 0);
-
-                  const pend = sumStage('Pending');
-                  const conf = sumStage('Confirmed');
-                  const rec = sumStage('Received');
-                  if (pend + conf + rec === 0) return null;
-
-                  return (
-                    <tr key={plat}>
-                      <td className="py-2.5 pr-4 font-medium">{plat}</td>
-                      <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-amber-700 dark:text-amber-400">
-                        {fmtCurrency(pend, currency)}
-                      </td>
-                      <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-[#315FEA] dark:text-[#7FA0FF]">
-                        {fmtCurrency(conf, currency)}
-                      </td>
-                      <td className="py-2.5 text-right font-mono tabular-nums text-emerald-700 dark:text-emerald-400 font-medium">
-                        {fmtCurrency(rec, currency)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="font-display text-sm font-semibold">
+              {t('finance.byPlatformTitle')}
+            </h2>
+            <SegmentedControl
+              ariaLabel={t('finance.byPlatformTitle')}
+              value={platformViewMode}
+              onChange={(v) => setPlatformViewMode(v as 'table' | 'chart')}
+              options={[
+                { value: 'table', label: t('finance.chart.platformTableTab') },
+                { value: 'chart', label: t('finance.chart.platformChartTab') },
+              ]}
+            />
           </div>
+
+          {(() => {
+            const platformRows = platforms
+              .map((plat) => {
+                const rows = state.financeEntries.filter(
+                  (e) =>
+                    !e.isProjection &&
+                    (!excludeTestData || !e.isTest) &&
+                    localizeFinanceEntry(e, lang).platform === plat &&
+                    (globalBrandFilter === 'all' || e.brandId === globalBrandFilter)
+                );
+                const sumStage = (st: CommissionStage) =>
+                  rows
+                    .filter(
+                      (r) =>
+                        (r.type === 'Commission' || r.type === 'DirectRevenue') &&
+                        r.stage === st
+                    )
+                    .reduce((acc, r) => acc + convertCurrency(r.amount, r.currency, currency), 0);
+
+                const pend = sumStage('Pending');
+                const conf = sumStage('Confirmed');
+                const rec = sumStage('Received');
+                return { plat, pend, conf, rec, confirmedTotal: conf + rec };
+              })
+              .filter((r) => r.pend + r.conf + r.rec > 0);
+
+            if (platformViewMode === 'chart') {
+              return (
+                <InteractiveComparisonChart
+                  selectedId={selectedPlatformId}
+                  onSelect={(item) => setSelectedPlatformId(item?.id ?? null)}
+                  items={[...platformRows]
+                    .sort((a, b) => b.confirmedTotal - a.confirmedTotal)
+                    .map((r) => ({
+                      id: r.plat,
+                      label: r.plat,
+                      sublabel: `${t('finance.col.received')}: ${fmtCurrency(r.rec, currency)} · ${t('finance.col.pending')}: ${fmtCurrency(r.pend, currency)}`,
+                      value: r.confirmedTotal,
+                      formattedValue: fmtCurrency(r.confirmedTotal, currency),
+                      color: '#315FEA',
+                    }))}
+                />
+              );
+            }
+
+            return (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-black/10 dark:border-white/10 text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                      <th className="py-2 pr-4">{t('finance.col.platform')}</th>
+                      <th className="py-2 pr-4 text-right">{t('finance.col.pending')}</th>
+                      <th className="py-2 pr-4 text-right">{t('finance.col.confirmed')}</th>
+                      <th className="py-2 text-right">{t('finance.col.received')}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-black/[0.06] dark:divide-white/[0.06]">
+                    {platformRows.map((r) => (
+                      <tr key={r.plat}>
+                        <td className="py-2.5 pr-4 font-medium">{r.plat}</td>
+                        <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-amber-700 dark:text-amber-400">
+                          {fmtCurrency(r.pend, currency)}
+                        </td>
+                        <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-[#315FEA] dark:text-[#7FA0FF]">
+                          {fmtCurrency(r.conf, currency)}
+                        </td>
+                        <td className="py-2.5 text-right font-mono tabular-nums text-emerald-700 dark:text-emerald-400 font-medium">
+                          {fmtCurrency(r.rec, currency)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
         </SurfacePanel>
 
         <SurfacePanel className="lg:col-span-5 space-y-4">

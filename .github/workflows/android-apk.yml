@@ -1,0 +1,108 @@
+name: Build Vyron Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: 'Tipo de APK (auto usa Release se os Secrets da keystore existirem; senão gera Debug)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - release
+          - debug
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+
+jobs:
+  build-android-apk:
+    name: Compilar APK Android (Vyron)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Configurar Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache do Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Instalar dependências web e gerar bundle de produção
+        run: |
+          npm ci
+          npm run build
+          npx cap sync android
+
+      - name: Preparar Gradle Wrapper
+        run: chmod +x android/gradlew
+
+      - name: Compilar APK Android
+        id: build_apk
+        working-directory: android
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          VYRON_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          VYRON_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          VYRON_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          REQUESTED_VARIANT: ${{ github.event.inputs.variant || 'auto' }}
+        run: |
+          mkdir -p ../apk-output
+
+          HAS_KEYSTORE="false"
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$VYRON_KEYSTORE_PASSWORD" ] && [ -n "$VYRON_KEY_ALIAS" ] && [ -n "$VYRON_KEY_PASSWORD" ]; then
+            HAS_KEYSTORE="true"
+          fi
+
+          if [ "$REQUESTED_VARIANT" = "release" ] && [ "$HAS_KEYSTORE" != "true" ]; then
+            echo "::error::Modo release selecionado, mas os Secrets ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS e ANDROID_KEY_PASSWORD não foram configurados."
+            exit 1
+          fi
+
+          if [ "$HAS_KEYSTORE" = "true" ] && [ "$REQUESTED_VARIANT" != "debug" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > app/vyron-release.jks
+            export VYRON_KEYSTORE_PATH="$(pwd)/app/vyron-release.jks"
+            ./gradlew assembleRelease --no-daemon
+            cp app/build/outputs/apk/release/app-release.apk ../apk-output/Vyron-release-signed.apk
+            rm -f app/vyron-release.jks
+            echo "apk_name=Vyron-release-signed.apk" >> "$GITHUB_OUTPUT"
+            echo "build_mode=release-signed" >> "$GITHUB_OUTPUT"
+          else
+            ./gradlew assembleDebug --no-daemon
+            cp app/build/outputs/apk/debug/app-debug.apk ../apk-output/Vyron-debug.apk
+            echo "apk_name=Vyron-debug.apk" >> "$GITHUB_OUTPUT"
+            echo "build_mode=debug" >> "$GITHUB_OUTPUT"
+            echo "::notice::APK Debug gerado. Para atualizações futuras com assinatura definitiva, configure os 4 Secrets de keystore no repositório."
+          fi
+
+      - name: Publicar APK para download (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vyron-android-apk-${{ steps.build_apk.outputs.build_mode }}
+          path: apk-output/*.apk
+          retention-days: 30

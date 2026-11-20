@@ -24,6 +24,11 @@ import {
   scoreProductV61,
 } from '../utils/vyronRules';
 import {
+  ProductChartMetric,
+  buildProductNativeCurrencyComparison,
+} from '../utils/chartSeries';
+import { InteractiveComparisonChart } from '../components/Charts';
+import {
   EmptyState,
   MetricBlock,
   ModalDialog,
@@ -50,6 +55,9 @@ export const ProductsView: React.FC = () => {
 
   const [statusFilter, setStatusFilter] = useState<'all' | ProductStatus>('all');
   const [viewMode, setViewMode] = useState<'by_currency' | 'catalog'>('by_currency');
+  const [chartCurrency, setChartCurrency] = useState<CurrencyCode>('BRL');
+  const [chartMetric, setChartMetric] = useState<ProductChartMetric>('opportunityScore');
+  const [selectedChartProductId, setSelectedChartProductId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
@@ -703,6 +711,132 @@ export const ProductsView: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Interactive Native-Currency Product Comparison */}
+      {(() => {
+        const chartRows = buildProductNativeCurrencyComparison(
+          visibleProducts,
+          chartCurrency,
+          chartMetric,
+          { excludeTest: excludeTestData, brandId: globalBrandFilter }
+        );
+        const selectedRow = selectedChartProductId
+          ? chartRows.find((r) => r.product.id === selectedChartProductId) ?? null
+          : null;
+        const selectedProd = selectedRow?.product ?? null;
+        const selectedProdContents = selectedProd
+          ? state.contents.filter((c) => c.productId === selectedProd.id).length
+          : 0;
+
+        return (
+          <SurfacePanel className="space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-sm font-semibold text-[#101216] dark:text-[#F1F2F3]">
+                  {t('products.chart.title')}
+                </h2>
+                <p className="text-xs text-[#525B68] dark:text-[#AEB7C2]">
+                  {t('products.chart.subtitle')}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <SegmentedControl
+                  ariaLabel={t('products.chart.currencyAria')}
+                  value={chartCurrency}
+                  onChange={(v) => {
+                    setChartCurrency(v as CurrencyCode);
+                    setSelectedChartProductId(null);
+                  }}
+                  options={[
+                    { value: 'BRL', label: 'BRL' },
+                    { value: 'USD', label: 'USD' },
+                    { value: 'EUR', label: 'EUR' },
+                  ]}
+                />
+                <SegmentedControl
+                  ariaLabel={t('products.chart.metricAria')}
+                  value={chartMetric}
+                  onChange={(v) => setChartMetric(v as ProductChartMetric)}
+                  options={[
+                    { value: 'opportunityScore', label: t('products.chart.metricScore') },
+                    { value: 'epcValue', label: t('products.chart.metricEpc') },
+                    { value: 'commissionRatePct', label: t('products.chart.metricCommission') },
+                    { value: 'demandTrendPct', label: t('products.chart.metricTrend') },
+                  ]}
+                />
+              </div>
+            </div>
+
+            <InteractiveComparisonChart
+              selectedId={selectedChartProductId}
+              onSelect={(item) => setSelectedChartProductId(item?.id ?? null)}
+              items={chartRows.map((row) => {
+                const p = row.product;
+                const brandName = state.brands.find((b) => b.id === p.brandId)?.name ?? p.brandId;
+                const formattedValue =
+                  row.value === null
+                    ? t('products.unknownNull')
+                    : chartMetric === 'opportunityScore'
+                    ? `${row.value}/100`
+                    : chartMetric === 'epcValue'
+                    ? fmtCurrency(row.value, p.currency)
+                    : chartMetric === 'commissionRatePct'
+                    ? `${fmtNumber(row.value, 1)}%`
+                    : `${row.value >= 0 ? '+' : ''}${fmtNumber(row.value, 1)}%`;
+
+                return {
+                  id: p.id,
+                  label: p.name,
+                  sublabel: `${brandName} · ${p.platform} · ${labelProductStatus(p.status, lang)}`,
+                  value: row.value,
+                  formattedValue,
+                  isMissing: row.missingData,
+                  badge: labelProductGradeBadge(p.qualityGrade, lang),
+                  color: row.missingData ? undefined : '#315FEA',
+                };
+              })}
+            />
+
+            {selectedProd && (
+              <div className="p-3.5 rounded-md bg-[#F1F2F3] dark:bg-[#101216] border border-black/10 dark:border-white/10 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="font-semibold text-[#101216] dark:text-[#F1F2F3]">
+                    {t('products.chart.drillTitle')}: {selectedProd.name}
+                  </div>
+                  <div className="font-mono tabular-nums text-[11px] text-[#525B68] dark:text-[#AEB7C2]">
+                    {selectedProd.price !== null
+                      ? fmtCurrency(selectedProd.price, selectedProd.currency)
+                      : t('products.unknownNull')}{' '}
+                    · EPC{' '}
+                    {selectedProd.epcValue !== null
+                      ? fmtCurrency(selectedProd.epcValue, selectedProd.currency)
+                      : t('products.unknownNull')}{' '}
+                    ·{' '}
+                    {selectedProd.cookieWindowDays !== null
+                      ? t('common.daysShort', { days: selectedProd.cookieWindowDays })
+                      : t('products.unknownNull')}{' '}
+                    · {t('products.chart.drillContents', { count: selectedProdContents })}
+                  </div>
+                  {(selectedProd.opportunityScore === null ||
+                    selectedProd.epcValue === null ||
+                    selectedProd.cookieWindowDays === null) && (
+                    <div className="text-[11px] text-amber-700 dark:text-amber-400">
+                      {t('products.chart.drillMissing')}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('products', { productId: selectedProd.id })}
+                  className="px-3.5 py-1.5 rounded bg-[#315FEA] text-white font-medium hover:bg-[#274FC9] whitespace-nowrap shrink-0"
+                >
+                  {t('products.chart.openDossier')}
+                </button>
+              </div>
+            )}
+          </SurfacePanel>
+        );
+      })()}
 
       {/* Product Side-by-Side Comparison Panel */}
       {comparedProducts.length >= 2 && (

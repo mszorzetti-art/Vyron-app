@@ -6,3 +6,14 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Android signing secrets & local Gradle build caches (never commit keystores/passwords)
+*.jks
+*.keystore
+android/keystore.properties
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/capacitor-cordova-android-plugins/build/
+

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="vyron_obsidian">#101216</color>
+    <color name="vyron_graphite">#292E36</color>
+    <color name="vyron_cobalt">#315FEA</color>
+    <color name="vyron_titanium">#AEB7C2</color>
+    <color name="vyron_cool_white">#F1F2F3</color>
+</resources>
