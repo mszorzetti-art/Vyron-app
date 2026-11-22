@@ -2190,6 +2190,17 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     );
   }
 
+  void toggleNotificationRead(String id) {
+    final prev = state.domain;
+    _commitDomain(
+      prev.copyWith(
+        notifications: prev.notifications
+            .map((n) => n.id == id ? n.copyWith(read: !n.read) : n)
+            .toList(),
+      ),
+    );
+  }
+
   void markAllNotificationsRead() {
     final prev = state.domain;
     _commitDomain(

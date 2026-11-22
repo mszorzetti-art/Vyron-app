@@ -15,6 +15,9 @@ extension ChartTimeRangePeriod on PeriodFilter {
       };
 }
 
+ChartTimeRange periodFilterToChartRange(PeriodFilter period) =>
+    period.asChartRange;
+
 enum SeriesAggregationMode { cumulative, daily }
 
 const String demoDataEarliestDate = '2026-10-28';

@@ -170,37 +170,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           title: t('products.title'),
           subtitle: t('products.subtitle'),
           actions: [
-            InkWell(
+            VyronToggleSwitch(
               key: const Key('products-test-toggle'),
-              onTap: () => notifier.setExcludeTestData(!excludeTestData),
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: palette.border),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: Checkbox(
-                        value: !excludeTestData,
-                        onChanged: (v) =>
-                            notifier.setExcludeTestData(!(v ?? false)),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      t('products.showTestData'),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
+              value: !excludeTestData,
+              compact: true,
+              label: t('products.showTestData'),
+              onChanged: (v) => notifier.setExcludeTestData(!v),
             ),
             ElevatedButton.icon(
               key: const Key('products-add-btn'),

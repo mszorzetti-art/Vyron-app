@@ -11,19 +11,20 @@ Aplicativo móvel nativo do **Vyron**, migrado integralmente da base React/TypeS
 - **App Name:** `Vyron` (`Vyron Preview` no flavor `preview`)
 - **Android Application ID:** `com.marcuszorzetti.vyron` (`com.marcuszorzetti.vyron.preview` no flavor `preview`)
 - **iOS Bundle ID base:** `com.marcuszorzetti.vyron` (`ITSAppUsesNonExemptEncryption = false`)
-- **Idiomas:** Português (`PT-BR`) e Inglês (`EN-US`) — paridade completa de 872 chaves.
+- **Idiomas:** Português (`PT-BR`) e Inglês (`EN-US`) — paridade completa de 881 chaves sincronizadas.
 - **Tema:** Dark-first (`Graphite #292E36`, `Obsidian Black #101216`, `Electric Cobalt #315FEA`, `Titanium #AEB7C2`, `Cool White #F1F2F3`) com suporte completo a Light Mode e tipografia local (`PlusJakartaSans`, `DMSans`, `JetBrainsMono`).
 
 ---
 
 ## Arquitetura em Camadas (`lib/`)
 
-- `lib/core/` — Tema, tokens, i18n (`pt_br.dart`, `en_us.dart`, `formatters.dart`, `domain_labels.dart`), segurança PBKDF2-SHA256 em `Isolate` + `flutter_secure_storage`, rotas (`GoRouter`) e componentes base (`VyronCard`, `VyronMetricBlock`, `VyronDataTable`, etc.).
+- `lib/core/` — Tema, tokens, i18n (`pt_br.dart`, `en_us.dart`, `formatters.dart`, `domain_labels.dart`), segurança PBKDF2-SHA256 em `Isolate` + `flutter_secure_storage`, rotas (`GoRouter`), skeletons estruturais (`vyron_skeleton.dart`) e componentes base (`VyronSurfacePanel`, `VyronMetricBlock`, `VyronToggleSwitch`, `VyronFeedbackBanner`, `VyronDataTable`, etc.).
 - `lib/domain/` — Modelos imutáveis (`Brand`, `Product`, `ContentItem`, `Channel`, `FinanceEntry`, `AutomationAgent`, `JobRun`, `ActivityLog`, `AppNotification`, `AppSettings`, `SystemControl`), engine de regras (Scoring V6.1, separação financeira, herança zero de hash SHA-256, `Stop All` fail-closed) e agregadores puros de séries gráficas.
 - `lib/data/` — Seed idempotente localizado e persistência atômica em armazenamento privado do aplicativo (`AtomicStateStorage` via `path_provider`).
 - `lib/application/` — `VyronStateNotifier` e `VyronAccessNotifier` (Riverpod).
-- `lib/presentation/` — Gate `Vyron Access`, `AdaptiveShell`, gráficos interativos em `CustomPainter` e todos os 11 módulos:
-  `Overview`, `Brands`, `Products`, `Content`, `Channels`, `Analytics`, `Finance`, `Automations`, `Activity`, `Notifications` e `Settings`.
+- `lib/presentation/` — Gate `Vyron Access`, `AdaptiveShell` com hidratação por skeleton, gráficos interativos em `CustomPainter` (curvas cúbicas monótonas Fritsch–Carlson e alternância **Linhas · Barras · Tabela**) e todos os 12 módulos/rotas (`Access`, `Overview`, `Brands`, `Products`, `Content/Calendar`, `Channels`, `Analytics`, `Finance`, `Automations`, `Activity`, `Notifications` e `Settings`).
+
+> **Fase 10 (Limpeza Estrutural & Redesign):** wrappers obsoletos de Capacitor 8 (`android/`, `capacitor.config.ts`, `.github/workflows/android-apk.yml`, `ANDROID_APK_GUIDE.md`) e scripts mortos (`boot_smoke_screen.dart`, `module_placeholder_view.dart`) foram removidos; o projeto Flutter nativo em `vyron_flutter/` é a base mobile principal e autônoma.
 
 ---
 

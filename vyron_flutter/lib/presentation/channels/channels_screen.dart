@@ -239,7 +239,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     BuildContext context, {
     required List<Channel> visibleChannels,
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required bool isDark,
     required String Function(String, [Map<String, String>?]) t,
     required void Function(String id) onSync,
@@ -681,7 +681,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     required List<ChannelComparisonItem> chartRows,
     required Channel? selectedChannel,
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required String Function(String, [Map<String, String>?]) t,
   }) {
     final items = chartRows.map((row) {
@@ -797,7 +797,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     );
   }
 
-  TextStyle _thStyle(VyronPalette palette) => TextStyle(
+  TextStyle _thStyle(VyronPaletteExtension palette) => TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w600,
         color: palette.textMuted,

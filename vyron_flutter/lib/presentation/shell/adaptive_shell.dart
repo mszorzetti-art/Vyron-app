@@ -7,6 +7,7 @@ import '../../core/i18n/translate.dart';
 import '../../core/security/vyron_access_rules.dart';
 import '../../core/theme/vyron_colors.dart';
 import '../../core/widgets/vyron_mark.dart';
+import '../../core/widgets/vyron_skeleton.dart';
 import '../../domain/models/brand_product_models.dart';
 import '../../domain/models/operations_settings_models.dart';
 import '../../domain/models/vyron_enums.dart';
@@ -361,7 +362,9 @@ class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
                       alignment: Alignment.topCenter,
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1440),
-                        child: widget.child,
+                        child: appState.isHydrated
+                            ? widget.child
+                            : const VyronModuleSkeleton(),
                       ),
                     ),
                   ),

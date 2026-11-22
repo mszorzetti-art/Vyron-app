@@ -270,56 +270,14 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
 
         if (_runnerNotice != null && _runnerNotice!.isNotEmpty) ...[
           const SizedBox(height: 14),
-          Container(
+          VyronFeedbackBanner(
             key: const Key('automations-runner-notice'),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: _runnerNoticeError
-                  ? VyronColors.crimson.withValues(alpha: 0.12)
-                  : VyronColors.emerald.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: _runnerNoticeError
-                    ? VyronColors.crimson.withValues(alpha: 0.4)
-                    : VyronColors.emerald.withValues(alpha: 0.35),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _runnerNoticeError
-                      ? Icons.error_outline_rounded
-                      : Icons.check_circle_outline_rounded,
-                  size: 16,
-                  color: _runnerNoticeError
-                      ? (isDark
-                          ? VyronColors.crimsonDarkText
-                          : VyronColors.crimsonLightText)
-                      : (isDark
-                          ? VyronColors.emeraldDarkText
-                          : VyronColors.emeraldLightText),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _runnerNotice!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: _runnerNoticeError
-                              ? (isDark
-                                  ? VyronColors.crimsonDarkText
-                                  : VyronColors.crimsonLightText)
-                              : (isDark
-                                  ? VyronColors.emeraldDarkText
-                                  : VyronColors.emeraldLightText),
-                        ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => setState(() => _runnerNotice = null),
-                  child: Text(translate(lang, 'common.close')),
-                ),
-              ],
-            ),
+            message: _runnerNotice!,
+            tone: _runnerNoticeError
+                ? VyronMetricTone.crimson
+                : VyronMetricTone.emerald,
+            dismissLabel: translate(lang, 'common.close'),
+            onDismiss: () => setState(() => _runnerNotice = null),
           ),
         ],
         const SizedBox(height: 16),
@@ -468,18 +426,20 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                 alignment: WrapAlignment.spaceBetween,
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
-                                  OutlinedButton(
-                                    onPressed: isHalted
-                                        ? null
-                                        : () => notifier.toggleAgentRun(agent.id),
-                                    child: Text(
-                                      translate(
-                                        lang,
-                                        agent.state == AgentRunState.running
-                                            ? 'automations.card.pause'
-                                            : 'automations.card.runDemo',
-                                      ),
+                                  VyronToggleSwitch(
+                                    key: Key('agent-toggle-${agent.id}'),
+                                    value: agent.state == AgentRunState.running,
+                                    compact: true,
+                                    enabled: !isHalted,
+                                    label: translate(
+                                      lang,
+                                      agent.state == AgentRunState.running
+                                          ? 'automations.card.pause'
+                                          : 'automations.card.runDemo',
                                     ),
+                                    onChanged: isHalted
+                                        ? null
+                                        : (_) => notifier.toggleAgentRun(agent.id),
                                   ),
                                   TextButton(
                                     key: Key('agent-detail-${agent.id}'),
@@ -1576,44 +1536,24 @@ class _AutomationDetailViewState extends ConsumerState<_AutomationDetailView> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 12),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: palette.surfaceAlt.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: palette.panelBorder),
+                  VyronToggleSwitch(
+                    key: const Key('automation-require-approval-toggle'),
+                    value: agent.limits.requireHumanApproval,
+                    label: translate(
+                      lang,
+                      'automations.detail.requireApproval',
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            translate(
-                              lang,
-                              'automations.detail.requireApproval',
-                            ),
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
+                    onChanged: (v) {
+                      notifier.updateAgentLimits(
+                        agent.id,
+                        AgentPolicyLimits(
+                          requireHumanApproval: v,
+                          maxActionsPerDay: agent.limits.maxActionsPerDay,
+                          maxDailySpendBRL: agent.limits.maxDailySpendBRL,
+                          allowedModules: agent.limits.allowedModules,
                         ),
-                        Switch(
-                          value: agent.limits.requireHumanApproval,
-                          onChanged: (v) {
-                            notifier.updateAgentLimits(
-                              agent.id,
-                              AgentPolicyLimits(
-                                requireHumanApproval: v,
-                                maxActionsPerDay:
-                                    agent.limits.maxActionsPerDay,
-                                maxDailySpendBRL:
-                                    agent.limits.maxDailySpendBRL,
-                                allowedModules: agent.limits.allowedModules,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 12),
                   Row(

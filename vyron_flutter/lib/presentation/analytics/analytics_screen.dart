@@ -138,7 +138,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final efficiency = computeOperationalEfficiency(
       finance,
       domain.contents,
-      globalBrandFilter,
+      brandId: globalBrandFilter,
     );
 
     final totalTraffic =
@@ -329,25 +329,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
         if (_exportNotice.isNotEmpty) ...[
           const SizedBox(height: 12),
-          Container(
+          VyronFeedbackBanner(
             key: const Key('analytics-export-notice'),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: VyronColors.emerald.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: VyronColors.emerald.withValues(alpha: 0.35),
-              ),
-            ),
-            child: Text(
-              _exportNotice,
-              style: TextStyle(
-                fontSize: 12,
-                color: isDark
-                    ? VyronColors.emeraldDarkText
-                    : VyronColors.emeraldLightText,
-              ),
-            ),
+            message: _exportNotice,
+            tone: VyronMetricTone.emerald,
+            onDismiss: () => setState(() => _exportNotice = ''),
           ),
         ],
         const SizedBox(height: 16),
@@ -772,7 +758,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     BuildContext context, {
     required UiLanguage lang,
     required CurrencyCode currency,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required String Function(String, [Map<String, String>?]) t,
     required List<Channel> filteredChannels,
     required String effectiveChannelFilter,
@@ -1046,7 +1032,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   Widget _buildChannelComparisonPanel(
     BuildContext context, {
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required bool isDark,
     required String Function(String, [Map<String, String>?]) t,
     required List<ChannelComparisonItem> rows,
@@ -1143,7 +1129,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     required List<ContentItem> filteredContents,
     required CurrencyCode currency,
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required bool isDark,
     required String Function(String, [Map<String, String>?]) t,
   }) {
@@ -1476,7 +1462,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     );
   }
 
-  TextStyle _thStyle(VyronPalette palette) => TextStyle(
+  TextStyle _thStyle(VyronPaletteExtension palette) => TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w600,
         color: palette.textMuted,

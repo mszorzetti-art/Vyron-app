@@ -29,6 +29,7 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   _NotificationFilter _filter = _NotificationFilter.all;
+  bool _unreadOnlyToggle = false;
 
   VyronMetricTone _badgeTone(NotificationType type) {
     switch (type) {
@@ -85,6 +86,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         .toList();
 
     final items = localizedItems.where((n) {
+      if (_unreadOnlyToggle && n.read) return false;
       switch (_filter) {
         case _NotificationFilter.all:
           return true;
@@ -106,6 +108,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           title: translate(lang, 'notifications.title'),
           subtitle: translate(lang, 'notifications.subtitle'),
           actions: [
+            VyronToggleSwitch(
+              key: const Key('notifications-unread-toggle'),
+              value: _unreadOnlyToggle,
+              label: translate(lang, 'notifications.unreadToggle'),
+              compact: true,
+              onChanged: (v) => setState(() => _unreadOnlyToggle = v),
+            ),
             OutlinedButton.icon(
               key: const Key('notifications-simulate-btn'),
               onPressed: notifier.simulateNotification,
@@ -159,11 +168,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               value: _filter,
               onChanged: (v) => setState(() => _filter = v),
             ),
-            TextButton(
+            TextButton.icon(
               key: const Key('notifications-prefs-link'),
               onPressed: () =>
                   navigateToVyronModule(ref, NavModule.settings),
-              child: Text(translate(lang, 'notifications.prefsLink')),
+              icon: const Icon(Icons.tune_rounded, size: 15),
+              label: Text(translate(lang, 'notifications.prefsLink')),
             ),
           ],
         ),
@@ -190,28 +200,49 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        crossAxisAlignment: WrapCrossAlignment.center,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          VyronToneBadge(
-                            label: labelNotificationType(item.type, lang),
-                            tone: _badgeTone(item.type),
+                          Expanded(
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                VyronToneBadge(
+                                  label: labelNotificationType(item.type, lang),
+                                  tone: _badgeTone(item.type),
+                                ),
+                                if (!item.read)
+                                  VyronToneBadge(
+                                    label: translate(
+                                      lang,
+                                      'notifications.unreadBadge',
+                                    ),
+                                    tone: VyronMetricTone.cobalt,
+                                  ),
+                                Text(
+                                  formatDateTimeForLang(item.timestamp, lang),
+                                  style: TextStyle(
+                                    fontFamily: VyronTypography.mono,
+                                    fontSize: 11,
+                                    color: palette.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          if (!item.read)
-                            VyronToneBadge(
-                              label:
-                                  translate(lang, 'notifications.unreadBadge'),
-                              tone: VyronMetricTone.cobalt,
+                          const SizedBox(width: 10),
+                          VyronToggleSwitch(
+                            key: Key('notif-read-toggle-${item.id}'),
+                            value: item.read,
+                            compact: true,
+                            label: translate(
+                              lang,
+                              'notifications.readSwitchLabel',
                             ),
-                          Text(
-                            formatDateTimeForLang(item.timestamp, lang),
-                            style: TextStyle(
-                              fontFamily: VyronTypography.mono,
-                              fontSize: 11,
-                              color: palette.textMuted,
-                            ),
+                            onChanged: (_) =>
+                                notifier.toggleNotificationRead(item.id),
                           ),
                         ],
                       ),
@@ -236,15 +267,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          if (!item.read)
-                            OutlinedButton(
-                              key: Key('notif-mark-read-${item.id}'),
-                              onPressed: () =>
-                                  notifier.markNotificationRead(item.id),
-                              child: Text(
-                                translate(lang, 'notifications.markRead'),
-                              ),
-                            ),
                           ElevatedButton.icon(
                             key: Key('notif-open-${item.id}'),
                             onPressed: () => _openNotificationTarget(item),

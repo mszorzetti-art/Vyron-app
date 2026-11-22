@@ -332,7 +332,105 @@ void main() {
         await tester.tap(find.byKey(const Key('vyron-bar-item-prod-1')));
         await tester.pumpAndSettle();
         expect(selectedBarId, isNull);
+
+        // Alterna modo comparação: Barras -> Tabela -> Barras
+        await tester.tap(find.byKey(const Key('vyron-comparison-mode-table')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('vyron-comparison-table')), findsOneWidget);
+        expect(find.text('Keychron Q1 Pro'), findsOneWidget);
+        expect(find.text('Não disponível'), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('vyron-comparison-mode-bar')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('vyron-bar-item-prod-1')), findsOneWidget);
+      },
+    );
+  });
+
+  group('Fase 10 — Curvas monótonas Fritsch-Carlson e alternância Linhas / Barras / Tabela', () {
+    test('computeMonotoneCubicSegments passa pelos pontos exatos e evita overshoot em platôs e vales', () {
+      const points = [
+        Offset(0, 100),
+        Offset(50, 20),
+        Offset(100, 20),
+        Offset(150, 120),
+      ];
+      final segments = computeMonotoneCubicSegments(points);
+      expect(segments.length, 3);
+
+      // Pontos exatos de início e fim preservados
+      expect(segments.first.p0, const Offset(0, 100));
+      expect(segments.last.p1, const Offset(150, 120));
+
+      // Platô [20 -> 20] mantém controle plano sem ultrapassar abaixo de 20
+      final plateau = segments[1];
+      expect(plateau.cp1.dy, 20.0);
+      expect(plateau.cp2.dy, 20.0);
+
+      // Caso limite com 2 pontos gera 1 segmento cúbico linearmente alinhado
+      final twoPts = computeMonotoneCubicSegments(const [
+        Offset(0, 10),
+        Offset(60, 40),
+      ]);
+      expect(twoPts.length, 1);
+      expect(twoPts.single.p0, const Offset(0, 10));
+      expect(twoPts.single.p1, const Offset(60, 40));
+    });
+
+    testWidgets(
+      'VyronInteractiveTimeSeriesChart alterna Linhas -> Barras -> Tabela -> Barras sem distorcer dados',
+      (tester) async {
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: VyronTheme.dark(),
+            home: Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.all(20),
+                child: VyronInteractiveTimeSeriesChart(
+                  language: UiLanguage.ptBR,
+                  points: _samplePoints(),
+                  series: _sampleSeries(),
+                  formatValue: (v) => formatCurrencyForLang(
+                    v,
+                    CurrencyCode.brl,
+                    UiLanguage.ptBR,
+                  ),
+                  semanticLabel: 'Série temporal Fase 10',
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('vyron-chart-mode-line')), findsOneWidget);
+        expect(find.byKey(const Key('vyron-chart-mode-bar')), findsOneWidget);
+        expect(find.byKey(const Key('vyron-chart-table-toggle')), findsOneWidget);
+
+        // Alterna para Gráfico de Barras agrupadas
+        await tester.tap(find.byKey(const Key('vyron-chart-mode-bar')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('vyron-chart-canvas')), findsOneWidget);
+
+        // Alterna para Tabela de dados e volta ao modo anterior (Barras)
+        await tester.tap(find.byKey(const Key('vyron-chart-table-toggle')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('vyron-chart-data-table')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('vyron-chart-table-toggle')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('vyron-chart-canvas')), findsOneWidget);
+
+        // Alterna de volta para Linhas suavizadas
+        await tester.tap(find.byKey(const Key('vyron-chart-mode-line')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('vyron-chart-canvas')), findsOneWidget);
       },
     );
   });
 }
+

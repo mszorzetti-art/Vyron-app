@@ -280,40 +280,12 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
           title: translate(lang, 'finance.title'),
           subtitle: translate(lang, 'finance.subtitle'),
           actions: [
-            InkWell(
+            VyronToggleSwitch(
               key: const Key('finance-include-test-toggle'),
-              onTap: () => notifier.setExcludeTestData(!excludeTest),
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: palette.surface,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: palette.border),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: Checkbox(
-                        value: !excludeTest,
-                        onChanged: (v) =>
-                            notifier.setExcludeTestData(!(v ?? false)),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      translate(lang, 'finance.includeTest'),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: palette.textMuted,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
+              value: !excludeTest,
+              compact: true,
+              label: translate(lang, 'finance.includeTest'),
+              onChanged: (v) => notifier.setExcludeTestData(!v),
             ),
             VyronSegmentedControl<CurrencyCode>(
               options: const [
@@ -638,6 +610,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                   if (_platformView == 'chart')
                     VyronInteractiveComparisonChart(
                       language: lang,
+                      allowTableToggle: false,
                       items: [
                         for (final p in platformBreakdown)
                           VyronComparisonBarItem(

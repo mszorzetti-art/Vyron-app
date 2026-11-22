@@ -249,3 +249,102 @@ String? computePointDeltaText({
   final sign = diff > 0 ? '+' : (diff < 0 ? '-' : '');
   return '$sign${fmt(diff.abs())}$pctStr';
 }
+
+enum VyronChartDisplayMode {
+  line,
+  bar,
+  table,
+}
+
+@immutable
+class MonotoneCubicSegment {
+  const MonotoneCubicSegment({
+    required this.p0,
+    required this.cp1,
+    required this.cp2,
+    required this.p1,
+  });
+
+  final Offset p0;
+  final Offset cp1;
+  final Offset cp2;
+  final Offset p1;
+}
+
+/// Computes Fritsch-Carlson monotone cubic Hermite segments for ordered points.
+/// Passes exactly through every data coordinate and prevents spline overshoot
+/// above peaks or below flat segments/zero baselines.
+List<MonotoneCubicSegment> computeMonotoneCubicSegments(List<Offset> points) {
+  final n = points.length;
+  if (n < 2) return const [];
+  if (n == 2) {
+    final p0 = points[0];
+    final p1 = points[1];
+    final dx = (p1.dx - p0.dx) / 3.0;
+    return [
+      MonotoneCubicSegment(
+        p0: p0,
+        cp1: Offset(p0.dx + dx, p0.dy + (p1.dy - p0.dy) / 3.0),
+        cp2: Offset(p1.dx - dx, p1.dy - (p1.dy - p0.dy) / 3.0),
+        p1: p1,
+      ),
+    ];
+  }
+
+  final dxs = List<double>.filled(n - 1, 0.0);
+  final slopes = List<double>.filled(n - 1, 0.0);
+  for (var i = 0; i < n - 1; i++) {
+    final dx = points[i + 1].dx - points[i].dx;
+    dxs[i] = dx;
+    slopes[i] = dx.abs() < 1e-6 ? 0.0 : (points[i + 1].dy - points[i].dy) / dx;
+  }
+
+  final tangents = List<double>.filled(n, 0.0);
+  tangents[0] = slopes[0];
+  tangents[n - 1] = slopes[n - 2];
+
+  for (var i = 1; i < n - 1; i++) {
+    final prev = slopes[i - 1];
+    final next = slopes[i];
+    if (prev == 0.0 || next == 0.0 || (prev > 0) != (next > 0)) {
+      tangents[i] = 0.0;
+    } else {
+      tangents[i] = (prev + next) * 0.5;
+    }
+  }
+
+  // Enforce monotonicity constraint (alpha^2 + beta^2 <= 9)
+  for (var i = 0; i < n - 1; i++) {
+    final d = slopes[i];
+    if (d.abs() < 1e-9) {
+      tangents[i] = 0.0;
+      tangents[i + 1] = 0.0;
+      continue;
+    }
+    final alpha = tangents[i] / d;
+    final beta = tangents[i + 1] / d;
+    final magSq = alpha * alpha + beta * beta;
+    if (magSq > 9.0) {
+      final tau = 3.0 / math.sqrt(magSq);
+      tangents[i] = tau * alpha * d;
+      tangents[i + 1] = tau * beta * d;
+    }
+  }
+
+  final segments = <MonotoneCubicSegment>[];
+  for (var i = 0; i < n - 1; i++) {
+    final p0 = points[i];
+    final p1 = points[i + 1];
+    final h = dxs[i] / 3.0;
+    segments.add(
+      MonotoneCubicSegment(
+        p0: p0,
+        cp1: Offset(p0.dx + h, p0.dy + tangents[i] * h),
+        cp2: Offset(p1.dx - h, p1.dy - tangents[i + 1] * h),
+        p1: p1,
+      ),
+    );
+  }
+  return segments;
+}
+

@@ -307,7 +307,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
     BuildContext context, {
     required List<ContentItem> visibleContents,
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required String Function(String, [Map<String, String>?]) t,
   }) {
     final domain = ref.read(vyronStateProvider).domain;
@@ -747,7 +747,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
     required LocalizedContentDisplay? localizedActive,
     required PreSendEvaluation? preSendEval,
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required String Function(String, [Map<String, String>?]) t,
   }) {
     final queuePanel = _buildQueuePanel(
@@ -801,7 +801,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
     required List<ContentItem> visibleContents,
     required ContentItem? activeContent,
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required String Function(String, [Map<String, String>?]) t,
   }) {
     final domain = appState.domain;
@@ -990,7 +990,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
     required LocalizedContentDisplay? localizedActive,
     required PreSendEvaluation? preSendEval,
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required String Function(String, [Map<String, String>?]) t,
   }) {
     if (activeContent == null ||
@@ -1942,7 +1942,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
     required ContentItem item,
     required LocalizedContentDisplay localizedActive,
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required String Function(String, [Map<String, String>?]) t,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -2097,7 +2097,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
     BuildContext context, {
     required LocalizedContentDisplay localizedActive,
     required UiLanguage lang,
-    required VyronPalette palette,
+    required VyronPaletteExtension palette,
     required String Function(String, [Map<String, String>?]) t,
   }) {
     final versions = localizedActive.versions;

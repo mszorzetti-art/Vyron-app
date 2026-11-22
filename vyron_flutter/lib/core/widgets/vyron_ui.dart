@@ -158,6 +158,7 @@ class VyronMetricBlock extends StatelessWidget {
     required this.label,
     required this.value,
     this.helper,
+    this.badge,
     this.tone = VyronMetricTone.neutral,
     this.onTap,
   });
@@ -165,6 +166,7 @@ class VyronMetricBlock extends StatelessWidget {
   final String label;
   final String value;
   final String? helper;
+  final String? badge;
   final VyronMetricTone tone;
   final VoidCallback? onTap;
 
@@ -185,48 +187,78 @@ class VyronMetricBlock extends StatelessWidget {
         isDark ? VyronColors.crimsonDarkText : VyronColors.crimsonLightText,
     };
 
-    final body = Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: VyronTypography.sans,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: palette.textMuted,
-              height: 1.35,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontFamily: VyronTypography.mono,
-              fontSize: 21,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.4,
-              color: valueColor,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          if (helper != null && helper!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              helper!,
-              style: TextStyle(
-                fontFamily: VyronTypography.sans,
-                fontSize: 12,
-                color: palette.textMuted,
-                height: 1.35,
+    final accentBarColor = switch (tone) {
+      VyronMetricTone.neutral => palette.panelBorder,
+      VyronMetricTone.cobalt => VyronColors.electricCobalt.withValues(alpha: 0.7),
+      VyronMetricTone.emerald => VyronColors.emerald.withValues(alpha: 0.7),
+      VyronMetricTone.amber => VyronColors.amber.withValues(alpha: 0.7),
+      VyronMetricTone.crimson => VyronColors.crimson.withValues(alpha: 0.7),
+    };
+
+    final body = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(height: 2, color: accentBarColor),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontFamily: VyronTypography.sans,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: palette.textMuted,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                  if (badge != null && badge!.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    VyronToneBadge(
+                      label: badge!,
+                      tone: tone,
+                      monospace: true,
+                    ),
+                  ],
+                ],
               ),
-            ),
-          ],
-        ],
-      ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: TextStyle(
+                  fontFamily: VyronTypography.mono,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.4,
+                  color: valueColor,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              if (helper != null && helper!.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  helper!,
+                  style: TextStyle(
+                    fontFamily: VyronTypography.sans,
+                    fontSize: 12,
+                    color: palette.textMuted,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
 
     return Material(
@@ -802,6 +834,246 @@ class VyronDropdownField<T> extends StatelessWidget {
           items: items,
           onChanged: onChanged,
         ),
+      ),
+    );
+  }
+}
+
+/// Toggle ON/OFF semântico e auditável alinhado à estética Graphite & Cobalt.
+class VyronToggleSwitch extends StatelessWidget {
+  const VyronToggleSwitch({
+    super.key,
+    required this.value,
+    required this.label,
+    this.subtitle,
+    required this.onChanged,
+    this.enabled = true,
+    this.compact = false,
+  });
+
+  final bool value;
+  final String label;
+  final String? subtitle;
+  final ValueChanged<bool>? onChanged;
+  final bool enabled;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.vyronColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isInteractive = enabled && onChanged != null;
+
+    final trackBg = value
+        ? (isInteractive
+            ? VyronColors.electricCobalt
+            : VyronColors.electricCobalt.withValues(alpha: 0.45))
+        : (isDark
+            ? VyronColors.obsidianBlack
+            : VyronColors.lightSurfaceAlt);
+    final trackBorder = value
+        ? VyronColors.electricCobalt.withValues(alpha: isInteractive ? 0.9 : 0.4)
+        : palette.border;
+
+    final thumbColor = value
+        ? Colors.white
+        : (isInteractive ? palette.textMuted : palette.textMuted.withValues(alpha: 0.5));
+
+    final switchTrack = AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      curve: Curves.easeOutCubic,
+      width: 38,
+      height: 22,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: trackBg,
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(color: trackBorder),
+      ),
+      child: AnimatedAlign(
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutCubic,
+        alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: thumbColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ),
+    );
+
+    final inner = compact
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              switchTrack,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: isInteractive
+                            ? palette.textPrimary
+                            : palette.textMuted,
+                        fontWeight: value ? FontWeight.w600 : FontWeight.w500,
+                      ),
+                ),
+              ),
+            ],
+          )
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontSize: 13,
+                            color: isInteractive
+                                ? palette.textPrimary
+                                : palette.textMuted,
+                          ),
+                    ),
+                    if (subtitle != null && subtitle!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: palette.textMuted,
+                              fontSize: 11,
+                            ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              if (!isInteractive) ...[
+                Icon(
+                  Icons.lock_outline_rounded,
+                  size: 14,
+                  color: palette.textMuted,
+                ),
+                const SizedBox(width: 6),
+              ],
+              switchTrack,
+            ],
+          );
+
+    return Semantics(
+      toggled: value,
+      enabled: isInteractive,
+      label: label,
+      child: Opacity(
+        opacity: isInteractive ? 1.0 : 0.62,
+        child: InkWell(
+          onTap: isInteractive ? () => onChanged!(!value) : null,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 10 : 12,
+              vertical: compact ? 7 : 10,
+            ),
+            decoration: BoxDecoration(
+              color: value && compact
+                  ? VyronColors.electricCobalt.withValues(alpha: 0.08)
+                  : (compact
+                      ? palette.surface
+                      : palette.surfaceAlt.withValues(alpha: 0.22)),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: value && compact
+                    ? VyronColors.electricCobalt.withValues(alpha: 0.45)
+                    : palette.panelBorder,
+              ),
+            ),
+            child: inner,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Banner unificado de feedback operacional (sucesso, aviso ou erro).
+class VyronFeedbackBanner extends StatelessWidget {
+  const VyronFeedbackBanner({
+    super.key,
+    required this.message,
+    this.tone = VyronMetricTone.emerald,
+    this.onDismiss,
+    this.dismissLabel,
+  });
+
+  final String message;
+  final VyronMetricTone tone;
+  final VoidCallback? onDismiss;
+  final String? dismissLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.vyronColors;
+
+    final fg = switch (tone) {
+      VyronMetricTone.crimson =>
+        isDark ? VyronColors.crimsonDarkText : VyronColors.crimsonLightText,
+      VyronMetricTone.amber =>
+        isDark ? VyronColors.amberDarkText : VyronColors.amberLightText,
+      VyronMetricTone.cobalt => palette.cobaltText,
+      VyronMetricTone.emerald =>
+        isDark ? VyronColors.emeraldDarkText : VyronColors.emeraldLightText,
+      VyronMetricTone.neutral => palette.textPrimary,
+    };
+
+    final bg = switch (tone) {
+      VyronMetricTone.crimson => VyronColors.crimson.withValues(alpha: 0.12),
+      VyronMetricTone.amber => VyronColors.amber.withValues(alpha: 0.12),
+      VyronMetricTone.cobalt =>
+        VyronColors.electricCobalt.withValues(alpha: 0.12),
+      VyronMetricTone.emerald => VyronColors.emerald.withValues(alpha: 0.12),
+      VyronMetricTone.neutral => palette.surfaceAlt.withValues(alpha: 0.35),
+    };
+
+    final icon = switch (tone) {
+      VyronMetricTone.crimson => Icons.error_outline_rounded,
+      VyronMetricTone.amber => Icons.warning_amber_rounded,
+      VyronMetricTone.cobalt => Icons.info_outline_rounded,
+      VyronMetricTone.emerald => Icons.check_circle_outline_rounded,
+      VyronMetricTone.neutral => Icons.info_outline_rounded,
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: fg.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: fg),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: fg),
+            ),
+          ),
+          if (onDismiss != null)
+            TextButton(
+              onPressed: onDismiss,
+              child: Text(dismissLabel ?? 'OK'),
+            ),
+        ],
       ),
     );
   }

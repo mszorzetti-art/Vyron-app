@@ -13,6 +13,7 @@ class VyronInteractiveComparisonChart extends StatefulWidget {
     this.selectedId,
     this.onSelect,
     this.emptyMessage,
+    this.allowTableToggle = true,
   });
 
   final UiLanguage language;
@@ -20,6 +21,7 @@ class VyronInteractiveComparisonChart extends StatefulWidget {
   final String? selectedId;
   final ValueChanged<VyronComparisonBarItem?>? onSelect;
   final String? emptyMessage;
+  final bool allowTableToggle;
 
   @override
   State<VyronInteractiveComparisonChart> createState() =>
@@ -29,11 +31,13 @@ class VyronInteractiveComparisonChart extends StatefulWidget {
 class _VyronInteractiveComparisonChartState
     extends State<VyronInteractiveComparisonChart> {
   String? _hoverId;
+  bool _showTable = false;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.vyronColors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lang = widget.language;
     final items = widget.items;
 
     if (items.isEmpty) {
@@ -42,12 +46,11 @@ class _VyronInteractiveComparisonChartState
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: palette.panelBorder),
         ),
         child: Text(
-          widget.emptyMessage ??
-              translate(widget.language, 'charts.noComparisonBars'),
+          widget.emptyMessage ?? translate(lang, 'charts.noComparisonBars'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: palette.textMuted,
@@ -64,14 +67,66 @@ class _VyronInteractiveComparisonChartState
       }
     }
 
+    final trackBg = isDark ? VyronColors.obsidianBlack : palette.surfaceAlt;
+    final activeBg = isDark ? VyronColors.graphite : VyronColors.lightSurface;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        for (var idx = 0; idx < items.length; idx++) ...[
-          if (idx > 0) const SizedBox(height: 8),
-          _buildRow(items[idx], maxAbs, palette, isDark),
+        if (widget.allowTableToggle) ...[
+          Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: trackBg,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: palette.panelBorder),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _MiniModeBtn(
+                    key: const Key('vyron-comparison-mode-bar'),
+                    icon: Icons.bar_chart_rounded,
+                    label: translate(lang, 'charts.modeBar'),
+                    active: !_showTable,
+                    activeBg: activeBg,
+                    onTap: () => setState(() => _showTable = false),
+                  ),
+                  const SizedBox(width: 2),
+                  _MiniModeBtn(
+                    key: const Key('vyron-comparison-mode-table'),
+                    icon: Icons.table_chart_outlined,
+                    label: translate(lang, 'charts.modeTable'),
+                    active: _showTable,
+                    activeBg: activeBg,
+                    onTap: () => setState(() => _showTable = true),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
         ],
+        if (_showTable)
+          _ComparisonDataTable(
+            items: items,
+            selectedId: widget.selectedId,
+            onSelect: widget.onSelect,
+          )
+        else
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var idx = 0; idx < items.length; idx++) ...[
+                if (idx > 0) const SizedBox(height: 8),
+                _buildRow(items[idx], maxAbs, palette, isDark),
+              ],
+            ],
+          ),
       ],
     );
   }
@@ -172,7 +227,7 @@ class _VyronInteractiveComparisonChartState
                   ),
                 )
               : ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
+                  borderRadius: BorderRadius.circular(4),
                   child: Stack(
                     children: [
                       Positioned.fill(
@@ -195,8 +250,13 @@ class _VyronInteractiveComparisonChartState
                               : 0.65,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: barColor,
-                              borderRadius: BorderRadius.circular(3),
+                              gradient: LinearGradient(
+                                colors: [
+                                  barColor.withValues(alpha: 0.85),
+                                  barColor,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                           ),
                         ),
@@ -240,6 +300,150 @@ class _VyronInteractiveComparisonChartState
             child: rowContent,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MiniModeBtn extends StatelessWidget {
+  const _MiniModeBtn({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.activeBg,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool active;
+  final Color activeBg;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.vyronColors;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(5),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: active ? activeBg : Colors.transparent,
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 13,
+              color: active ? palette.cobaltText : palette.textMuted,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: VyronTypography.sans,
+                fontSize: 11,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                color: active ? palette.textPrimary : palette.textMuted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ComparisonDataTable extends StatelessWidget {
+  const _ComparisonDataTable({
+    required this.items,
+    required this.selectedId,
+    required this.onSelect,
+  });
+
+  final List<VyronComparisonBarItem> items;
+  final String? selectedId;
+  final ValueChanged<VyronComparisonBarItem?>? onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.vyronColors;
+    return Container(
+      key: const Key('vyron-comparison-table'),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: palette.panelBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) Divider(height: 1, color: palette.panelBorder),
+            InkWell(
+              onTap: onSelect == null
+                  ? null
+                  : () => onSelect!(
+                        selectedId == items[i].id ? null : items[i],
+                      ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 9,
+                ),
+                color: selectedId == items[i].id
+                    ? VyronColors.electricCobalt.withValues(alpha: 0.08)
+                    : Colors.transparent,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            items[i].label,
+                            style: TextStyle(
+                              fontFamily: VyronTypography.sans,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: palette.textPrimary,
+                            ),
+                          ),
+                          if (items[i].sublabel != null &&
+                              items[i].sublabel!.isNotEmpty)
+                            Text(
+                              items[i].sublabel!,
+                              style: TextStyle(
+                                fontFamily: VyronTypography.sans,
+                                fontSize: 10,
+                                color: palette.textMuted,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      items[i].formattedValue,
+                      style: TextStyle(
+                        fontFamily: VyronTypography.mono,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: palette.textPrimary,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
