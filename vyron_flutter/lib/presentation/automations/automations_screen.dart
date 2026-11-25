@@ -1,6 +1,8 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -15,10 +17,7 @@ import '../../domain/rules/vyron_rules.dart';
 import '../shell/system_control_modal.dart';
 
 class AutomationsScreen extends ConsumerStatefulWidget {
-  const AutomationsScreen({
-    super.key,
-    this.automationId,
-  });
+  const AutomationsScreen({super.key, this.automationId});
 
   final String? automationId;
 
@@ -53,7 +52,8 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
     final lang = domain.settings.uiLanguage;
     final palette = context.vyronColors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isHalted = domain.systemControl.state == SystemControlStatus.halted ||
+    final isHalted =
+        domain.systemControl.state == SystemControlStatus.halted ||
         domain.settings.emergencyStopActive;
 
     final effectiveId = widget.automationId ?? appState.selectedAutomationId;
@@ -92,8 +92,9 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
       );
     }
 
-    final localizedAgents =
-        domain.automations.map((a) => localizeAgent(a, lang)).toList();
+    final localizedAgents = domain.automations
+        .map((a) => localizeAgent(a, lang))
+        .toList();
     final filteredAgents = _catFilter == null
         ? localizedAgents
         : localizedAgents.where((a) => a.category == _catFilter).toList();
@@ -104,8 +105,10 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
               a.state == AgentRunState.running || a.state == AgentRunState.idle,
         )
         .length;
-    final pendingApprovals = domain.automations
-        .fold<int>(0, (acc, a) => acc + a.pendingApprovalCount);
+    final pendingApprovals = domain.automations.fold<int>(
+      0,
+      (acc, a) => acc + a.pendingApprovalCount,
+    );
     final blockingJobs = domain.jobRuns
         .where(
           (j) =>
@@ -113,8 +116,9 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
               j.status == JobRunStatus.unknown,
         )
         .toList();
-    final localizedJobRuns =
-        domain.jobRuns.map((j) => localizeJobRun(j, lang)).toList();
+    final localizedJobRuns = domain.jobRuns
+        .map((j) => localizeJobRun(j, lang))
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -139,12 +143,14 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                 backgroundColor: isHalted
                     ? VyronColors.electricCobalt
                     : (isDark
-                        ? VyronColors.crimson
-                        : VyronColors.crimsonLightButton),
+                          ? VyronColors.crimson
+                          : VyronColors.crimsonLightButton),
                 foregroundColor: Colors.white,
               ),
               icon: Icon(
-                isHalted ? Icons.play_arrow_rounded : Icons.stop_circle_outlined,
+                isHalted
+                    ? Icons.play_arrow_rounded
+                    : Icons.stop_circle_outlined,
                 size: 16,
               ),
               label: Text(
@@ -166,8 +172,8 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
             final cols = constraints.maxWidth >= 960
                 ? 4
                 : constraints.maxWidth >= 560
-                    ? 2
-                    : 1;
+                ? 2
+                : 1;
             const spacing = 12.0;
             final cardWidth =
                 (constraints.maxWidth - (cols - 1) * spacing) / cols;
@@ -175,8 +181,10 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
               VyronMetricBlock(
                 key: const Key('automations-kpi-controls'),
                 label: translate(lang, 'automations.kpi.controls'),
-                value:
-                    labelSystemControlState(domain.systemControl.state, lang),
+                value: labelSystemControlState(
+                  domain.systemControl.state,
+                  lang,
+                ),
                 helper: translate(lang, 'automations.kpi.actor', {
                   'actor': localizeActor(domain.systemControl.actor, lang),
                 }),
@@ -318,10 +326,7 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                       ),
                                       const SizedBox(height: 3),
                                       Text(
-                                        '${labelAgentCategory(agent.category, lang)} · ${translate(lang, 'automations.card.meta', {
-                                          'level': agent.autonomyLevel,
-                                          'max': agent.limits.maxActionsPerDay,
-                                        })}',
+                                        '${labelAgentCategory(agent.category, lang)} · ${translate(lang, 'automations.card.meta', {'level': agent.autonomyLevel, 'max': agent.limits.maxActionsPerDay})}',
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall
@@ -343,9 +348,7 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                             const SizedBox(height: 10),
                             Text(
                               agent.responsibility,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: palette.textMuted),
                             ),
                             if (agent.lastError != null &&
@@ -357,12 +360,14 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                   vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: VyronColors.crimson
-                                      .withValues(alpha: 0.12),
+                                  color: VyronColors.crimson.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(
-                                    color: VyronColors.crimson
-                                        .withValues(alpha: 0.35),
+                                    color: VyronColors.crimson.withValues(
+                                      alpha: 0.35,
+                                    ),
                                   ),
                                 ),
                                 child: Text(
@@ -371,9 +376,7 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                     'automations.card.errorPrefix',
                                     {'error': agent.lastError!},
                                   ),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: isDark
                                             ? VyronColors.crimsonDarkText
@@ -391,19 +394,19 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                   vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: VyronColors.amber
-                                      .withValues(alpha: 0.12),
+                                  color: VyronColors.amber.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(
-                                    color: VyronColors.amber
-                                        .withValues(alpha: 0.35),
+                                    color: VyronColors.amber.withValues(
+                                      alpha: 0.35,
+                                    ),
                                   ),
                                 ),
                                 child: Text(
                                   agent.pendingApprovalSummary!,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: isDark
                                             ? VyronColors.amberDarkText
@@ -439,7 +442,8 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                     ),
                                     onChanged: isHalted
                                         ? null
-                                        : (_) => notifier.toggleAgentRun(agent.id),
+                                        : (_) =>
+                                              notifier.toggleAgentRun(agent.id),
                                   ),
                                   TextButton(
                                     key: Key('agent-detail-${agent.id}'),
@@ -528,11 +532,11 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                         children: [
                           Text(
                             translate(lang, 'automations.jobs.reason'),
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: palette.textMuted,
-                                      fontSize: 11,
-                                    ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: palette.textMuted,
+                                  fontSize: 11,
+                                ),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -540,9 +544,7 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                               domain.systemControl.reason,
                               lang,
                             ),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: palette.textPrimary),
                           ),
                         ],
@@ -583,9 +585,7 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                     language: lang,
                                   ).reason ??
                                   '',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: palette.textPrimary),
                             ),
                             const SizedBox(height: 8),
@@ -636,8 +636,8 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                         backgroundColor: isHalted
                             ? VyronColors.electricCobalt
                             : (isDark
-                                ? VyronColors.crimson
-                                : VyronColors.crimsonLightButton),
+                                  ? VyronColors.crimson
+                                  : VyronColors.crimsonLightButton),
                         foregroundColor: Colors.white,
                       ),
                       child: Text(
@@ -825,7 +825,9 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                               margin: const EdgeInsets.only(bottom: 10),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: palette.surfaceAlt.withValues(alpha: 0.25),
+                                color: palette.surfaceAlt.withValues(
+                                  alpha: 0.25,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: palette.panelBorder),
                               ),
@@ -844,7 +846,10 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                             ?.copyWith(fontSize: 13),
                                       ),
                                       VyronStatusLabel(
-                                        status: labelJobStatus(job.status, lang),
+                                        status: labelJobStatus(
+                                          job.status,
+                                          lang,
+                                        ),
                                         statusKey: job.status.wire,
                                       ),
                                     ],
@@ -852,15 +857,15 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                   const SizedBox(height: 4),
                                   Text(
                                     '${labelJobMode(job.mode, lang)} · ${formatDateTimeForLang(job.startedAt, lang)} · ${job.recordsProcessed}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
+                                    style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(color: palette.textMuted),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
                                     job.summary,
-                                    style: Theme.of(context).textTheme.bodySmall,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall,
                                   ),
                                   if (job.error != null &&
                                       job.error!.isNotEmpty) ...[
@@ -886,9 +891,8 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
 
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints:
-                            BoxConstraints(minWidth: constraints.maxWidth - 4),
+                      child: SizedBox(
+                        width: math.max(constraints.maxWidth - 4, 780),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -896,8 +900,9 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom:
-                                      BorderSide(color: palette.panelBorder),
+                                  bottom: BorderSide(
+                                    color: palette.panelBorder,
+                                  ),
                                 ),
                               ),
                               child: Row(
@@ -994,13 +999,15 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                             ),
                             for (final job in localizedJobRuns)
                               Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(
-                                      color: palette.panelBorder
-                                          .withValues(alpha: 0.5),
+                                      color: palette.panelBorder.withValues(
+                                        alpha: 0.5,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1046,7 +1053,10 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                     Expanded(
                                       flex: 2,
                                       child: VyronStatusLabel(
-                                        status: labelJobStatus(job.status, lang),
+                                        status: labelJobStatus(
+                                          job.status,
+                                          lang,
+                                        ),
                                         statusKey: job.status.wire,
                                       ),
                                     ),
@@ -1104,9 +1114,9 @@ class _AutomationsScreenState extends ConsumerState<AutomationsScreen> {
                                                     fontSize: 11,
                                                     color: isDark
                                                         ? VyronColors
-                                                            .crimsonDarkText
+                                                              .crimsonDarkText
                                                         : VyronColors
-                                                            .crimsonLightText,
+                                                              .crimsonLightText,
                                                   ),
                                             ),
                                           ],
@@ -1148,21 +1158,28 @@ class _KeyValueLine extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall
-              ?.copyWith(color: palette.textMuted),
+        Flexible(
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: palette.textMuted),
+          ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontFamily:
-                monoValue ? VyronTypography.mono : VyronTypography.sans,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: palette.textPrimary,
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: monoValue
+                  ? VyronTypography.mono
+                  : VyronTypography.sans,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: palette.textPrimary,
+            ),
           ),
         ),
       ],
@@ -1192,8 +1209,8 @@ class _RunnerCommandTile extends StatelessWidget {
     final borderColor = dangerBorder
         ? VyronColors.crimson.withValues(alpha: 0.45)
         : amberBorder
-            ? VyronColors.amber.withValues(alpha: 0.45)
-            : palette.border;
+        ? VyronColors.amber.withValues(alpha: 0.45)
+        : palette.border;
 
     return InkWell(
       onTap: onTap,
@@ -1210,17 +1227,14 @@ class _RunnerCommandTile extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontSize: 13,
-                  ),
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontSize: 13),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: palette.textMuted,
-                    fontSize: 11,
-                  ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: palette.textMuted, fontSize: 11),
             ),
           ],
         ),
@@ -1470,17 +1484,13 @@ class _AutomationDetailViewState extends ConsumerState<_AutomationDetailView> {
                   const SizedBox(height: 10),
                   Text(
                     agent.responsibility,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
+                    style: Theme.of(context).textTheme.bodySmall
                         ?.copyWith(color: palette.textMuted),
                   ),
                   const SizedBox(height: 14),
                   Text(
                     translate(lang, 'automations.detail.dependencies'),
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
+                    style: Theme.of(context).textTheme.labelSmall
                         ?.copyWith(color: palette.textMuted),
                   ),
                   const SizedBox(height: 6),
@@ -1564,9 +1574,7 @@ class _AutomationDetailViewState extends ConsumerState<_AutomationDetailView> {
                           children: [
                             Text(
                               translate(lang, 'automations.detail.maxActions'),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     color: palette.textMuted,
                                     fontSize: 11,
@@ -1605,9 +1613,7 @@ class _AutomationDetailViewState extends ConsumerState<_AutomationDetailView> {
                           children: [
                             Text(
                               translate(lang, 'automations.detail.maxSpend'),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     color: palette.textMuted,
                                     fontSize: 11,
@@ -1619,8 +1625,8 @@ class _AutomationDetailViewState extends ConsumerState<_AutomationDetailView> {
                               controller: _maxSpendController,
                               keyboardType:
                                   const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
+                                    decimal: true,
+                                  ),
                               onChanged: (raw) {
                                 final val = double.tryParse(
                                   raw.trim().replaceAll(',', '.'),
@@ -1649,9 +1655,7 @@ class _AutomationDetailViewState extends ConsumerState<_AutomationDetailView> {
                   const SizedBox(height: 14),
                   Text(
                     translate(lang, 'automations.detail.allowedModules'),
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
+                    style: Theme.of(context).textTheme.labelSmall
                         ?.copyWith(color: palette.textMuted),
                   ),
                   const SizedBox(height: 6),
@@ -1678,11 +1682,7 @@ class _AutomationDetailViewState extends ConsumerState<_AutomationDetailView> {
               );
             }
             return Column(
-              children: [
-                flowCard,
-                const SizedBox(height: 14),
-                policyCard,
-              ],
+              children: [flowCard, const SizedBox(height: 14), policyCard],
             );
           },
         ),

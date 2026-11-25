@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -55,18 +56,21 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     navigateToVyronModule(
       ref,
       item.targetModule,
-      productId:
-          item.targetModule == NavModule.products ? item.targetId : null,
-      setProductId: item.targetModule == NavModule.products &&
+      productId: item.targetModule == NavModule.products ? item.targetId : null,
+      setProductId:
+          item.targetModule == NavModule.products &&
           item.targetId != null &&
           item.targetId!.isNotEmpty,
       contentId: item.targetModule == NavModule.content ? item.targetId : null,
-      setContentId: item.targetModule == NavModule.content &&
+      setContentId:
+          item.targetModule == NavModule.content &&
           item.targetId != null &&
           item.targetId!.isNotEmpty,
-      automationId:
-          item.targetModule == NavModule.automations ? item.targetId : null,
-      setAutomationId: item.targetModule == NavModule.automations &&
+      automationId: item.targetModule == NavModule.automations
+          ? item.targetId
+          : null,
+      setAutomationId:
+          item.targetModule == NavModule.automations &&
           item.targetId != null &&
           item.targetId!.isNotEmpty,
     );
@@ -123,8 +127,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             ),
             ElevatedButton.icon(
               key: const Key('notifications-mark-all-btn'),
-              onPressed:
-                  unreadCount == 0 ? null : notifier.markAllNotificationsRead,
+              onPressed: unreadCount == 0
+                  ? null
+                  : notifier.markAllNotificationsRead,
               icon: const Icon(Icons.done_all_rounded, size: 16),
               label: Text(translate(lang, 'notifications.markAllRead')),
             ),
@@ -170,8 +175,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             ),
             TextButton.icon(
               key: const Key('notifications-prefs-link'),
-              onPressed: () =>
-                  navigateToVyronModule(ref, NavModule.settings),
+              onPressed: () => navigateToVyronModule(ref, NavModule.settings),
               icon: const Icon(Icons.tune_rounded, size: 15),
               label: Text(translate(lang, 'notifications.prefsLink')),
             ),
@@ -249,17 +253,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       const SizedBox(height: 8),
                       Text(
                         item.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
+                        style: Theme.of(context).textTheme.titleSmall
                             ?.copyWith(fontSize: 14),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         item.message,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
+                        style: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(color: palette.textMuted),
                       ),
                       const SizedBox(height: 12),

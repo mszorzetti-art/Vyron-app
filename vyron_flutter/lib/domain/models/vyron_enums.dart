@@ -86,9 +86,9 @@ enum BrandArchetype {
   final String wire;
 
   static BrandArchetype fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => BrandArchetype.hibrida,
-      );
+    (e) => e.wire == v,
+    orElse: () => BrandArchetype.hibrida,
+  );
 }
 
 enum ValidationStage {
@@ -102,9 +102,9 @@ enum ValidationStage {
   final String wire;
 
   static ValidationStage fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => ValidationStage.exploracao,
-      );
+    (e) => e.wire == v,
+    orElse: () => ValidationStage.exploracao,
+  );
 }
 
 enum ProductStatus {
@@ -116,8 +116,10 @@ enum ProductStatus {
   const ProductStatus(this.wire);
   final String wire;
 
-  static ProductStatus fromWire(String? v) =>
-      values.firstWhere((e) => e.wire == v, orElse: () => ProductStatus.candidate);
+  static ProductStatus fromWire(String? v) => values.firstWhere(
+    (e) => e.wire == v,
+    orElse: () => ProductStatus.candidate,
+  );
 }
 
 enum ProductQualityGrade {
@@ -147,9 +149,9 @@ enum ComplianceState {
   final String wire;
 
   static ComplianceState fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => ComplianceState.pending,
-      );
+    (e) => e.wire == v,
+    orElse: () => ComplianceState.pending,
+  );
 }
 
 enum RemunerationModel {
@@ -162,9 +164,9 @@ enum RemunerationModel {
   final String wire;
 
   static RemunerationModel fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => RemunerationModel.revShare,
-      );
+    (e) => e.wire == v,
+    orElse: () => RemunerationModel.revShare,
+  );
 }
 
 enum DataConfidence {
@@ -189,9 +191,9 @@ enum CompetitionLevel {
   final String wire;
 
   static CompetitionLevel fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => CompetitionLevel.desconhecida,
-      );
+    (e) => e.wire == v,
+    orElse: () => CompetitionLevel.desconhecida,
+  );
 }
 
 enum ContentStatus {
@@ -217,8 +219,10 @@ enum ContentFormat {
   const ContentFormat(this.wire);
   final String wire;
 
-  static ContentFormat fromWire(String? v) =>
-      values.firstWhere((e) => e.wire == v, orElse: () => ContentFormat.longForm);
+  static ContentFormat fromWire(String? v) => values.firstWhere(
+    (e) => e.wire == v,
+    orElse: () => ContentFormat.longForm,
+  );
 }
 
 enum ContentCategory {
@@ -230,9 +234,9 @@ enum ContentCategory {
   final String wire;
 
   static ContentCategory fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => ContentCategory.descoberta,
-      );
+    (e) => e.wire == v,
+    orElse: () => ContentCategory.descoberta,
+  );
 }
 
 enum ContentVisibility {
@@ -244,9 +248,9 @@ enum ContentVisibility {
   final String wire;
 
   static ContentVisibility fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => ContentVisibility.unlisted,
-      );
+    (e) => e.wire == v,
+    orElse: () => ContentVisibility.unlisted,
+  );
 }
 
 enum AnalysisMethod {
@@ -258,9 +262,9 @@ enum AnalysisMethod {
   final String wire;
 
   static AnalysisMethod fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => AnalysisMethod.analiseDocumental,
-      );
+    (e) => e.wire == v,
+    orElse: () => AnalysisMethod.analiseDocumental,
+  );
 }
 
 enum SensitiveTopic {
@@ -274,8 +278,10 @@ enum SensitiveTopic {
   const SensitiveTopic(this.wire);
   final String wire;
 
-  static SensitiveTopic fromWire(String? v) =>
-      values.firstWhere((e) => e.wire == v, orElse: () => SensitiveTopic.nenhum);
+  static SensitiveTopic fromWire(String? v) => values.firstWhere(
+    (e) => e.wire == v,
+    orElse: () => SensitiveTopic.nenhum,
+  );
 }
 
 enum FeedbackCategory {
@@ -306,9 +312,9 @@ enum AuthorizationType {
   final String wire;
 
   static AuthorizationType fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => AuthorizationType.individual,
-      );
+    (e) => e.wire == v,
+    orElse: () => AuthorizationType.individual,
+  );
 }
 
 enum AttributionStatus {
@@ -320,9 +326,9 @@ enum AttributionStatus {
   final String wire;
 
   static AttributionStatus fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => AttributionStatus.estimativaEmInvestigacao,
-      );
+    (e) => e.wire == v,
+    orElse: () => AttributionStatus.estimativaEmInvestigacao,
+  );
 }
 
 enum ChannelPlatform {
@@ -336,9 +342,9 @@ enum ChannelPlatform {
   final String wire;
 
   static ChannelPlatform fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => ChannelPlatform.youtube,
-      );
+    (e) => e.wire == v,
+    orElse: () => ChannelPlatform.youtube,
+  );
 }
 
 enum ChannelIntegrationStatus {
@@ -350,9 +356,9 @@ enum ChannelIntegrationStatus {
   final String wire;
 
   static ChannelIntegrationStatus fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => ChannelIntegrationStatus.configuradoDemo,
-      );
+    (e) => e.wire == v,
+    orElse: () => ChannelIntegrationStatus.configuradoDemo,
+  );
 }
 
 enum CommissionStage {
@@ -364,9 +370,9 @@ enum CommissionStage {
   final String wire;
 
   static CommissionStage fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => CommissionStage.pending,
-      );
+    (e) => e.wire == v,
+    orElse: () => CommissionStage.pending,
+  );
 }
 
 enum FinanceEntryType {
@@ -379,9 +385,9 @@ enum FinanceEntryType {
   final String wire;
 
   static FinanceEntryType fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => FinanceEntryType.commission,
-      );
+    (e) => e.wire == v,
+    orElse: () => FinanceEntryType.commission,
+  );
 }
 
 enum AgentCategory {
@@ -396,9 +402,9 @@ enum AgentCategory {
   final String wire;
 
   static AgentCategory fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => AgentCategory.operations,
-      );
+    (e) => e.wire == v,
+    orElse: () => AgentCategory.operations,
+  );
 }
 
 enum AgentRunState {
@@ -425,9 +431,9 @@ enum AgentExecutionStatus {
   final String wire;
 
   static AgentExecutionStatus fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => AgentExecutionStatus.success,
-      );
+    (e) => e.wire == v,
+    orElse: () => AgentExecutionStatus.success,
+  );
 }
 
 enum JobTaskName {
@@ -439,8 +445,10 @@ enum JobTaskName {
   const JobTaskName(this.wire);
   final String wire;
 
-  static JobTaskName fromWire(String? v) =>
-      values.firstWhere((e) => e.wire == v, orElse: () => JobTaskName.pipelineRun);
+  static JobTaskName fromWire(String? v) => values.firstWhere(
+    (e) => e.wire == v,
+    orElse: () => JobTaskName.pipelineRun,
+  );
 }
 
 enum JobMode {
@@ -475,9 +483,9 @@ enum SystemControlStatus {
   final String wire;
 
   static SystemControlStatus fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => SystemControlStatus.active,
-      );
+    (e) => e.wire == v,
+    orElse: () => SystemControlStatus.active,
+  );
 }
 
 enum RiskPriority {
@@ -519,9 +527,9 @@ enum ActivityCategory {
   final String wire;
 
   static ActivityCategory fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => ActivityCategory.sistema,
-      );
+    (e) => e.wire == v,
+    orElse: () => ActivityCategory.sistema,
+  );
 }
 
 enum ActivitySeverity {
@@ -534,9 +542,9 @@ enum ActivitySeverity {
   final String wire;
 
   static ActivitySeverity fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => ActivitySeverity.info,
-      );
+    (e) => e.wire == v,
+    orElse: () => ActivitySeverity.info,
+  );
 }
 
 enum NotificationType {
@@ -551,9 +559,9 @@ enum NotificationType {
   final String wire;
 
   static NotificationType fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => NotificationType.operational,
-      );
+    (e) => e.wire == v,
+    orElse: () => NotificationType.operational,
+  );
 }
 
 enum IntegrationConfigStatus {
@@ -565,7 +573,7 @@ enum IntegrationConfigStatus {
   final String wire;
 
   static IntegrationConfigStatus fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => IntegrationConfigStatus.pendente,
-      );
+    (e) => e.wire == v,
+    orElse: () => IntegrationConfigStatus.pendente,
+  );
 }

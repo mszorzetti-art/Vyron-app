@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
+
 import 'package:crypto/crypto.dart';
+
 import '../../domain/models/content_channel_finance_models.dart';
 import '../../domain/models/vyron_enums.dart';
 
@@ -64,7 +66,11 @@ String pbkdf2HmacSha256Sync({
     throw ArgumentError.value(iterations, 'iterations', 'Must be positive');
   }
   if (keyLengthBytes <= 0) {
-    throw ArgumentError.value(keyLengthBytes, 'keyLengthBytes', 'Must be positive');
+    throw ArgumentError.value(
+      keyLengthBytes,
+      'keyLengthBytes',
+      'Must be positive',
+    );
   }
 
   final passwordBytes = utf8.encode(password);
@@ -154,22 +160,22 @@ class ManifestFields {
   });
 
   factory ManifestFields.fromContent(ContentItem item) => ManifestFields(
-        brandId: item.brandId,
-        channelId: item.channelId,
-        productId: item.productId,
-        title: item.title,
-        description: item.description,
-        format: item.format,
-        category: item.category,
-        visibility: item.visibility,
-        analysisMethod: item.analysisMethod,
-        sensitiveTopic: item.sensitiveTopic,
-        script: item.script,
-        affiliateLinkUrl: item.affiliateLinkUrl,
-        affiliateDisclosure: item.affiliateDisclosure,
-        aiDisclosureRequired: item.aiDisclosureRequired,
-        aiDisclosureText: item.aiDisclosureText,
-      );
+    brandId: item.brandId,
+    channelId: item.channelId,
+    productId: item.productId,
+    title: item.title,
+    description: item.description,
+    format: item.format,
+    category: item.category,
+    visibility: item.visibility,
+    analysisMethod: item.analysisMethod,
+    sensitiveTopic: item.sensitiveTopic,
+    script: item.script,
+    affiliateLinkUrl: item.affiliateLinkUrl,
+    affiliateDisclosure: item.affiliateDisclosure,
+    aiDisclosureRequired: item.aiDisclosureRequired,
+    aiDisclosureText: item.aiDisclosureText,
+  );
 
   final String brandId;
   final String channelId;

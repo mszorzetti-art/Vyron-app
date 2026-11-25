@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../crypto/vyron_crypto.dart';
 
 const String _legacyAccessSalt = 'vyron-access-v1:';
@@ -24,9 +25,9 @@ enum AccessHashVersion {
   final String wire;
 
   static AccessHashVersion fromWire(String? v) => values.firstWhere(
-        (e) => e.wire == v,
-        orElse: () => AccessHashVersion.sha256V1,
-      );
+    (e) => e.wire == v,
+    orElse: () => AccessHashVersion.sha256V1,
+  );
 }
 
 enum LockReason {
@@ -46,12 +47,7 @@ enum LockReason {
   }
 }
 
-enum AccessErrorCode {
-  emptyPassword,
-  wrongPassword,
-  currentWrong,
-  newTooShort,
-}
+enum AccessErrorCode { emptyPassword, wrongPassword, currentWrong, newTooShort }
 
 @immutable
 class CredentialVerifier {
@@ -63,10 +59,10 @@ class CredentialVerifier {
   });
 
   const CredentialVerifier.legacyDefault()
-      : hashVersion = AccessHashVersion.sha256V1,
-        credentialHash = defaultDemoAccessHash,
-        saltHex = null,
-        iterations = 1;
+    : hashVersion = AccessHashVersion.sha256V1,
+      credentialHash = defaultDemoAccessHash,
+      saltHex = null,
+      iterations = 1;
 
   final AccessHashVersion hashVersion;
   final String credentialHash;
@@ -76,11 +72,11 @@ class CredentialVerifier {
   bool get isLegacy => hashVersion == AccessHashVersion.sha256V1;
 
   Map<String, dynamic> toJson() => {
-        'hashVersion': hashVersion.wire,
-        'credentialHash': credentialHash,
-        if (saltHex != null) 'saltHex': saltHex,
-        'iterations': iterations,
-      };
+    'hashVersion': hashVersion.wire,
+    'credentialHash': credentialHash,
+    if (saltHex != null) 'saltHex': saltHex,
+    'iterations': iterations,
+  };
 
   factory CredentialVerifier.fromJson(Map<String, dynamic> json) {
     final rawHash = json['credentialHash'] as String?;
@@ -89,7 +85,8 @@ class CredentialVerifier {
     }
     final version = AccessHashVersion.fromWire(json['hashVersion'] as String?);
     final salt = json['saltHex'] as String?;
-    final iter = (json['iterations'] as num?)?.toInt() ??
+    final iter =
+        (json['iterations'] as num?)?.toInt() ??
         (version == AccessHashVersion.pbkdf2Sha256V1
             ? defaultPbkdf2Iterations
             : 1);
@@ -178,8 +175,9 @@ class VyronAccessSession {
       locked: locked ?? this.locked,
       lockReason: clearLockReason ? null : (lockReason ?? this.lockReason),
       unlockedAt: clearUnlockedAt ? null : (unlockedAt ?? this.unlockedAt),
-      lastActivityAt:
-          clearLastActivityAt ? null : (lastActivityAt ?? this.lastActivityAt),
+      lastActivityAt: clearLastActivityAt
+          ? null
+          : (lastActivityAt ?? this.lastActivityAt),
       sessionExpiresAt: clearSessionExpiresAt
           ? null
           : (sessionExpiresAt ?? this.sessionExpiresAt),
@@ -191,29 +189,29 @@ class VyronAccessSession {
   }
 
   Map<String, dynamic> toJson() => {
-        'authenticated': authenticated,
-        'locked': locked,
-        'lockReason': lockReason?.wire,
-        'unlockedAt': unlockedAt,
-        'lastActivityAt': lastActivityAt,
-        'sessionExpiresAt': sessionExpiresAt,
-        'idleTimeoutMinutes': idleTimeoutMinutes,
-        'verifier': verifier.toJson(),
-        'usingDefaultCredential': usingDefaultCredential,
-      };
+    'authenticated': authenticated,
+    'locked': locked,
+    'lockReason': lockReason?.wire,
+    'unlockedAt': unlockedAt,
+    'lastActivityAt': lastActivityAt,
+    'sessionExpiresAt': sessionExpiresAt,
+    'idleTimeoutMinutes': idleTimeoutMinutes,
+    'verifier': verifier.toJson(),
+    'usingDefaultCredential': usingDefaultCredential,
+  };
 
   factory VyronAccessSession.fromJson(Map<String, dynamic> json) {
     final verifierJson = json['verifier'];
     final verifier = verifierJson is Map<String, dynamic>
         ? CredentialVerifier.fromJson(verifierJson)
         : (json['credentialHash'] is String &&
-                (json['credentialHash'] as String).length == 64)
-            ? CredentialVerifier(
-                hashVersion: AccessHashVersion.sha256V1,
-                credentialHash: json['credentialHash'] as String,
-                iterations: 1,
-              )
-            : const CredentialVerifier.legacyDefault();
+              (json['credentialHash'] as String).length == 64)
+        ? CredentialVerifier(
+            hashVersion: AccessHashVersion.sha256V1,
+            credentialHash: json['credentialHash'] as String,
+            iterations: 1,
+          )
+        : const CredentialVerifier.legacyDefault();
 
     return VyronAccessSession(
       authenticated: json['authenticated'] as bool? ?? false,
@@ -224,7 +222,7 @@ class VyronAccessSession {
       sessionExpiresAt: (json['sessionExpiresAt'] as num?)?.toInt(),
       idleTimeoutMinutes:
           (json['idleTimeoutMinutes'] as num?)?.toInt() ??
-              defaultIdleTimeoutMinutes,
+          defaultIdleTimeoutMinutes,
       verifier: verifier,
       usingDefaultCredential: json['usingDefaultCredential'] as bool? ?? true,
     );
@@ -340,10 +338,7 @@ VyronAccessSession evaluatePersistedSession(
         nowMs: now,
         idleTimeoutMinutes: session.idleTimeoutMinutes,
       )) {
-    return session.copyWith(
-      locked: true,
-      lockReason: LockReason.inactivity,
-    );
+    return session.copyWith(locked: true, lockReason: LockReason.inactivity);
   }
 
   return session;

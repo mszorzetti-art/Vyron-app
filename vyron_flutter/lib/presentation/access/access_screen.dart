@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_access_notifier.dart';
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/translate.dart';
@@ -11,10 +12,7 @@ import '../../domain/models/vyron_enums.dart';
 
 /// Tela oficial de autenticação e desbloqueio Vyron Access (sempre Obsidian Dark).
 class AccessScreen extends ConsumerStatefulWidget {
-  const AccessScreen({
-    super.key,
-    this.onUnlocked,
-  });
+  const AccessScreen({super.key, this.onUnlocked});
 
   final void Function({required bool wasLocked})? onUnlocked;
 
@@ -87,11 +85,9 @@ class _AccessScreenState extends ConsumerState<AccessScreen> {
     }
 
     final footerLockLabel = session.idleTimeoutMinutes > 0
-        ? translate(
-            lang,
-            'access.autoLockLabel',
-            {'minutes': session.idleTimeoutMinutes},
-          )
+        ? translate(lang, 'access.autoLockLabel', {
+            'minutes': session.idleTimeoutMinutes,
+          })
         : translate(lang, 'access.manualLockLabel');
 
     // Tela de acesso preserva superfície escura oficial Obsidian & Cobalt.
@@ -155,12 +151,14 @@ class _AccessScreenState extends ConsumerState<AccessScreen> {
                                 vertical: 10,
                               ),
                               decoration: BoxDecoration(
-                                color:
-                                    VyronColors.graphite.withValues(alpha: 0.6),
+                                color: VyronColors.graphite.withValues(
+                                  alpha: 0.6,
+                                ),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: VyronColors.titanium
-                                      .withValues(alpha: 0.16),
+                                  color: VyronColors.titanium.withValues(
+                                    alpha: 0.16,
+                                  ),
                                 ),
                               ),
                               child: Row(
@@ -217,8 +215,10 @@ class _AccessScreenState extends ConsumerState<AccessScreen> {
                               color: VyronColors.coolWhite,
                             ),
                             decoration: InputDecoration(
-                              hintText:
-                                  translate(lang, 'access.passwordPlaceholder'),
+                              hintText: translate(
+                                lang,
+                                'access.passwordPlaceholder',
+                              ),
                               hintStyle: const TextStyle(
                                 color: Color(0xFF687280),
                               ),
@@ -289,12 +289,16 @@ class _AccessScreenState extends ConsumerState<AccessScreen> {
                                           ),
                                         ),
                                         const SizedBox(width: 8),
-                                        Text(
-                                          translate(lang, 'access.verifying'),
-                                          style: const TextStyle(
-                                            fontFamily: VyronTypography.sans,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
+                                        Flexible(
+                                          child: Text(
+                                            translate(lang, 'access.verifying'),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontFamily: VyronTypography.sans,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -333,8 +337,9 @@ class _AccessScreenState extends ConsumerState<AccessScreen> {
                                 style: TextStyle(
                                   fontFamily: VyronTypography.mono,
                                   fontSize: 11,
-                                  color: VyronColors.titanium
-                                      .withValues(alpha: 0.8),
+                                  color: VyronColors.titanium.withValues(
+                                    alpha: 0.8,
+                                  ),
                                 ),
                               ),
                             ],

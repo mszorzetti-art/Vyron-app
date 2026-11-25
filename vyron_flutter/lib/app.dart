@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'application/lifecycle/vyron_lifecycle_observer.dart';
 import 'application/state/vyron_state_notifier.dart';
 import 'core/routing/vyron_router.dart';

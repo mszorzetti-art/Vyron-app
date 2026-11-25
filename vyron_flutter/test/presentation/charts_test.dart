@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vyron/core/i18n/formatters.dart';
 import 'package:vyron/core/theme/vyron_colors.dart';
@@ -8,53 +8,53 @@ import 'package:vyron/domain/models/vyron_enums.dart';
 import 'package:vyron/presentation/charts/vyron_charts.dart';
 
 List<VyronSeriesConfig> _sampleSeries() => const [
-      VyronSeriesConfig(
-        id: 'confirmed',
-        label: 'Comercial confirmado',
-        color: VyronColors.electricCobalt,
-        areaFill: true,
-      ),
-      VyronSeriesConfig(
-        id: 'received',
-        label: 'Recebido em caixa',
-        color: VyronColors.emerald,
-      ),
-      VyronSeriesConfig(
-        id: 'projection',
-        label: 'Projeção isolada',
-        color: VyronColors.titanium,
-        dashed: true,
-        isProjection: true,
-      ),
-    ];
+  VyronSeriesConfig(
+    id: 'confirmed',
+    label: 'Comercial confirmado',
+    color: VyronColors.electricCobalt,
+    areaFill: true,
+  ),
+  VyronSeriesConfig(
+    id: 'received',
+    label: 'Recebido em caixa',
+    color: VyronColors.emerald,
+  ),
+  VyronSeriesConfig(
+    id: 'projection',
+    label: 'Projeção isolada',
+    color: VyronColors.titanium,
+    dashed: true,
+    isProjection: true,
+  ),
+];
 
 List<VyronTimeSeriesPoint> _samplePoints() => const [
-      VyronTimeSeriesPoint(
-        id: 'pt-1',
-        label: '01/11',
-        fullDateLabel: '01/11/2026',
-        values: {'confirmed': 1200, 'received': 800, 'projection': null},
-      ),
-      VyronTimeSeriesPoint(
-        id: 'pt-2',
-        label: '08/11',
-        fullDateLabel: '08/11/2026',
-        values: {'confirmed': 2400, 'received': 1400, 'projection': null},
-      ),
-      VyronTimeSeriesPoint(
-        id: 'pt-3',
-        label: '15/11',
-        fullDateLabel: '15/11/2026',
-        values: {'confirmed': 3600, 'received': 2100, 'projection': 3600},
-      ),
-      VyronTimeSeriesPoint(
-        id: 'pt-4',
-        label: '15/12',
-        fullDateLabel: '15/12/2026',
-        isProjection: true,
-        values: {'confirmed': null, 'received': null, 'projection': 5100},
-      ),
-    ];
+  VyronTimeSeriesPoint(
+    id: 'pt-1',
+    label: '01/11',
+    fullDateLabel: '01/11/2026',
+    values: {'confirmed': 1200, 'received': 800, 'projection': null},
+  ),
+  VyronTimeSeriesPoint(
+    id: 'pt-2',
+    label: '08/11',
+    fullDateLabel: '08/11/2026',
+    values: {'confirmed': 2400, 'received': 1400, 'projection': null},
+  ),
+  VyronTimeSeriesPoint(
+    id: 'pt-3',
+    label: '15/11',
+    fullDateLabel: '15/11/2026',
+    values: {'confirmed': 3600, 'received': 2100, 'projection': 3600},
+  ),
+  VyronTimeSeriesPoint(
+    id: 'pt-4',
+    label: '15/12',
+    fullDateLabel: '15/12/2026',
+    isProjection: true,
+    values: {'confirmed': null, 'received': null, 'projection': 5100},
+  ),
+];
 
 void main() {
   group('Lote 5 — Geometria pura e cálculo de deltas', () {
@@ -84,65 +84,74 @@ void main() {
       expect(visibleX.length, lessThan(24));
     });
 
-    test('computePointDeltaText formata delta absoluto e percentual em PT-BR', () {
-      final delta = computePointDeltaText(
-        points: _samplePoints(),
-        visibleSeries: _sampleSeries(),
-        activeIdx: 1,
-        defaultFormatter: (v) =>
-            formatCurrencyForLang(v, CurrencyCode.brl, UiLanguage.ptBR),
-        language: UiLanguage.ptBR,
-      );
-      expect(delta, isNotNull);
-      expect(delta, contains('+100,0%'));
-    });
+    test(
+      'computePointDeltaText formata delta absoluto e percentual em PT-BR',
+      () {
+        final delta = computePointDeltaText(
+          points: _samplePoints(),
+          visibleSeries: _sampleSeries(),
+          activeIdx: 1,
+          defaultFormatter: (v) =>
+              formatCurrencyForLang(v, CurrencyCode.brl, UiLanguage.ptBR),
+          language: UiLanguage.ptBR,
+        );
+        expect(delta, isNotNull);
+        expect(delta, contains('+100,0%'));
+      },
+    );
   });
 
   group('Lote 5 — Widgets interativos de gráficos', () {
-    testWidgets('VyronChartTimeframeToolbar alterna intervalos, datas custom e comparação', (tester) async {
-      var range = ChartTimeRange.d30;
-      var compare = false;
+    testWidgets(
+      'VyronChartTimeframeToolbar alterna intervalos, datas custom e comparação',
+      (tester) async {
+        var range = ChartTimeRange.d30;
+        var compare = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: VyronTheme.dark(),
-          home: Scaffold(
-            body: StatefulBuilder(
-              builder: (context, setState) {
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: VyronChartTimeframeToolbar(
-                    language: UiLanguage.ptBR,
-                    range: range,
-                    onRangeChange: (next) => setState(() => range = next),
-                    customStart: '2026-10-28',
-                    customEnd: '2026-11-18',
-                    onCustomStartChange: (_) {},
-                    onCustomEndChange: (_) {},
-                    comparePrevious: compare,
-                    hasPreviousData: false,
-                    onToggleComparePrevious: () =>
-                        setState(() => compare = !compare),
-                  ),
-                );
-              },
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: VyronTheme.dark(),
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: VyronChartTimeframeToolbar(
+                      language: UiLanguage.ptBR,
+                      range: range,
+                      onRangeChange: (next) => setState(() => range = next),
+                      customStart: '2026-10-28',
+                      customEnd: '2026-11-18',
+                      onCustomStartChange: (_) {},
+                      onCustomEndChange: (_) {},
+                      comparePrevious: compare,
+                      hasPreviousData: false,
+                      onToggleComparePrevious: () =>
+                          setState(() => compare = !compare),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.byKey(const Key('vyron-chart-range-custom')));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('vyron-chart-range-custom')));
+        await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('vyron-chart-custom-start')), findsOneWidget);
-      expect(find.byKey(const Key('vyron-chart-custom-end')), findsOneWidget);
+        expect(
+          find.byKey(const Key('vyron-chart-custom-start')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('vyron-chart-custom-end')), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('vyron-chart-compare-prev')));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('vyron-chart-compare-prev')));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Comparando período anterior'), findsOneWidget);
-      expect(find.textContaining('28/10/2026'), findsWidgets);
-    });
+        expect(find.text('Comparando período anterior'), findsOneWidget);
+        expect(find.textContaining('28/10/2026'), findsWidgets);
+      },
+    );
 
     testWidgets(
       'VyronInteractiveTimeSeriesChart suporta pin por toque, tooltip, legendas e Tabela de dados em 1280x800',
@@ -187,8 +196,9 @@ void main() {
         expect(find.textContaining('Passe o cursor ou toque'), findsOneWidget);
 
         // Toque no segundo ponto (aprox. 1/3 horizontal dentro do canvas)
-        final canvasBox =
-            tester.getRect(find.byKey(const Key('vyron-chart-canvas')));
+        final canvasBox = tester.getRect(
+          find.byKey(const Key('vyron-chart-canvas')),
+        );
         await tester.tapAt(
           Offset(canvasBox.left + canvasBox.width * 0.36, canvasBox.center.dy),
         );
@@ -409,7 +419,10 @@ void main() {
 
         expect(find.byKey(const Key('vyron-chart-mode-line')), findsOneWidget);
         expect(find.byKey(const Key('vyron-chart-mode-bar')), findsOneWidget);
-        expect(find.byKey(const Key('vyron-chart-table-toggle')), findsOneWidget);
+        expect(
+          find.byKey(const Key('vyron-chart-table-toggle')),
+          findsOneWidget,
+        );
 
         // Alterna para Gráfico de Barras agrupadas
         await tester.tap(find.byKey(const Key('vyron-chart-mode-bar')));
@@ -433,4 +446,3 @@ void main() {
     );
   });
 }
-

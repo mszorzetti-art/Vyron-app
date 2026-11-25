@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -7,6 +8,7 @@ import '../../core/i18n/translate.dart';
 import '../../core/theme/vyron_colors.dart';
 import '../../core/widgets/vyron_ui.dart';
 import '../../domain/charts/chart_series.dart';
+import '../../domain/models/brand_product_models.dart';
 import '../../domain/models/content_channel_finance_models.dart';
 import '../../domain/models/vyron_enums.dart';
 import '../charts/vyron_charts.dart';
@@ -46,28 +48,33 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
       return true;
     }).toList();
 
-    final totalFollowers =
-        visibleChannels.fold<int>(0, (acc, c) => acc + c.followers);
-    final totalViews =
-        visibleChannels.fold<int>(0, (acc, c) => acc + c.views30d);
+    final totalFollowers = visibleChannels.fold<int>(
+      0,
+      (acc, c) => acc + c.followers,
+    );
+    final totalViews = visibleChannels.fold<int>(
+      0,
+      (acc, c) => acc + c.views30d,
+    );
     final ytChannels = visibleChannels
         .where((c) => c.platform == ChannelPlatform.youtube)
         .toList();
-    final unlockedYtCount =
-        ytChannels.where((c) => c.advancedFeaturesUnlocked).length;
+    final unlockedYtCount = ytChannels
+        .where((c) => c.advancedFeaturesUnlocked)
+        .length;
     final avgShortsBridge = ytChannels.isNotEmpty
         ? ytChannels.fold<double>(
-              0.0,
-              (acc, c) => acc + (c.shortsToLongPct ?? 0.0),
-            ) /
-            ytChannels.length
+                0.0,
+                (acc, c) => acc + (c.shortsToLongPct ?? 0.0),
+              ) /
+              ytChannels.length
         : 0.0;
     final avgEngagement = visibleChannels.isNotEmpty
         ? visibleChannels.fold<double>(
-              0.0,
-              (acc, c) => acc + c.engagementRatePct,
-            ) /
-            visibleChannels.length
+                0.0,
+                (acc, c) => acc + c.engagementRatePct,
+              ) /
+              visibleChannels.length
         : 0.0;
 
     final chartRows = buildChannelComparisonItems(
@@ -120,10 +127,9 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                   child: VyronMetricBlock(
                     label: t('channels.kpi.audience'),
                     value: formatCompactNumberForLang(totalFollowers, lang),
-                    helper: t(
-                      'channels.kpi.audienceHelper',
-                      {'count': '${visibleChannels.length}'},
-                    ),
+                    helper: t('channels.kpi.audienceHelper', {
+                      'count': '${visibleChannels.length}',
+                    }),
                   ),
                 ),
                 SizedBox(
@@ -131,10 +137,9 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                   child: VyronMetricBlock(
                     label: t('channels.kpi.views'),
                     value: formatCompactNumberForLang(totalViews, lang),
-                    helper: t(
-                      'channels.kpi.viewsHelper',
-                      {'pct': formatPercentForLang(avgEngagement, lang, 1)},
-                    ),
+                    helper: t('channels.kpi.viewsHelper', {
+                      'pct': formatPercentForLang(avgEngagement, lang, 1),
+                    }),
                     tone: VyronMetricTone.cobalt,
                   ),
                 ),
@@ -223,11 +228,7 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
               }
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  listPanel,
-                  const SizedBox(height: 18),
-                  chartPanel,
-                ],
+                children: [listPanel, const SizedBox(height: 18), chartPanel],
               );
             },
           ),
@@ -364,11 +365,11 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                                       '${growthPositive ? '+' : ''}${formatPercentForLang(ch.growthPct30d, lang, 1)}',
                                   color: growthPositive
                                       ? (isDark
-                                          ? VyronColors.emeraldDarkText
-                                          : VyronColors.emeraldLightText)
+                                            ? VyronColors.emeraldDarkText
+                                            : VyronColors.emeraldLightText)
                                       : (isDark
-                                          ? VyronColors.crimsonDarkText
-                                          : VyronColors.crimsonLightText),
+                                            ? VyronColors.crimsonDarkText
+                                            : VyronColors.crimsonLightText),
                                 ),
                               ),
                               Expanded(
@@ -504,8 +505,9 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                         decoration: idx < visibleChannels.length - 1
                             ? BoxDecoration(
                                 border: Border(
-                                  bottom:
-                                      BorderSide(color: palette.panelBorder),
+                                  bottom: BorderSide(
+                                    color: palette.panelBorder,
+                                  ),
                                 ),
                               )
                             : null,
@@ -586,11 +588,11 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
                                   ],
                                   color: growthPositive
                                       ? (isDark
-                                          ? VyronColors.emeraldDarkText
-                                          : VyronColors.emeraldLightText)
+                                            ? VyronColors.emeraldDarkText
+                                            : VyronColors.emeraldLightText)
                                       : (isDark
-                                          ? VyronColors.crimsonDarkText
-                                          : VyronColors.crimsonLightText),
+                                            ? VyronColors.crimsonDarkText
+                                            : VyronColors.crimsonLightText),
                                 ),
                               ),
                             ),
@@ -686,8 +688,11 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
   }) {
     final items = chartRows.map((row) {
       final formattedValue = switch (_chartMetric) {
-        ChannelChartMetric.engagementRatePct =>
-          formatPercentForLang(row.rawValue, lang, 1),
+        ChannelChartMetric.engagementRatePct => formatPercentForLang(
+          row.rawValue,
+          lang,
+          1,
+        ),
         ChannelChartMetric.growthPct30d =>
           '${row.rawValue >= 0 ? '+' : ''}${formatPercentForLang(row.rawValue, lang, 1)}',
         _ => formatCompactNumberForLang(row.rawValue, lang),
@@ -798,10 +803,10 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
   }
 
   TextStyle _thStyle(VyronPaletteExtension palette) => TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: palette.textMuted,
-      );
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    color: palette.textMuted,
+  );
 
   Future<void> _openCreateChannelModal(
     BuildContext context,
@@ -810,214 +815,227 @@ class _ChannelsScreenState extends ConsumerState<ChannelsScreen> {
     final domain = ref.read(vyronStateProvider).domain;
     final notifier = ref.read(vyronStateProvider.notifier);
 
-    final nameCtrl = TextEditingController();
-    final handleCtrl = TextEditingController();
-    var brandId = domain.brands.isNotEmpty ? domain.brands.first.id : '';
-    var platform = ChannelPlatform.youtube;
-    var language = 'PT-BR';
-    var advUnlocked = false;
-    final formKey = GlobalKey<FormState>();
-
     await showVyronModalDialog<void>(
       context: context,
       title: translate(lang, 'channels.modal.title'),
       subtitle: translate(lang, 'channels.modal.subtitle'),
       language: lang,
       builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (ctx, setModalState) {
-            return Form(
-              key: formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextFormField(
-                    key: const Key('create-channel-name'),
-                    controller: nameCtrl,
-                    decoration: InputDecoration(
-                      labelText: translate(lang, 'channels.modal.nameReq'),
-                      hintText:
-                          translate(lang, 'channels.modal.namePlaceholder'),
-                    ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? '*' : null,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: VyronDropdownField<ChannelPlatform>(
-                          key: const Key('create-channel-platform'),
-                          labelText:
-                              translate(lang, 'channels.modal.platform'),
-                          value: platform,
-                          items: [
-                            for (final p in ChannelPlatform.values)
-                              DropdownMenuItem(value: p, child: Text(p.wire)),
-                          ],
-                          onChanged: (next) {
-                            if (next != null) {
-                              setModalState(() => platform = next);
-                            }
-                          },
-                        ),
-                      ),
-                      if (domain.brands.isNotEmpty) ...[
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: VyronDropdownField<String>(
-                            key: const Key('create-channel-brand'),
-                            labelText: translate(lang, 'channels.modal.brand'),
-                            value: brandId,
-                            items: [
-                              for (final b in domain.brands)
-                                DropdownMenuItem(
-                                  value: b.id,
-                                  child: Text(
-                                    b.name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                            ],
-                            onChanged: (next) {
-                              if (next != null) {
-                                setModalState(() => brandId = next);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          key: const Key('create-channel-handle'),
-                          controller: handleCtrl,
-                          decoration: InputDecoration(
-                            labelText:
-                                translate(lang, 'channels.modal.handleReq'),
-                            hintText: translate(
-                              lang,
-                              'channels.modal.handlePlaceholder',
-                            ),
-                          ),
-                          validator: (v) =>
-                              v == null || v.trim().isEmpty ? '*' : null,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: VyronDropdownField<String>(
-                          key: const Key('create-channel-lang'),
-                          labelText:
-                              translate(lang, 'channels.modal.language'),
-                          value: language,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'PT-BR',
-                              child: Text('PT-BR'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'EN-US',
-                              child: Text('EN-US'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'FR-FR',
-                              child: Text('FR-FR'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'ES-ES',
-                              child: Text('ES-ES'),
-                            ),
-                          ],
-                          onChanged: (next) {
-                            if (next != null) {
-                              setModalState(() => language = next);
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  CheckboxListTile(
-                    key: const Key('create-channel-adv'),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    activeColor: VyronColors.electricCobalt,
-                    value: advUnlocked,
-                    title: Text(
-                      translate(lang, 'channels.modal.advCheckbox'),
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    onChanged: (v) {
-                      if (v != null) setModalState(() => advUnlocked = v);
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      OutlinedButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: Text(translate(lang, 'common.cancel')),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        key: const Key('create-channel-submit'),
-                        onPressed: () {
-                          if (!formKey.currentState!.validate()) return;
-                          notifier.createChannel(
-                            ChannelCreateInput(
-                              brandId: brandId,
-                              name: nameCtrl.text.trim(),
-                              handle: handleCtrl.text.trim(),
-                              platform: platform,
-                              language: language,
-                              advancedFeaturesUnlocked: advUnlocked,
-                              integrationStatus:
-                                  ChannelIntegrationStatus.configuradoDemo,
-                              followers: 1200,
-                              growthPct30d: 4.5,
-                              views30d: 8400,
-                              reach30d: 11200,
-                              engagementRatePct: 4.2,
-                              shortsToLongPct:
-                                  platform == ChannelPlatform.youtube
-                                      ? 9.0
-                                      : null,
-                              publications30d: 2,
-                            ),
-                          );
-                          Navigator.of(dialogContext).pop();
-                        },
-                        child: Text(translate(lang, 'channels.modal.submit')),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
+        return _CreateChannelModalBody(
+          lang: lang,
+          brands: domain.brands,
+          onCancel: () => Navigator.of(dialogContext).pop(),
+          onSubmit: (input) {
+            notifier.createChannel(input);
+            Navigator.of(dialogContext).pop();
           },
         );
       },
     );
+  }
+}
 
-    nameCtrl.dispose();
-    handleCtrl.dispose();
+class _CreateChannelModalBody extends StatefulWidget {
+  const _CreateChannelModalBody({
+    required this.lang,
+    required this.brands,
+    required this.onCancel,
+    required this.onSubmit,
+  });
+
+  final UiLanguage lang;
+  final List<Brand> brands;
+  final VoidCallback onCancel;
+  final ValueChanged<ChannelCreateInput> onSubmit;
+
+  @override
+  State<_CreateChannelModalBody> createState() =>
+      _CreateChannelModalBodyState();
+}
+
+class _CreateChannelModalBodyState extends State<_CreateChannelModalBody> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameCtrl = TextEditingController();
+  final _handleCtrl = TextEditingController();
+  late String _brandId;
+  ChannelPlatform _platform = ChannelPlatform.youtube;
+  String _language = 'PT-BR';
+  bool _advUnlocked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _brandId = widget.brands.isNotEmpty ? widget.brands.first.id : '';
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _handleCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = widget.lang;
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextFormField(
+            key: const Key('create-channel-name'),
+            controller: _nameCtrl,
+            decoration: InputDecoration(
+              labelText: translate(lang, 'channels.modal.nameReq'),
+              hintText: translate(lang, 'channels.modal.namePlaceholder'),
+            ),
+            validator: (v) => v == null || v.trim().isEmpty ? '*' : null,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: VyronDropdownField<ChannelPlatform>(
+                  key: const Key('create-channel-platform'),
+                  labelText: translate(lang, 'channels.modal.platform'),
+                  value: _platform,
+                  items: [
+                    for (final p in ChannelPlatform.values)
+                      DropdownMenuItem(value: p, child: Text(p.wire)),
+                  ],
+                  onChanged: (next) {
+                    if (next != null) {
+                      setState(() => _platform = next);
+                    }
+                  },
+                ),
+              ),
+              if (widget.brands.isNotEmpty) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: VyronDropdownField<String>(
+                    key: const Key('create-channel-brand'),
+                    labelText: translate(lang, 'channels.modal.brand'),
+                    value: _brandId,
+                    items: [
+                      for (final b in widget.brands)
+                        DropdownMenuItem(
+                          value: b.id,
+                          child: Text(b.name, overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: (next) {
+                      if (next != null) {
+                        setState(() => _brandId = next);
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  key: const Key('create-channel-handle'),
+                  controller: _handleCtrl,
+                  decoration: InputDecoration(
+                    labelText: translate(lang, 'channels.modal.handleReq'),
+                    hintText: translate(
+                      lang,
+                      'channels.modal.handlePlaceholder',
+                    ),
+                  ),
+                  validator: (v) => v == null || v.trim().isEmpty ? '*' : null,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: VyronDropdownField<String>(
+                  key: const Key('create-channel-lang'),
+                  labelText: translate(lang, 'channels.modal.language'),
+                  value: _language,
+                  items: const [
+                    DropdownMenuItem(value: 'PT-BR', child: Text('PT-BR')),
+                    DropdownMenuItem(value: 'EN-US', child: Text('EN-US')),
+                    DropdownMenuItem(value: 'FR-FR', child: Text('FR-FR')),
+                    DropdownMenuItem(value: 'ES-ES', child: Text('ES-ES')),
+                  ],
+                  onChanged: (next) {
+                    if (next != null) {
+                      setState(() => _language = next);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          CheckboxListTile(
+            key: const Key('create-channel-adv'),
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            controlAffinity: ListTileControlAffinity.leading,
+            activeColor: VyronColors.electricCobalt,
+            value: _advUnlocked,
+            title: Text(
+              translate(lang, 'channels.modal.advCheckbox'),
+              style: const TextStyle(fontSize: 12),
+            ),
+            onChanged: (v) {
+              if (v != null) setState(() => _advUnlocked = v);
+            },
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              OutlinedButton(
+                onPressed: widget.onCancel,
+                child: Text(translate(lang, 'common.cancel')),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                key: const Key('create-channel-submit'),
+                onPressed: () {
+                  if (!_formKey.currentState!.validate()) return;
+                  widget.onSubmit(
+                    ChannelCreateInput(
+                      brandId: _brandId,
+                      name: _nameCtrl.text.trim(),
+                      handle: _handleCtrl.text.trim(),
+                      platform: _platform,
+                      language: _language,
+                      advancedFeaturesUnlocked: _advUnlocked,
+                      integrationStatus:
+                          ChannelIntegrationStatus.configuradoDemo,
+                      followers: 1200,
+                      growthPct30d: 4.5,
+                      views30d: 8400,
+                      reach30d: 11200,
+                      engagementRatePct: 4.2,
+                      shortsToLongPct: _platform == ChannelPlatform.youtube
+                          ? 9.0
+                          : null,
+                      publications30d: 2,
+                    ),
+                  );
+                },
+                child: Text(translate(lang, 'channels.modal.submit')),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
 class _ChMetricCell extends StatelessWidget {
-  const _ChMetricCell({
-    required this.label,
-    required this.value,
-    this.color,
-  });
+  const _ChMetricCell({required this.label, required this.value, this.color});
 
   final String label;
   final String value;

@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+
 import '../../core/i18n/translate.dart';
 import '../../core/theme/vyron_colors.dart';
 import '../../domain/models/vyron_enums.dart';
@@ -86,9 +88,8 @@ class _VyronInteractiveTimeSeriesChartState
     }
   }
 
-  List<VyronSeriesConfig> get _visibleSeries => widget.series
-      .where((s) => _hiddenSeriesIds[s.id] != true)
-      .toList();
+  List<VyronSeriesConfig> get _visibleSeries =>
+      widget.series.where((s) => _hiddenSeriesIds[s.id] != true).toList();
 
   int? get _selectedIdx {
     final selId = widget.selectedPointId;
@@ -170,18 +171,13 @@ class _VyronInteractiveTimeSeriesChartState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.trending_up_rounded,
-              size: 22,
-              color: palette.textMuted,
-            ),
+            Icon(Icons.trending_up_rounded, size: 22, color: palette.textMuted),
             const SizedBox(height: 8),
             Text(
               widget.emptyMessage ?? translate(lang, 'charts.emptyPeriod'),
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: palette.textMuted,
-                  ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: palette.textMuted),
             ),
           ],
         ),
@@ -191,8 +187,9 @@ class _VyronInteractiveTimeSeriesChartState
     final visibleSeries = _visibleSeries;
     final selectedIdx = _selectedIdx;
     final activeIdx = _hoverIdx ?? selectedIdx;
-    final activePoint =
-        activeIdx != null && activeIdx < points.length ? points[activeIdx] : null;
+    final activePoint = activeIdx != null && activeIdx < points.length
+        ? points[activeIdx]
+        : null;
     final deltaText = computePointDeltaText(
       points: points,
       visibleSeries: visibleSeries,
@@ -249,7 +246,9 @@ class _VyronInteractiveTimeSeriesChartState
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
                         border: Border.all(
-                          color: VyronColors.electricCobalt.withValues(alpha: 0.45),
+                          color: VyronColors.electricCobalt.withValues(
+                            alpha: 0.45,
+                          ),
                         ),
                       ),
                       child: Row(
@@ -434,7 +433,8 @@ class _VyronInteractiveTimeSeriesChartState
                                   width: chartWidth,
                                   height: widget.height,
                                   child: CustomPaint(
-                                    painter: _displayMode ==
+                                    painter:
+                                        _displayMode ==
                                             VyronChartDisplayMode.bar
                                         ? _VyronTimeSeriesBarPainter(
                                             geometry: geometry,
@@ -442,7 +442,8 @@ class _VyronInteractiveTimeSeriesChartState
                                             selectedIdx: selectedIdx,
                                             palette: palette,
                                             isDark: isDark,
-                                            formatYAxis: widget.formatYAxis ??
+                                            formatYAxis:
+                                                widget.formatYAxis ??
                                                 widget.formatValue,
                                           )
                                         : _VyronTimeSeriesPainter(
@@ -451,7 +452,8 @@ class _VyronInteractiveTimeSeriesChartState
                                             selectedIdx: selectedIdx,
                                             palette: palette,
                                             isDark: isDark,
-                                            formatYAxis: widget.formatYAxis ??
+                                            formatYAxis:
+                                                widget.formatYAxis ??
                                                 widget.formatValue,
                                           ),
                                   ),
@@ -486,9 +488,7 @@ class _VyronInteractiveTimeSeriesChartState
           key: const Key('vyron-chart-readout'),
           padding: const EdgeInsets.only(top: 10),
           decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(color: palette.panelBorder),
-            ),
+            border: Border(top: BorderSide(color: palette.panelBorder)),
           ),
           child: activePoint == null
               ? Text(
@@ -555,11 +555,9 @@ class _VyronInteractiveTimeSeriesChartState
                         ),
                     if (deltaText != null)
                       Text(
-                        translate(
-                          lang,
-                          'charts.deltaFromPrev',
-                          {'delta': deltaText},
-                        ),
+                        translate(lang, 'charts.deltaFromPrev', {
+                          'delta': deltaText,
+                        }),
                         style: TextStyle(
                           fontFamily: VyronTypography.mono,
                           fontSize: 10,
@@ -661,8 +659,8 @@ class _SeriesLegendChip extends StatelessWidget {
             color: hidden
                 ? Colors.transparent
                 : (isDark
-                    ? VyronColors.obsidianBlack
-                    : VyronColors.coolWhite.withValues(alpha: 0.7)),
+                      ? VyronColors.obsidianBlack
+                      : VyronColors.coolWhite.withValues(alpha: 0.7)),
             borderRadius: BorderRadius.circular(5),
             border: Border.all(color: palette.panelBorder),
           ),
@@ -697,10 +695,7 @@ class _SeriesLegendChip extends StatelessWidget {
 }
 
 class _LegendSwatchPainter extends CustomPainter {
-  const _LegendSwatchPainter({
-    required this.color,
-    required this.dashed,
-  });
+  const _LegendSwatchPainter({required this.color, required this.dashed});
 
   final Color color;
   final bool dashed;
@@ -861,7 +856,9 @@ class _FloatingChartTooltip extends StatelessWidget {
                 border: Border(top: BorderSide(color: palette.panelBorder)),
               ),
               child: Text(
-                translate(language, 'charts.deltaFromPrev', {'delta': deltaText}),
+                translate(language, 'charts.deltaFromPrev', {
+                  'delta': deltaText,
+                }),
                 style: TextStyle(
                   fontFamily: VyronTypography.mono,
                   fontSize: 10,
@@ -918,7 +915,9 @@ class _ChartDataTable extends StatelessWidget {
             color: palette.textMuted,
           ),
           columns: [
-            DataColumn(label: Text(translate(language, 'charts.tableColPeriod'))),
+            DataColumn(
+              label: Text(translate(language, 'charts.tableColPeriod')),
+            ),
             for (final s in visibleSeries)
               DataColumn(numeric: true, label: Text(s.label)),
           ],
@@ -992,11 +991,11 @@ void _paintYAxisAndGrid(
     final linePaint = Paint()
       ..color = tick.ratio == 0
           ? (isDark
-              ? Colors.white.withValues(alpha: 0.16)
-              : Colors.black.withValues(alpha: 0.16))
+                ? Colors.white.withValues(alpha: 0.16)
+                : Colors.black.withValues(alpha: 0.16))
           : (isDark
-              ? Colors.white.withValues(alpha: 0.06)
-              : Colors.black.withValues(alpha: 0.06))
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.black.withValues(alpha: 0.06))
       ..strokeWidth = 1.0;
 
     canvas.drawLine(
@@ -1248,8 +1247,8 @@ class _VyronTimeSeriesPainter extends CustomPainter {
         final dotRadius = isActive
             ? 4.4
             : points.length > 16
-                ? 2.0
-                : 2.8;
+            ? 2.0
+            : 2.8;
         canvas.drawCircle(center, dotRadius, Paint()..color = s.color);
         if (isActive) {
           canvas.drawCircle(

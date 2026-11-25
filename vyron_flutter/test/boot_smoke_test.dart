@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vyron/app.dart';
@@ -102,23 +103,23 @@ void main() {
         await tester.tap(toggle);
         await tester.pumpAndSettle();
 
-        final materialApp =
-            tester.widget<MaterialApp>(find.byType(MaterialApp));
+        final materialApp = tester.widget<MaterialApp>(
+          find.byType(MaterialApp),
+        );
         expect(materialApp.themeMode, ThemeMode.light);
       },
     );
 
-    testWidgets(
-      'renderiza sem overflow em viewport desktop/tablet 1280x800',
-      (tester) async {
-        tester.view.physicalSize = const Size(1280, 800);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+    testWidgets('renderiza sem overflow em viewport desktop/tablet 1280x800', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWidget(_buildTestRoot(authorized: true));
-        await tester.pumpAndSettle();
-        expect(find.byType(VyronWordmark), findsOneWidget);
-      },
-    );
+      await tester.pumpWidget(_buildTestRoot(authorized: true));
+      await tester.pumpAndSettle();
+      expect(find.byType(VyronWordmark), findsOneWidget);
+    });
   });
 }

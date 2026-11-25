@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+
 import '../theme/vyron_colors.dart';
 
 /// Primitivo estrutural de skeleton loading alinhado à estética Graphite & Cobalt.
@@ -51,7 +52,8 @@ class _VyronSkeletonBoxState extends State<VyronSkeletonBox>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        final fill = Color.lerp(baseColor, highlightColor, _controller.value) ??
+        final fill =
+            Color.lerp(baseColor, highlightColor, _controller.value) ??
             baseColor;
         return Container(
           width: widget.width ?? double.infinity,
@@ -71,10 +73,7 @@ class _VyronSkeletonBoxState extends State<VyronSkeletonBox>
 
 /// Skeleton estrutural para blocos de KPI (1, 2 ou 4 colunas responsivas).
 class VyronKpiGridSkeleton extends StatelessWidget {
-  const VyronKpiGridSkeleton({
-    super.key,
-    this.count = 4,
-  });
+  const VyronKpiGridSkeleton({super.key, this.count = 4});
 
   final int count;
 
@@ -86,8 +85,8 @@ class VyronKpiGridSkeleton extends StatelessWidget {
         final cols = constraints.maxWidth >= 960
             ? 4
             : constraints.maxWidth >= 560
-                ? 2
-                : 1;
+            ? 2
+            : 1;
         const spacing = 12.0;
         final cardWidth = (constraints.maxWidth - (cols - 1) * spacing) / cols;
         return Wrap(
@@ -126,10 +125,7 @@ class VyronKpiGridSkeleton extends StatelessWidget {
 
 /// Skeleton estrutural preservando altura e eixos do painel de gráfico Vyron.
 class VyronChartSkeleton extends StatelessWidget {
-  const VyronChartSkeleton({
-    super.key,
-    this.height = 240,
-  });
+  const VyronChartSkeleton({super.key, this.height = 240});
 
   final double height;
 
@@ -201,10 +197,7 @@ class VyronChartSkeleton extends StatelessWidget {
 
 /// Skeleton estrutural para tabelas de dados e ledgers financeiros/execuções.
 class VyronTableSkeleton extends StatelessWidget {
-  const VyronTableSkeleton({
-    super.key,
-    this.rows = 4,
-  });
+  const VyronTableSkeleton({super.key, this.rows = 4});
 
   final int rows;
 
@@ -254,10 +247,7 @@ class VyronTableSkeleton extends StatelessWidget {
 
 /// Skeleton estrutural de lista de cards (Notificações, Agentes, Marcas, Atividades).
 class VyronCardListSkeleton extends StatelessWidget {
-  const VyronCardListSkeleton({
-    super.key,
-    this.cards = 3,
-  });
+  const VyronCardListSkeleton({super.key, this.cards = 3});
 
   final int cards;
 

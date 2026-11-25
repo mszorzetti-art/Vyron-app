@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -13,10 +14,7 @@ import '../../domain/models/vyron_enums.dart';
 import '../../domain/rules/vyron_rules.dart';
 
 class BrandsScreen extends ConsumerStatefulWidget {
-  const BrandsScreen({
-    super.key,
-    this.brandId,
-  });
+  const BrandsScreen({super.key, this.brandId});
 
   final String? brandId;
 
@@ -45,8 +43,9 @@ class _BrandsScreenState extends ConsumerState<BrandsScreen> {
     String t(String key, [Map<String, String>? params]) =>
         translate(lang, key, params);
 
-    final localizedBrands =
-        domain.brands.map((b) => localizeBrand(b, lang)).toList();
+    final localizedBrands = domain.brands
+        .map((b) => localizeBrand(b, lang))
+        .toList();
 
     final rollups = computeBrandRollups(
       localizedBrands,
@@ -75,7 +74,9 @@ class _BrandsScreenState extends ConsumerState<BrandsScreen> {
               onPressed: () => setState(() => _compareMode = !_compareMode),
               icon: const Icon(Icons.compare_arrows_rounded, size: 16),
               label: Text(
-                _compareMode ? t('brands.compareHide') : t('brands.compareShow'),
+                _compareMode
+                    ? t('brands.compareHide')
+                    : t('brands.compareShow'),
               ),
             ),
             ElevatedButton.icon(
@@ -94,10 +95,9 @@ class _BrandsScreenState extends ConsumerState<BrandsScreen> {
             options: [
               VyronSegmentOption(
                 value: 'all',
-                label: t(
-                  'brands.filter.all',
-                  {'count': '${domain.brands.length}'},
-                ),
+                label: t('brands.filter.all', {
+                  'count': '${domain.brands.length}',
+                }),
               ),
               VyronSegmentOption(
                 value: BrandStatus.active.wire,
@@ -174,8 +174,9 @@ class _BrandsScreenState extends ConsumerState<BrandsScreen> {
                                           color: parseVyronHexColor(
                                             r.brand.accentColor,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(2),
+                                          borderRadius: BorderRadius.circular(
+                                            2,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
@@ -402,10 +403,8 @@ class _BrandPortfolioCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             brand.niche,
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: palette.textMuted,
-                                    ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: palette.textMuted),
                           ),
                         ],
                       ),
@@ -431,10 +430,8 @@ class _BrandPortfolioCard extends StatelessWidget {
                   brand.description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: palette.textMuted,
-                        height: 1.4,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: palette.textMuted, height: 1.4),
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -477,10 +474,9 @@ class _BrandPortfolioCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     VyronToneBadge(
-                      label: t(
-                        'brands.card.pillars',
-                        {'count': '${brand.pillars.length}'},
-                      ),
+                      label: t('brands.card.pillars', {
+                        'count': '${brand.pillars.length}',
+                      }),
                       tone: VyronMetricTone.neutral,
                     ),
                     OutlinedButton.icon(
@@ -501,10 +497,7 @@ class _BrandPortfolioCard extends StatelessWidget {
 }
 
 class _CardStatCell extends StatelessWidget {
-  const _CardStatCell({
-    required this.label,
-    required this.value,
-  });
+  const _CardStatCell({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -516,10 +509,7 @@ class _CardStatCell extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 10.5, color: palette.textMuted),
-        ),
+        Text(label, style: TextStyle(fontSize: 10.5, color: palette.textMuted)),
         const SizedBox(height: 2),
         Text(
           value,
@@ -573,8 +563,9 @@ class _BrandDetailView extends ConsumerWidget {
     }
 
     final brand = localizeBrand(rawBrand, lang);
-    final brandChannels =
-        domain.channels.where((c) => c.brandId == brand.id).toList();
+    final brandChannels = domain.channels
+        .where((c) => c.brandId == brand.id)
+        .toList();
     final brandProducts = domain.products
         .where(
           (p) =>
@@ -583,8 +574,9 @@ class _BrandDetailView extends ConsumerWidget {
         )
         .map((p) => localizeProduct(p, lang))
         .toList();
-    final brandContents =
-        domain.contents.where((c) => c.brandId == brand.id).toList();
+    final brandContents = domain.contents
+        .where((c) => c.brandId == brand.id)
+        .toList();
     final brandActivities = domain.activities
         .where((a) => a.brandId == brand.id)
         .take(6)
@@ -597,10 +589,13 @@ class _BrandDetailView extends ConsumerWidget {
       brandId: brand.id,
       excludeTest: appState.excludeTestData,
     );
-    final totalViews30d =
-        brandChannels.fold<int>(0, (acc, c) => acc + c.views30d);
-    final publishedCount =
-        brandContents.where((c) => c.status == ContentStatus.published).length;
+    final totalViews30d = brandChannels.fold<int>(
+      0,
+      (acc, c) => acc + c.views30d,
+    );
+    final publishedCount = brandContents
+        .where((c) => c.status == ContentStatus.published)
+        .length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -665,16 +660,13 @@ class _BrandDetailView extends ConsumerWidget {
 
         VyronPageHeader(
           title: brand.name,
-          subtitle: t(
-            'brands.detail.subtitle',
-            {
-              'niche': brand.niche,
-              'market': labelComplianceMarket(brand.market, lang),
-              'lang': brand.language,
-              'tz': brand.timezone,
-              'archetype': labelBrandArchetype(brand.archetype, lang),
-            },
-          ),
+          subtitle: t('brands.detail.subtitle', {
+            'niche': brand.niche,
+            'market': labelComplianceMarket(brand.market, lang),
+            'lang': brand.language,
+            'tz': brand.timezone,
+            'archetype': labelBrandArchetype(brand.archetype, lang),
+          }),
           actions: [
             VyronStatusLabel(
               status: labelBrandStatus(brand.status, lang),
@@ -703,16 +695,13 @@ class _BrandDetailView extends ConsumerWidget {
                       currency,
                       lang,
                     ),
-                    helper: t(
-                      'brands.detail.kpi.receivedHelper',
-                      {
-                        'amount': formatCurrencyForLang(
-                          fin.receivedCashIn,
-                          currency,
-                          lang,
-                        ),
-                      },
-                    ),
+                    helper: t('brands.detail.kpi.receivedHelper', {
+                      'amount': formatCurrencyForLang(
+                        fin.receivedCashIn,
+                        currency,
+                        lang,
+                      ),
+                    }),
                     tone: VyronMetricTone.cobalt,
                   ),
                 ),
@@ -734,10 +723,9 @@ class _BrandDetailView extends ConsumerWidget {
                   child: VyronMetricBlock(
                     label: t('brands.detail.kpi.reach'),
                     value: formatCompactNumberForLang(totalViews30d, lang),
-                    helper: t(
-                      'brands.detail.kpi.channelsHelper',
-                      {'count': '${brandChannels.length}'},
-                    ),
+                    helper: t('brands.detail.kpi.channelsHelper', {
+                      'count': '${brandChannels.length}',
+                    }),
                   ),
                 ),
                 SizedBox(
@@ -745,14 +733,11 @@ class _BrandDetailView extends ConsumerWidget {
                   child: VyronMetricBlock(
                     label: t('brands.detail.kpi.stage'),
                     value: labelValidationStage(brand.validationStage, lang),
-                    helper: t(
-                      'brands.detail.kpi.stageHelper',
-                      {
-                        'products': '${brandProducts.length}',
-                        'published': '$publishedCount',
-                        'total': '${brandContents.length}',
-                      },
-                    ),
+                    helper: t('brands.detail.kpi.stageHelper', {
+                      'products': '${brandProducts.length}',
+                      'published': '$publishedCount',
+                      'total': '${brandContents.length}',
+                    }),
                     tone: VyronMetricTone.emerald,
                   ),
                 ),
@@ -774,10 +759,8 @@ class _BrandDetailView extends ConsumerWidget {
               const SizedBox(height: 12),
               Text(
                 brand.description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: palette.textMuted,
-                      height: 1.45,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: palette.textMuted, height: 1.45),
               ),
               const SizedBox(height: 14),
               Wrap(
@@ -802,8 +785,10 @@ class _BrandDetailView extends ConsumerWidget {
                     children: [
                       Text(
                         t('brands.detail.palette'),
-                        style:
-                            TextStyle(fontSize: 11, color: palette.textMuted),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: palette.textMuted,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Row(
@@ -820,13 +805,10 @@ class _BrandDetailView extends ConsumerWidget {
               ),
               const SizedBox(height: 14),
               Text(
-                t(
-                  'brands.detail.pillarsTitle',
-                  {'count': '${brand.pillars.length}'},
-                ),
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge
+                t('brands.detail.pillarsTitle', {
+                  'count': '${brand.pillars.length}',
+                }),
+                style: Theme.of(context).textTheme.labelLarge
                     ?.copyWith(fontSize: 12),
               ),
               const SizedBox(height: 8),
@@ -835,10 +817,7 @@ class _BrandDetailView extends ConsumerWidget {
                 runSpacing: 8,
                 children: [
                   for (final pillar in brand.pillars)
-                    VyronToneBadge(
-                      label: pillar,
-                      tone: VyronMetricTone.cobalt,
-                    ),
+                    VyronToneBadge(label: pillar, tone: VyronMetricTone.cobalt),
                 ],
               ),
             ],
@@ -855,10 +834,9 @@ class _BrandDetailView extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   VyronSectionTitle(
-                    title: t(
-                      'brands.detail.channelsTitle',
-                      {'count': '${brandChannels.length}'},
-                    ),
+                    title: t('brands.detail.channelsTitle', {
+                      'count': '${brandChannels.length}',
+                    }),
                     trailing: TextButton(
                       onPressed: () =>
                           navigateToVyronModule(ref, NavModule.channels),
@@ -931,10 +909,9 @@ class _BrandDetailView extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   VyronSectionTitle(
-                    title: t(
-                      'brands.detail.productsTitle',
-                      {'count': '${brandProducts.length}'},
-                    ),
+                    title: t('brands.detail.productsTitle', {
+                      'count': '${brandProducts.length}',
+                    }),
                     subtitle: t('brands.detail.sharedCatalogNote'),
                     trailing: TextButton(
                       onPressed: () =>
@@ -1025,10 +1002,9 @@ class _BrandDetailView extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               VyronSectionTitle(
-                title: t(
-                  'brands.detail.contentsTitle',
-                  {'count': '${brandContents.length}'},
-                ),
+                title: t('brands.detail.contentsTitle', {
+                  'count': '${brandContents.length}',
+                }),
               ),
               const SizedBox(height: 10),
               for (final item in brandContents)
@@ -1165,11 +1141,8 @@ class _BrandDetailView extends ConsumerWidget {
       title: translate(lang, 'brands.modal.editTitle'),
       language: lang,
       maxWidth: 560,
-      builder: (_) => _EditBrandDialogBody(
-        language: lang,
-        brand: brand,
-        onSave: onSave,
-      ),
+      builder: (_) =>
+          _EditBrandDialogBody(language: lang, brand: brand, onSave: onSave),
     );
   }
 }
@@ -1192,10 +1165,7 @@ class _IdentityMetaField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 11, color: palette.textMuted),
-        ),
+        Text(label, style: TextStyle(fontSize: 11, color: palette.textMuted)),
         const SizedBox(height: 3),
         Text(
           value,
@@ -1316,8 +1286,9 @@ class _CreateBrandDialogBodyState extends State<_CreateBrandDialogBody> {
         slug: slug.isEmpty ? 'brand' : slug,
         niche: niche,
         segment: niche,
-        market:
-            _marketCtrl.text.trim().isEmpty ? 'Brasil' : _marketCtrl.text.trim(),
+        market: _marketCtrl.text.trim().isEmpty
+            ? 'Brasil'
+            : _marketCtrl.text.trim(),
         language: _languageCtrl.text.trim().isEmpty
             ? 'PT-BR'
             : _languageCtrl.text.trim(),
@@ -1375,15 +1346,18 @@ class _CreateBrandDialogBodyState extends State<_CreateBrandDialogBody> {
             Expanded(
               child: TextField(
                 controller: _marketCtrl,
-                decoration: InputDecoration(labelText: t('brands.modal.market')),
+                decoration: InputDecoration(
+                  labelText: t('brands.modal.market'),
+                ),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: TextField(
                 controller: _languageCtrl,
-                decoration:
-                    InputDecoration(labelText: t('brands.modal.language')),
+                decoration: InputDecoration(
+                  labelText: t('brands.modal.language'),
+                ),
               ),
             ),
           ],
@@ -1396,8 +1370,9 @@ class _CreateBrandDialogBodyState extends State<_CreateBrandDialogBody> {
         const SizedBox(height: 12),
         TextField(
           controller: _pillarsCtrl,
-          decoration:
-              InputDecoration(labelText: t('brands.modal.pillarsLabel')),
+          decoration: InputDecoration(
+            labelText: t('brands.modal.pillarsLabel'),
+          ),
         ),
         const SizedBox(height: 12),
         TextField(
@@ -1530,8 +1505,9 @@ class _EditBrandDialogBodyState extends State<_EditBrandDialogBody> {
             Expanded(
               child: TextField(
                 controller: _windowCtrl,
-                decoration:
-                    InputDecoration(labelText: t('brands.modal.window')),
+                decoration: InputDecoration(
+                  labelText: t('brands.modal.window'),
+                ),
               ),
             ),
           ],
@@ -1557,15 +1533,18 @@ class _EditBrandDialogBodyState extends State<_EditBrandDialogBody> {
             Expanded(
               child: TextField(
                 controller: _marketCtrl,
-                decoration: InputDecoration(labelText: t('brands.modal.market')),
+                decoration: InputDecoration(
+                  labelText: t('brands.modal.market'),
+                ),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: TextField(
                 controller: _accentCtrl,
-                decoration:
-                    InputDecoration(labelText: t('brands.modal.primaryColor')),
+                decoration: InputDecoration(
+                  labelText: t('brands.modal.primaryColor'),
+                ),
               ),
             ),
           ],

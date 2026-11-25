@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import 'vyron_enums.dart';
 
 abstract final class OwnerProfile {
@@ -110,48 +111,50 @@ class Brand {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'slug': slug,
-        'niche': niche,
-        'segment': segment,
-        'market': market,
-        'language': language,
-        'timezone': timezone,
-        'publishWindow': publishWindow,
-        'archetype': archetype.wire,
-        'validationStage': validationStage.wire,
-        'pillars': pillars,
-        'status': status.wire,
-        'accentColor': accentColor,
-        'secondaryColor': secondaryColor,
-        'typographyNote': typographyNote,
-        'tagline': tagline,
-        'description': description,
-        'createdAt': createdAt,
-      };
+    'id': id,
+    'name': name,
+    'slug': slug,
+    'niche': niche,
+    'segment': segment,
+    'market': market,
+    'language': language,
+    'timezone': timezone,
+    'publishWindow': publishWindow,
+    'archetype': archetype.wire,
+    'validationStage': validationStage.wire,
+    'pillars': pillars,
+    'status': status.wire,
+    'accentColor': accentColor,
+    'secondaryColor': secondaryColor,
+    'typographyNote': typographyNote,
+    'tagline': tagline,
+    'description': description,
+    'createdAt': createdAt,
+  };
 
   factory Brand.fromJson(Map<String, dynamic> json) => Brand(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        slug: json['slug'] as String,
-        niche: json['niche'] as String,
-        segment: json['segment'] as String,
-        market: json['market'] as String,
-        language: json['language'] as String,
-        timezone: json['timezone'] as String,
-        publishWindow: json['publishWindow'] as String,
-        archetype: BrandArchetype.fromWire(json['archetype'] as String?),
-        validationStage: ValidationStage.fromWire(json['validationStage'] as String?),
-        pillars: List<String>.from(json['pillars'] as List<dynamic>),
-        status: BrandStatus.fromWire(json['status'] as String?),
-        accentColor: json['accentColor'] as String,
-        secondaryColor: json['secondaryColor'] as String,
-        typographyNote: json['typographyNote'] as String,
-        tagline: json['tagline'] as String,
-        description: json['description'] as String,
-        createdAt: json['createdAt'] as String,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    slug: json['slug'] as String,
+    niche: json['niche'] as String,
+    segment: json['segment'] as String,
+    market: json['market'] as String,
+    language: json['language'] as String,
+    timezone: json['timezone'] as String,
+    publishWindow: json['publishWindow'] as String,
+    archetype: BrandArchetype.fromWire(json['archetype'] as String?),
+    validationStage: ValidationStage.fromWire(
+      json['validationStage'] as String?,
+    ),
+    pillars: List<String>.from(json['pillars'] as List<dynamic>),
+    status: BrandStatus.fromWire(json['status'] as String?),
+    accentColor: json['accentColor'] as String,
+    secondaryColor: json['secondaryColor'] as String,
+    typographyNote: json['typographyNote'] as String,
+    tagline: json['tagline'] as String,
+    description: json['description'] as String,
+    createdAt: json['createdAt'] as String,
+  );
 }
 
 @immutable
@@ -171,14 +174,15 @@ class ProductEvidence {
   final String verifiedAt;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'sourceName': sourceName,
-        'url': url,
-        'summary': summary,
-        'verifiedAt': verifiedAt,
-      };
+    'id': id,
+    'sourceName': sourceName,
+    'url': url,
+    'summary': summary,
+    'verifiedAt': verifiedAt,
+  };
 
-  factory ProductEvidence.fromJson(Map<String, dynamic> json) => ProductEvidence(
+  factory ProductEvidence.fromJson(Map<String, dynamic> json) =>
+      ProductEvidence(
         id: json['id'] as String,
         sourceName: json['sourceName'] as String,
         url: json['url'] as String,
@@ -206,17 +210,20 @@ class ProductDecisionLog {
   final String timestamp;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'previousStatus': previousStatus.wire,
-        'newStatus': newStatus.wire,
-        'justification': justification,
-        'actor': actor,
-        'timestamp': timestamp,
-      };
+    'id': id,
+    'previousStatus': previousStatus.wire,
+    'newStatus': newStatus.wire,
+    'justification': justification,
+    'actor': actor,
+    'timestamp': timestamp,
+  };
 
-  factory ProductDecisionLog.fromJson(Map<String, dynamic> json) => ProductDecisionLog(
+  factory ProductDecisionLog.fromJson(Map<String, dynamic> json) =>
+      ProductDecisionLog(
         id: json['id'] as String,
-        previousStatus: ProductStatus.fromWire(json['previousStatus'] as String?),
+        previousStatus: ProductStatus.fromWire(
+          json['previousStatus'] as String?,
+        ),
         newStatus: ProductStatus.fromWire(json['newStatus'] as String?),
         justification: json['justification'] as String,
         actor: json['actor'] as String,
@@ -330,20 +337,26 @@ class Product {
       remunerationModel: remunerationModel ?? this.remunerationModel,
       price: clearPrice ? null : (price ?? this.price),
       currency: currency ?? this.currency,
-      commissionRatePct:
-          clearCommissionRatePct ? null : (commissionRatePct ?? this.commissionRatePct),
+      commissionRatePct: clearCommissionRatePct
+          ? null
+          : (commissionRatePct ?? this.commissionRatePct),
       cpaValue: clearCpaValue ? null : (cpaValue ?? this.cpaValue),
       epcValue: clearEpcValue ? null : (epcValue ?? this.epcValue),
-      cookieWindowDays:
-          clearCookieWindowDays ? null : (cookieWindowDays ?? this.cookieWindowDays),
-      opportunityScore:
-          clearOpportunityScore ? null : (opportunityScore ?? this.opportunityScore),
+      cookieWindowDays: clearCookieWindowDays
+          ? null
+          : (cookieWindowDays ?? this.cookieWindowDays),
+      opportunityScore: clearOpportunityScore
+          ? null
+          : (opportunityScore ?? this.opportunityScore),
       dataConfidence: dataConfidence ?? this.dataConfidence,
-      qualityGrade: clearQualityGrade ? null : (qualityGrade ?? this.qualityGrade),
+      qualityGrade: clearQualityGrade
+          ? null
+          : (qualityGrade ?? this.qualityGrade),
       complianceState: complianceState ?? this.complianceState,
       complianceMarket: complianceMarket ?? this.complianceMarket,
-      demandTrendPct:
-          clearDemandTrendPct ? null : (demandTrendPct ?? this.demandTrendPct),
+      demandTrendPct: clearDemandTrendPct
+          ? null
+          : (demandTrendPct ?? this.demandTrendPct),
       competitionLevel: competitionLevel ?? this.competitionLevel,
       status: status ?? this.status,
       evidence: evidence ?? this.evidence,
@@ -353,67 +366,70 @@ class Product {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'externalId': externalId,
-        'brandId': brandId,
-        'linkedBrandIds': linkedBrandIds,
-        'isTest': isTest,
-        'name': name,
-        'category': category,
-        'platform': platform,
-        'remunerationModel': remunerationModel.wire,
-        'price': price,
-        'currency': currency.wire,
-        'commissionRatePct': commissionRatePct,
-        'cpaValue': cpaValue,
-        'epcValue': epcValue,
-        'cookieWindowDays': cookieWindowDays,
-        'opportunityScore': opportunityScore,
-        'dataConfidence': dataConfidence.wire,
-        'qualityGrade': qualityGrade?.wire,
-        'complianceState': complianceState.wire,
-        'complianceMarket': complianceMarket,
-        'demandTrendPct': demandTrendPct,
-        'competitionLevel': competitionLevel.wire,
-        'status': status.wire,
-        'evidence': evidence.map((e) => e.toJson()).toList(),
-        'decisions': decisions.map((e) => e.toJson()).toList(),
-        'updatedAt': updatedAt,
-      };
+    'id': id,
+    'externalId': externalId,
+    'brandId': brandId,
+    'linkedBrandIds': linkedBrandIds,
+    'isTest': isTest,
+    'name': name,
+    'category': category,
+    'platform': platform,
+    'remunerationModel': remunerationModel.wire,
+    'price': price,
+    'currency': currency.wire,
+    'commissionRatePct': commissionRatePct,
+    'cpaValue': cpaValue,
+    'epcValue': epcValue,
+    'cookieWindowDays': cookieWindowDays,
+    'opportunityScore': opportunityScore,
+    'dataConfidence': dataConfidence.wire,
+    'qualityGrade': qualityGrade?.wire,
+    'complianceState': complianceState.wire,
+    'complianceMarket': complianceMarket,
+    'demandTrendPct': demandTrendPct,
+    'competitionLevel': competitionLevel.wire,
+    'status': status.wire,
+    'evidence': evidence.map((e) => e.toJson()).toList(),
+    'decisions': decisions.map((e) => e.toJson()).toList(),
+    'updatedAt': updatedAt,
+  };
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
-        id: json['id'] as String,
-        externalId: json['externalId'] as String,
-        brandId: json['brandId'] as String,
-        linkedBrandIds: List<String>.from(json['linkedBrandIds'] as List<dynamic>),
-        isTest: json['isTest'] as bool? ?? false,
-        name: json['name'] as String,
-        category: json['category'] as String,
-        platform: json['platform'] as String,
-        remunerationModel:
-            RemunerationModel.fromWire(json['remunerationModel'] as String?),
-        price: (json['price'] as num?)?.toDouble(),
-        currency: CurrencyCode.fromWire(json['currency'] as String?),
-        commissionRatePct: (json['commissionRatePct'] as num?)?.toDouble(),
-        cpaValue: (json['cpaValue'] as num?)?.toDouble(),
-        epcValue: (json['epcValue'] as num?)?.toDouble(),
-        cookieWindowDays: (json['cookieWindowDays'] as num?)?.toInt(),
-        opportunityScore: (json['opportunityScore'] as num?)?.toInt(),
-        dataConfidence: DataConfidence.fromWire(json['dataConfidence'] as String?),
-        qualityGrade: ProductQualityGrade.fromWire(json['qualityGrade'] as String?),
-        complianceState:
-            ComplianceState.fromWire(json['complianceState'] as String?),
-        complianceMarket: json['complianceMarket'] as String,
-        demandTrendPct: (json['demandTrendPct'] as num?)?.toDouble(),
-        competitionLevel:
-            CompetitionLevel.fromWire(json['competitionLevel'] as String?),
-        status: ProductStatus.fromWire(json['status'] as String?),
-        evidence: (json['evidence'] as List<dynamic>)
-            .map((e) => ProductEvidence.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        decisions: (json['decisions'] as List<dynamic>)
-            .map((e) => ProductDecisionLog.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        updatedAt: json['updatedAt'] as String,
-      );
+    id: json['id'] as String,
+    externalId: json['externalId'] as String,
+    brandId: json['brandId'] as String,
+    linkedBrandIds: List<String>.from(json['linkedBrandIds'] as List<dynamic>),
+    isTest: json['isTest'] as bool? ?? false,
+    name: json['name'] as String,
+    category: json['category'] as String,
+    platform: json['platform'] as String,
+    remunerationModel: RemunerationModel.fromWire(
+      json['remunerationModel'] as String?,
+    ),
+    price: (json['price'] as num?)?.toDouble(),
+    currency: CurrencyCode.fromWire(json['currency'] as String?),
+    commissionRatePct: (json['commissionRatePct'] as num?)?.toDouble(),
+    cpaValue: (json['cpaValue'] as num?)?.toDouble(),
+    epcValue: (json['epcValue'] as num?)?.toDouble(),
+    cookieWindowDays: (json['cookieWindowDays'] as num?)?.toInt(),
+    opportunityScore: (json['opportunityScore'] as num?)?.toInt(),
+    dataConfidence: DataConfidence.fromWire(json['dataConfidence'] as String?),
+    qualityGrade: ProductQualityGrade.fromWire(json['qualityGrade'] as String?),
+    complianceState: ComplianceState.fromWire(
+      json['complianceState'] as String?,
+    ),
+    complianceMarket: json['complianceMarket'] as String,
+    demandTrendPct: (json['demandTrendPct'] as num?)?.toDouble(),
+    competitionLevel: CompetitionLevel.fromWire(
+      json['competitionLevel'] as String?,
+    ),
+    status: ProductStatus.fromWire(json['status'] as String?),
+    evidence: (json['evidence'] as List<dynamic>)
+        .map((e) => ProductEvidence.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    decisions: (json['decisions'] as List<dynamic>)
+        .map((e) => ProductDecisionLog.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    updatedAt: json['updatedAt'] as String,
+  );
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vyron/app.dart';
@@ -47,9 +48,15 @@ void main() {
         await tester.tap(find.byKey(const Key('vyron-nav-content')));
         await tester.pumpAndSettle();
 
-        expect(find.text('Content Studio & Aprovação por Hash'), findsOneWidget);
+        expect(
+          find.text('Content Studio & Aprovação por Hash'),
+          findsOneWidget,
+        );
         expect(find.byKey(const Key('content-hash-panel')), findsOneWidget);
-        expect(find.byKey(const Key('content-check-hashMatch')), findsOneWidget);
+        expect(
+          find.byKey(const Key('content-check-hashMatch')),
+          findsOneWidget,
+        );
         expect(
           find.byKey(const Key('content-check-systemControlPhase')),
           findsOneWidget,
@@ -109,7 +116,12 @@ void main() {
         await tester.pumpAndSettle();
 
         // Switch to Editorial Calendar and tap a scheduled item
-        await tester.tap(find.text('Calendário Editorial'));
+        final calTab = find.descendant(
+          of: find.byKey(const Key('content-subview-switch')),
+          matching: find.text('Calendário Editorial'),
+        );
+        await tester.ensureVisible(calTab);
+        await tester.tap(calTab);
         await tester.pumpAndSettle();
 
         expect(find.byKey(const Key('content-calendar-panel')), findsOneWidget);
@@ -139,7 +151,10 @@ void main() {
         await tester.tap(find.byKey(const Key('vyron-nav-content')));
         await tester.pumpAndSettle();
 
-        expect(find.text('Content Studio & Aprovação por Hash'), findsOneWidget);
+        expect(
+          find.text('Content Studio & Aprovação por Hash'),
+          findsOneWidget,
+        );
 
         await tester.tap(find.text('Calendário Editorial'));
         await tester.pumpAndSettle();
@@ -163,9 +178,21 @@ void main() {
         expect(find.text('Gestão de Canais'), findsOneWidget);
         expect(find.text('Audiência total agregada'), findsOneWidget);
 
-        await tester.tap(find.text('YouTube'));
+        await tester.tap(
+          find.descendant(
+            of: find.byKey(const Key('channels-platform-filter')),
+            matching: find.text('YouTube'),
+          ),
+        );
         await tester.pumpAndSettle();
-        expect(find.byKey(const Key('channel-row-ch-apex-yt')), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (w) =>
+                w.key == const Key('channel-row-ch-apex-yt') ||
+                w.key == const Key('channel-card-ch-apex-yt'),
+          ),
+          findsOneWidget,
+        );
 
         await tester.tap(find.byKey(const Key('channel-sync-ch-apex-yt')));
         await tester.pumpAndSettle();
@@ -179,7 +206,9 @@ void main() {
           findsOneWidget,
         );
 
-        await tester.tap(find.byKey(const Key('channels-add-btn')));
+        final addChannelBtn = find.byKey(const Key('channels-add-btn'));
+        await tester.ensureVisible(addChannelBtn);
+        await tester.tap(addChannelBtn);
         await tester.pumpAndSettle();
         await tester.enterText(
           find.byKey(const Key('create-channel-name')),
@@ -189,7 +218,11 @@ void main() {
           find.byKey(const Key('create-channel-handle')),
           '@kinetixshorts',
         );
-        await tester.tap(find.byKey(const Key('create-channel-submit')));
+        final createChannelSubmit = find.byKey(
+          const Key('create-channel-submit'),
+        );
+        await tester.ensureVisible(createChannelSubmit);
+        await tester.tap(createChannelSubmit);
         await tester.pumpAndSettle();
 
         expect(find.text('Kinetix Shorts Lab'), findsWidgets);
@@ -210,7 +243,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Analytics & Inteligência'), findsOneWidget);
-        expect(find.textContaining('Estimativa [Em investigação]'), findsWidgets);
+        expect(
+          find.textContaining('Estimativa [Em investigação]'),
+          findsWidgets,
+        );
 
         await tester.tap(find.text('CTR (%)'));
         await tester.pumpAndSettle();

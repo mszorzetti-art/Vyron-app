@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+
 import '../theme/vyron_colors.dart';
 
 enum VyronMarkVariant {
@@ -34,9 +35,7 @@ class VyronMark extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size * aspectRatio,
-      child: CustomPaint(
-        painter: VyronMarkPainter(variant: variant),
-      ),
+      child: CustomPaint(painter: VyronMarkPainter(variant: variant)),
     );
   }
 }
@@ -139,10 +138,10 @@ class VyronWordmark extends StatelessWidget {
     final wordColor = variant == VyronMarkVariant.white
         ? VyronColors.coolWhite
         : variant == VyronMarkVariant.obsidian
-            ? VyronColors.obsidianBlack
-            : variant == VyronMarkVariant.titanium
-                ? VyronColors.titanium
-                : palette.textPrimary;
+        ? VyronColors.obsidianBlack
+        : variant == VyronMarkVariant.titanium
+        ? VyronColors.titanium
+        : palette.textPrimary;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -150,11 +149,7 @@ class VyronWordmark extends StatelessWidget {
         if (showMark) VyronMark(size: markSize, variant: variant),
         if (showMark && showDivider) ...[
           const SizedBox(width: 14),
-          Container(
-            width: 1,
-            height: markSize * 0.85,
-            color: palette.border,
-          ),
+          Container(width: 1, height: markSize * 0.85, color: palette.border),
           const SizedBox(width: 14),
         ] else if (showMark) ...[
           const SizedBox(width: 12),

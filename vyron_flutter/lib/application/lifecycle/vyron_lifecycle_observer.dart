@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../state/vyron_access_notifier.dart';
 
 /// Observador global de ciclo de vida Android/iOS e atividade do usuário:
@@ -8,10 +10,7 @@ import '../state/vyron_access_notifier.dart';
 /// - Verifica expiração de sessão e tempo de ociosidade a cada 15s.
 /// - Reavalia imediatamente ao retornar para primeiro plano (`AppLifecycleState.resumed`).
 class VyronLifecycleObserver extends ConsumerStatefulWidget {
-  const VyronLifecycleObserver({
-    super.key,
-    required this.child,
-  });
+  const VyronLifecycleObserver({super.key, required this.child});
 
   final Widget child;
 
@@ -28,13 +27,10 @@ class _VyronLifecycleObserverState extends ConsumerState<VyronLifecycleObserver>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _idleTimer = Timer.periodic(
-      const Duration(seconds: 15),
-      (_) {
-        if (!mounted) return;
-        ref.read(vyronAccessProvider.notifier).checkInactivityAndExpiry();
-      },
-    );
+    _idleTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (!mounted) return;
+      ref.read(vyronAccessProvider.notifier).checkInactivityAndExpiry();
+    });
   }
 
   @override

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Official Vyron Graphite & Cobalt visual identity tokens.
 /// Preserved identically from src/index.css and official brand sheets.
@@ -137,7 +137,11 @@ class VyronPaletteExtension extends ThemeExtension<VyronPaletteExtension> {
       background: Color.lerp(background, other.background, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       surfaceAlt: Color.lerp(surfaceAlt, other.surfaceAlt, t)!,
-      sidebarBackground: Color.lerp(sidebarBackground, other.sidebarBackground, t)!,
+      sidebarBackground: Color.lerp(
+        sidebarBackground,
+        other.sidebarBackground,
+        t,
+      )!,
       border: Color.lerp(border, other.border, t)!,
       panelBorder: Color.lerp(panelBorder, other.panelBorder, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,

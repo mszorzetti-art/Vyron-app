@@ -1,6 +1,8 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -154,8 +156,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                   e.type == FinanceEntryType.directRevenue) &&
               e.stage == CommissionStage.received;
       }
-    }).toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    }).toList()..sort((a, b) => b.date.compareTo(a.date));
 
     // Group by platform (realized/confirmed/pending, strictly excluding projections)
     final platformMap = <String, _PlatformTotals>{};
@@ -258,7 +259,8 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
     FinanceCashflowPoint? selectedCashflowPoint;
     if (_selectedCashflowDate != null) {
       for (final pt in cashflowRes.points) {
-        if (pt.id == _selectedCashflowDate || pt.date == _selectedCashflowDate) {
+        if (pt.id == _selectedCashflowDate ||
+            pt.date == _selectedCashflowDate) {
           selectedCashflowPoint = pt;
           break;
         }
@@ -312,8 +314,8 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
             final cols = constraints.maxWidth >= 980
                 ? 4
                 : constraints.maxWidth >= 560
-                    ? 2
-                    : 1;
+                ? 2
+                : 1;
             const spacing = 12.0;
             final cardWidth =
                 (constraints.maxWidth - (cols - 1) * spacing) / cols;
@@ -472,9 +474,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                                   lang,
                                 ),
                               }),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
+                              style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(fontSize: 13),
                             ),
                           ),
@@ -592,13 +592,17 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                         options: [
                           VyronSegmentOption(
                             value: 'table',
-                            label:
-                                translate(lang, 'finance.chart.platformTableTab'),
+                            label: translate(
+                              lang,
+                              'finance.chart.platformTableTab',
+                            ),
                           ),
                           VyronSegmentOption(
                             value: 'chart',
-                            label:
-                                translate(lang, 'finance.chart.platformChartTab'),
+                            label: translate(
+                              lang,
+                              'finance.chart.platformChartTab',
+                            ),
                           ),
                         ],
                         value: _platformView,
@@ -635,9 +639,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Text(
                         translate(lang, 'charts.emptyPeriod'),
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
+                        style: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(color: palette.textMuted),
                       ),
                     )
@@ -652,11 +654,13 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                                   margin: const EdgeInsets.only(bottom: 8),
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: palette.surfaceAlt
-                                        .withValues(alpha: 0.25),
+                                    color: palette.surfaceAlt.withValues(
+                                      alpha: 0.25,
+                                    ),
                                     borderRadius: BorderRadius.circular(6),
-                                    border:
-                                        Border.all(color: palette.panelBorder),
+                                    border: Border.all(
+                                      color: palette.panelBorder,
+                                    ),
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
@@ -729,7 +733,9 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom: BorderSide(color: palette.panelBorder),
+                                  bottom: BorderSide(
+                                    color: palette.panelBorder,
+                                  ),
                                 ),
                               ),
                               child: Row(
@@ -782,13 +788,15 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                             ),
                             for (final row in platformBreakdown)
                               Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(
-                                      color: palette.panelBorder
-                                          .withValues(alpha: 0.5),
+                                      color: palette.panelBorder.withValues(
+                                        alpha: 0.5,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -948,11 +956,11 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                       children: [
                         Text(
                           translate(lang, 'finance.fxTitle'),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: palette.textPrimary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: palette.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -960,9 +968,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                           children: [
                             Text(
                               translate(lang, 'finance.fxUsd'),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: palette.textMuted),
                             ),
                             Text(
@@ -988,9 +994,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                           children: [
                             Text(
                               translate(lang, 'finance.fxEur'),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: palette.textMuted),
                             ),
                             Text(
@@ -1090,8 +1094,9 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                               decoration: BoxDecoration(
                                 color: row.isTest
                                     ? VyronColors.amber.withValues(alpha: 0.08)
-                                    : palette.surfaceAlt
-                                        .withValues(alpha: 0.25),
+                                    : palette.surfaceAlt.withValues(
+                                        alpha: 0.25,
+                                      ),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: palette.panelBorder),
                               ),
@@ -1149,9 +1154,7 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                                   const SizedBox(height: 4),
                                   Text(
                                     '${_brandName(domain.brands, row.brandId, lang)} · ${row.platform}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
+                                    style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(color: palette.textMuted),
                                   ),
                                   const SizedBox(height: 8),
@@ -1183,15 +1186,18 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                                           fontFamily: VyronTypography.mono,
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
-                                          color: row.type ==
-                                                      FinanceEntryType.expense ||
+                                          color:
+                                              row.type ==
+                                                      FinanceEntryType
+                                                          .expense ||
                                                   row.type ==
                                                       FinanceEntryType
                                                           .reinvestment
                                               ? (isDark
-                                                  ? VyronColors.crimsonDarkText
-                                                  : VyronColors
-                                                      .crimsonLightText)
+                                                    ? VyronColors
+                                                          .crimsonDarkText
+                                                    : VyronColors
+                                                          .crimsonLightText)
                                               : palette.textPrimary,
                                           fontFeatures: const [
                                             FontFeature.tabularFigures(),
@@ -1210,9 +1216,8 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
 
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints:
-                            BoxConstraints(minWidth: constraints.maxWidth - 28),
+                      child: SizedBox(
+                        width: math.max(constraints.maxWidth - 28, 760),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -1223,8 +1228,9 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                               ),
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom:
-                                      BorderSide(color: palette.panelBorder),
+                                  bottom: BorderSide(
+                                    color: palette.panelBorder,
+                                  ),
                                 ),
                               ),
                               child: Row(
@@ -1312,13 +1318,15 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: row.isTest
-                                      ? VyronColors.amber
-                                          .withValues(alpha: 0.06)
+                                      ? VyronColors.amber.withValues(
+                                          alpha: 0.06,
+                                        )
                                       : null,
                                   border: Border(
                                     bottom: BorderSide(
-                                      color: palette.panelBorder
-                                          .withValues(alpha: 0.5),
+                                      color: palette.panelBorder.withValues(
+                                        alpha: 0.5,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1338,8 +1346,9 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                                     Expanded(
                                       flex: 4,
                                       child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 8),
+                                        padding: const EdgeInsets.only(
+                                          right: 8,
+                                        ),
                                         child: Wrap(
                                           spacing: 6,
                                           runSpacing: 4,
@@ -1452,15 +1461,18 @@ class _FinanceScreenState extends ConsumerState<FinanceScreen> {
                                           fontFamily: VyronTypography.mono,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
-                                          color: row.type ==
-                                                      FinanceEntryType.expense ||
+                                          color:
+                                              row.type ==
+                                                      FinanceEntryType
+                                                          .expense ||
                                                   row.type ==
                                                       FinanceEntryType
                                                           .reinvestment
                                               ? (isDark
-                                                  ? VyronColors.crimsonDarkText
-                                                  : VyronColors
-                                                      .crimsonLightText)
+                                                    ? VyronColors
+                                                          .crimsonDarkText
+                                                    : VyronColors
+                                                          .crimsonLightText)
                                               : palette.textPrimary,
                                           fontFeatures: const [
                                             FontFeature.tabularFigures(),
@@ -1492,11 +1504,7 @@ class _PlatformTotals {
 }
 
 class _MiniVal extends StatelessWidget {
-  const _MiniVal({
-    required this.label,
-    required this.val,
-    required this.color,
-  });
+  const _MiniVal({required this.label, required this.val, required this.color});
 
   final String label;
   final String val;
@@ -1557,10 +1565,8 @@ class _OutflowCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: palette.textMuted,
-                  fontSize: 11,
-                ),
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: palette.textMuted, fontSize: 11),
           ),
           const SizedBox(height: 6),
           Text(
@@ -1650,13 +1656,16 @@ class _CreateFinanceEntryFormState
     if (desc.isEmpty) return;
     final parsedAmount =
         double.tryParse(_amountController.text.trim().replaceAll(',', '.')) ??
-            0.0;
-    final effectiveStage = (_type == FinanceEntryType.expense ||
+        0.0;
+    final effectiveStage =
+        (_type == FinanceEntryType.expense ||
             _type == FinanceEntryType.reinvestment)
         ? CommissionStage.received
         : _stage;
 
-    ref.read(vyronStateProvider.notifier).addFinanceEntry(
+    ref
+        .read(vyronStateProvider.notifier)
+        .addFinanceEntry(
           FinanceEntryCreateInput(
             brandId: _brandId,
             platform: _platformController.text.trim().isNotEmpty
@@ -1683,7 +1692,8 @@ class _CreateFinanceEntryFormState
   Widget build(BuildContext context) {
     final lang = widget.language;
     final palette = context.vyronColors;
-    final stageLocked = _type == FinanceEntryType.expense ||
+    final stageLocked =
+        _type == FinanceEntryType.expense ||
         _type == FinanceEntryType.reinvestment;
 
     return Column(
@@ -1803,8 +1813,9 @@ class _CreateFinanceEntryFormState
                   TextField(
                     key: const Key('finance-modal-amount'),
                     controller: _amountController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ],
               ),

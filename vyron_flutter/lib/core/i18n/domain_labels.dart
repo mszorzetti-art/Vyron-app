@@ -118,10 +118,7 @@ String labelAgentState(AgentRunState state, UiLanguage lang) {
   }
 }
 
-String labelAgentExecutionStatus(
-  AgentExecutionStatus status,
-  UiLanguage lang,
-) {
+String labelAgentExecutionStatus(AgentExecutionStatus status, UiLanguage lang) {
   if (lang == UiLanguage.enUS) return status.wire;
   switch (status) {
     case AgentExecutionStatus.success:
@@ -225,10 +222,7 @@ String labelFinanceType(FinanceEntryType type, UiLanguage lang) {
   }
 }
 
-String labelSystemControlState(
-  SystemControlStatus state,
-  UiLanguage lang,
-) {
+String labelSystemControlState(SystemControlStatus state, UiLanguage lang) {
   if (lang == UiLanguage.enUS) {
     return state == SystemControlStatus.active ? 'Active' : 'Halted';
   }

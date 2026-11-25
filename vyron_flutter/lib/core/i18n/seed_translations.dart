@@ -78,8 +78,7 @@ const Map<String, _BrandEnTranslation> _brandTranslations = {
     niche: 'Hardware & Productivity Setups',
     segment: 'Tech Reviews & High-Ticket Affiliate',
     tagline: 'Applied engineering for the workspace.',
-    description:
-        'Editorial and commercial operation focused on mechanical keyboards, OLED monitors, and high-precision ergonomics for tech professionals in Brazil (CDC/CONAR compliance).',
+    description: 'Editorial and commercial operation focused on mechanical keyboards, OLED monitors, and high-precision ergonomics for tech professionals in Brazil (CDC/CONAR compliance).',
     typographyNote: 'Plus Jakarta Sans + JetBrains Mono for benchmarks',
     pillars: [
       'Desk Ergonomics & Biomechanics',
@@ -92,8 +91,7 @@ const Map<String, _BrandEnTranslation> _brandTranslations = {
     niche: 'Minimalist Workspace & Industrial Design',
     segment: 'Digital Products & Curated Gear Affiliate',
     tagline: 'Quiet precision for modern work.',
-    description:
-        'International brand prepared for the EU/France pilot (Loi 2023-451 / DSA), focused on architectural desk setups and digital ergonomics guides.',
+    description: 'International brand prepared for the EU/France pilot (Loi 2023-451 / DSA), focused on architectural desk setups and digital ergonomics guides.',
     typographyNote: 'Manrope + tabular numerals',
     pillars: [
       'Asymmetric Lighting & OLED Contrast',
@@ -105,8 +103,7 @@ const Map<String, _BrandEnTranslation> _brandTranslations = {
     niche: 'Acoustics, IEMs & Audio Production',
     segment: 'Audio Gear & Software Plugins',
     tagline: 'Clarity measured in decibels.',
-    description:
-        'Technical channel and portal specializing in audio interfaces, dynamic microphones, and DSP suites monetized via PartnerStack and Amazon Global.',
+    description: 'Technical channel and portal specializing in audio interfaces, dynamic microphones, and DSP suites monetized via PartnerStack and Amazon Global.',
     typographyNote: 'Outfit + IBM Plex Mono',
     pillars: [
       'Vocal Capture in Untreated Rooms',
@@ -118,8 +115,7 @@ const Map<String, _BrandEnTranslation> _brandTranslations = {
     niche: 'Home Automation & Smart Living',
     segment: 'Connected Home',
     tagline: 'Quiet domestic routines.',
-    description:
-        'Vertical on tactical pause for Matter/Thread portfolio review and direct partnership renegotiation.',
+    description: 'Vertical on tactical pause for Matter/Thread portfolio review and direct partnership renegotiation.',
     typographyNote: 'DM Sans',
     pillars: [
       'Local Matter & Thread Protocol',
@@ -160,14 +156,11 @@ const Map<String, _ProductTranslation> _productTranslations = {
   'prod-keychron-q1': _ProductTranslation(
     enCategory: 'Mechanical Keyboards',
     enEvidenceSummaries: {
-      'ev-1':
-          '+24% search growth for "wireless custom keyboard" over the last 90 days.',
-      'ev-2':
-          '4.8% average conversion rate across comparative reviews over 12 minutes.',
+      'ev-1': '+24% search growth for "wireless custom keyboard" over the last 90 days.',
+      'ev-2': '4.8% average conversion rate across comparative reviews over 12 minutes.',
     },
     enDecisionJustifications: {
-      'dec-1':
-          r'EPC above R$ 2.00 with strong retention among software engineering audiences.',
+      'dec-1': r'EPC above R$ 2.00 with strong retention among software engineering audiences.',
     },
   ),
   'prod-dell-oled': _ProductTranslation(
@@ -177,33 +170,28 @@ const Map<String, _ProductTranslation> _productTranslations = {
       'ev-3': 'Extended 30-day cookie window + CPA bonus on corporate orders.',
     },
     enDecisionJustifications: {
-      'dec-2':
-          'High ticket with a 30-day cookie and low saturation on Brazilian YouTube.',
+      'dec-2': 'High ticket with a 30-day cookie and low saturation on Brazilian YouTube.',
     },
   ),
   'prod-benq-halo': _ProductTranslation(
     enCategory: 'Desk Lighting',
     enEvidenceSummaries: {
-      'ev-4':
-          'Minimalist desk setup pins with ScreenBar achieve 2.3x account average CTR.',
+      'ev-4': 'Minimalist desk setup pins with ScreenBar achieve 2.3x account average CTR.',
     },
     enDecisionJustifications: {
-      'dec-3':
-          'Recurring conversion via Pinterest and YouTube Shorts for US/EU audiences.',
+      'dec-3': 'Recurring conversion via Pinterest and YouTube Shorts for US/EU audiences.',
     },
   ),
   'prod-ergo-chair-x': _ProductTranslation(
     enCategory: 'Ergonomic Chairs',
     enEvidenceSummaries: {
-      'ev-5':
-          'Signal spotted across 14 r/battlestations threads with explicit purchase intent.',
+      'ev-5': 'Signal spotted across 14 r/battlestations threads with explicit purchase intent.',
     },
   ),
   'prod-shure-mv7x': _ProductTranslation(
     enCategory: 'Dynamic Microphones',
     enEvidenceSummaries: {
-      'ev-6':
-          'Monthly search volume grew 22% with low supply in practical comparisons.',
+      'ev-6': 'Monthly search volume grew 22% with low supply in practical comparisons.',
     },
     enDecisionJustifications: {
       'dec-4': 'Strong synergy with acoustic treatment scripts for creators.',
@@ -219,27 +207,23 @@ const Map<String, _ProductTranslation> _productTranslations = {
     enName: 'Loupedeck CT Console (EU Batch)',
     enCategory: 'Workflow Controllers',
     enEvidenceSummaries: {
-      'ev-unknown':
-          'EPC and cookie window omitted by advertiser in initial feed (kept as null).',
+      'ev-unknown': 'EPC and cookie window omitted by advertiser in initial feed (kept as null).',
     },
   ),
   'prod-cheap-hub': _ProductTranslation(
     enName: 'Generic 11-in-1 USB Hub',
     enCategory: 'Accessories',
     enEvidenceSummaries: {
-      'ev-8':
-          r'Net margin per click well below Apex operational floor (R$ 1.00 EPC).',
+      'ev-8': r'Net margin per click well below Apex operational floor (R$ 1.00 EPC).',
     },
     enDecisionJustifications: {
-      'dec-5':
-          'Low ticket, high return rate, and Grade C quality misaligned with positioning.',
+      'dec-5': 'Low ticket, high return rate, and Grade C quality misaligned with positioning.',
     },
   ),
   'prod-aqara-hub': _ProductTranslation(
     enCategory: 'Smart Home',
     enDecisionJustifications: {
-      'dec-6':
-          'Temporarily archived due to tactical pause of the Veloce Casa brand.',
+      'dec-6': 'Temporarily archived due to tactical pause of the Veloce Casa brand.',
     },
   ),
   'prod-seed-test': _ProductTranslation(
@@ -302,39 +286,28 @@ class _ContentDisplayTranslation {
 const Map<String, _ContentDisplayTranslation> _contentDisplayMap = {
   'cnt-1': _ContentDisplayTranslation(
     enTitle: 'Keychron Q1 Pro after 90 days: worth it in Brazil?',
-    enBrief:
-        'Technical review of wireless latency, gasket mount acoustics, and local/import cost.',
-    enDescription:
-        'Technical evaluation after 90 days of coding and design work, with real Bluetooth/2.4GHz latency and acoustic measurements.',
+    enBrief: 'Technical review of wireless latency, gasket mount acoustics, and local/import cost.',
+    enDescription: 'Technical evaluation after 90 days of coding and design work, with real Bluetooth/2.4GHz latency and acoustic measurements.',
     enVersionNotes: {
       'v2.0': 'Approved and published with tracked link cards.',
       'v1.0': 'Initial script structured from the product brief.',
     },
-    enDossierClaims: {
-      'dos-1': '1000Hz wired polling latency vs 90Hz BT 5.1',
-    },
+    enDossierClaims: {'dos-1': '1000Hz wired polling latency vs 90Hz BT 5.1'},
   ),
   'cnt-2': _ContentDisplayTranslation(
     enTitle: '4K Monitor for Code & Design: Dell UltraSharp 32 in practice',
-    enBrief:
-        'Demonstrate text sharpness (subpixel layout), built-in Thunderbolt hub, and sRGB calibration.',
-    enDescription:
-        'Evaluation of subpixel layout for crisp text, 90W Thunderbolt hub, and factory sRGB/DCI-P3 calibration.',
-    enVersionNotes: {
-      'v1.1': 'Refined intro to emphasize visual ergonomics.',
-    },
+    enBrief: 'Demonstrate text sharpness (subpixel layout), built-in Thunderbolt hub, and sRGB calibration.',
+    enDescription: 'Evaluation of subpixel layout for crisp text, 90W Thunderbolt hub, and factory sRGB/DCI-P3 calibration.',
+    enVersionNotes: {'v1.1': 'Refined intro to emphasize visual ergonomics.'},
     enDossierClaims: {
-      'dos-2':
-          '2000:1 IPS Black static contrast measured with Calibrite colorimeter',
+      'dos-2': '2000:1 IPS Black static contrast measured with Calibrite colorimeter',
       'dos-3': 'Native HiDPI scaling on macOS Sonoma/Sequoia',
     },
   ),
   'cnt-3': _ContentDisplayTranslation(
     enTitle: 'Sound Test: Banana vs Brown Switch in CNC Aluminum',
-    enBrief:
-        '42-second vertical cut focused on binaural audio with no background music.',
-    enDescription:
-        'Direct binaural comparison between tactile switches with zero soundtrack, aimed at 8h/day workers.',
+    enBrief: '42-second vertical cut focused on binaural audio with no background music.',
+    enDescription: 'Direct binaural comparison between tactile switches with zero soundtrack, aimed at 8h/day workers.',
     enVersionNotes: {
       'v1.0': 'Approved for private/unlisted delivery in Phase A.',
     },
@@ -343,31 +316,22 @@ const Map<String, _ContentDisplayTranslation> _contentDisplayMap = {
     },
   ),
   'cnt-4': _ContentDisplayTranslation(
-    enVersionNotes: {
-      'v2.0': 'Published across YouTube & Pinterest embed.',
-    },
+    enVersionNotes: {'v2.0': 'Published across YouTube & Pinterest embed.'},
     enDossierClaims: {
       'dos-5': 'Recommended 500 lux illuminance on work surface',
     },
   ),
   'cnt-5': _ContentDisplayTranslation(
-    enAiDisclosureText:
-        'Conceptual diagrams assisted by synthetic rendering (labeled per YouTube/EU standard).',
-    enVersionNotes: {
-      'v1.0': 'Draft generated from weekly content plan.',
-    },
+    enAiDisclosureText: 'Conceptual diagrams assisted by synthetic rendering (labeled per YouTube/EU standard).',
+    enVersionNotes: {'v1.0': 'Draft generated from weekly content plan.'},
   ),
   'cnt-6': _ContentDisplayTranslation(
-    enVersionNotes: {
-      'v1.0': 'Initial brief opened.',
-    },
+    enVersionNotes: {'v1.0': 'Initial brief opened.'},
   ),
   'cnt-7': _ContentDisplayTranslation(
     enTitle: 'Definitive Guide: Pixel Density (PPI) for macOS and Windows',
-    enBrief:
-        'Evergreen technical guide with comparative 1440p vs 4K vs 5K scaling calculator.',
-    enDescription:
-        'Evergreen technical article with HiDPI scaling tables for 27" and 32" 4K monitors.',
+    enBrief: 'Evergreen technical guide with comparative 1440p vs 4K vs 5K scaling calculator.',
+    enDescription: 'Evergreen technical article with HiDPI scaling tables for 27" and 32" 4K monitors.',
     enVersionNotes: {
       'v1.0': 'Technical review completed; awaiting final hash.',
     },
@@ -378,8 +342,7 @@ const Map<String, _ContentDisplayTranslation> _contentDisplayMap = {
   'cnt-8': _ContentDisplayTranslation(
     enBrief: 'Fast short-form cut with before-and-after desk transition.',
     enVersionNotes: {
-      'v1.0':
-          'Rejected in review: sensationalist tone misaligned with Nordic Desk editorial aesthetic.',
+      'v1.0': 'Rejected in review: sensationalist tone misaligned with Nordic Desk editorial aesthetic.',
     },
   ),
 };
@@ -462,11 +425,7 @@ LocalizedContentDisplay localizeContentDisplay(
 }
 
 class _FinanceTranslation {
-  const _FinanceTranslation({
-    required this.enDesc,
-    this.enPlatform,
-    this.enFx,
-  });
+  const _FinanceTranslation({required this.enDesc, this.enPlatform, this.enFx});
 
   final String enDesc;
   final String? enPlatform;
@@ -539,8 +498,8 @@ FinanceEntry localizeFinanceEntry(FinanceEntry entry, UiLanguage lang) {
   if (map == null) return entry;
   final cleanPtDesc =
       entry.id == 'fin-test-1' && entry.description.contains('is_test')
-          ? '[TESTE] Lançamento sintético de validação de registro de teste'
-          : entry.description;
+      ? '[TESTE] Lançamento sintético de validação de registro de teste'
+      : entry.description;
 
   if (lang == UiLanguage.ptBR) {
     return FinanceEntry(
@@ -610,8 +569,7 @@ class _AgentTranslation {
 const Map<String, _AgentTranslation> _agentTranslations = {
   'ag-research': _AgentTranslation(
     enName: 'Demand & Trends Observer',
-    enResp:
-        'Monitors search shifts, product launches, and editorial gaps by market and language (read-only).',
+    enResp: 'Monitors search shifts, product launches, and editorial gaps by market and language (read-only).',
     enDeps: ['Google Trends Connector (Demo)', 'Brand Registry'],
     enSteps: [
       'Collect terms by niche and language',
@@ -626,12 +584,10 @@ const Map<String, _AgentTranslation> _agentTranslations = {
   ),
   'ag-product-intel': _AgentTranslation(
     ptName: 'Qualificador Comercial',
-    ptResp:
-        'Calcula o índice de avaliação do produto por moeda nativa mantendo campos sem dados explícitos e submete candidatos.',
+    ptResp: 'Calcula o índice de avaliação do produto por moeda nativa mantendo campos sem dados explícitos e submete candidatos.',
     ptDeps: ['Observador de Demanda & Tendências', 'Catálogo Compartilhado'],
     enName: 'Commercial Qualifier',
-    enResp:
-        'Computes the product evaluation index per native currency preserving missing fields and submits candidates.',
+    enResp: 'Computes the product evaluation index per native currency preserving missing fields and submits candidates.',
     enDeps: ['Demand & Trends Observer', 'Shared Catalog'],
     enSteps: [
       'Extract price and rate without mixing currencies',
@@ -639,16 +595,15 @@ const Map<String, _AgentTranslation> _agentTranslations = {
       'Compute native-currency evaluation index',
       'Submit candidate for mandatory human approval',
     ],
-    enPending:
-        '2 candidate products (Herman Miller Embody Refurb and iZotope RX 11) await human decision.',
+    enPending: '2 candidate products (Herman Miller Embody Refurb and iZotope RX 11) await human decision.',
     enHistorySummaries: {
-      'h-3': 'Index computed; gated by policy before changing status to Approved.',
+      'h-3':
+          'Index computed; gated by policy before changing status to Approved.',
     },
   ),
   'ag-content-brief': _AgentTranslation(
     enName: 'Brief & Dossier Structurer (Block 6)',
-    enResp:
-        'Generates drafts, source dossiers (levels 1–4), and computes the SHA-256 manifest awaiting individual authorization.',
+    enResp: 'Generates drafts, source dossiers (levels 1–4), and computes the SHA-256 manifest awaiting individual authorization.',
     enDeps: ['Commercial Qualifier', 'Editorial Calendar'],
     enSteps: [
       'Read approved products clear of compliance blocks',
@@ -656,16 +611,14 @@ const Map<String, _AgentTranslation> _agentTranslations = {
       'Compute manifest SHA-256 hash',
       'Submit to Individual Approval Panel',
     ],
-    enPending:
-        '2 scripts in In Review (Dell 32 4K Monitor and PPI Guide) await individual hash approval.',
+    enPending: '2 scripts in In Review (Dell 32 4K Monitor and PPI Guide) await individual hash approval.',
     enHistorySummaries: {
       'h-4': '1 new draft created for Nordic Workspace Boards.',
     },
   ),
   'ag-analytics-anom': _AgentTranslation(
     enName: 'Anomaly & Attribution Detector',
-    enResp:
-        'Monitors 30s retention drops, Shorts → Long-form bridge, and validates tracking tags (V1–V5).',
+    enResp: 'Monitors 30s retention drops, Shorts → Long-form bridge, and validates tracking tags (V1–V5).',
     enDeps: ['Channels Sync', 'Content Metrics'],
     enSteps: [
       'Normalize time series by IANA timezone',
@@ -678,11 +631,9 @@ const Map<String, _AgentTranslation> _agentTranslations = {
     },
   ),
   'ag-finance-reconcile': _AgentTranslation(
-    ptResp:
-        'Separa Pendente, Confirmado e Recebido em caixa, mantendo registros de teste isolados.',
+    ptResp: 'Separa Pendente, Confirmado e Recebido em caixa, mantendo registros de teste isolados.',
     enName: 'Commission & Cash Reconciler',
-    enResp:
-        'Separates Pending, Confirmed, and Received cash while keeping test records isolated.',
+    enResp: 'Separates Pending, Confirmed, and Received cash while keeping test records isolated.',
     enDeps: ['Financial Ledger', 'FX Rate Table'],
     enSteps: [
       'Audit settlement stage by platform',
@@ -695,22 +646,18 @@ const Map<String, _AgentTranslation> _agentTranslations = {
   ),
   'ag-ops-sync': _AgentTranslation(
     ptName: 'Monitor de Saúde de Canais & Execuções',
-    ptResp:
-        'Verifica tokens de leitura, recursos avançados no YouTube e identifica execuções pendentes para reconciliação.',
+    ptResp: 'Verifica tokens de leitura, recursos avançados no YouTube e identifica execuções pendentes para reconciliação.',
     ptDeps: ['Registro de Canais', 'Execuções de tarefas'],
-    ptError:
-        'Canal TikTok (@nordic.desk) retornou token expirado; 1 execução pendente (#104) detectada.',
+    ptError: 'Canal TikTok (@nordic.desk) retornou token expirado; 1 execução pendente (#104) detectada.',
     enName: 'Channel Health & Runs Monitor',
-    enResp:
-        'Checks read tokens, YouTube advanced features, and detects stalled runs for reconciliation.',
+    enResp: 'Checks read tokens, YouTube advanced features, and detects stalled runs for reconciliation.',
     enDeps: ['Channel Registry', 'Job Runs'],
     enSteps: [
       'Run read-only handshake per channel',
       'Detect running jobs past SLA threshold',
       'Report failure immediately to the owner',
     ],
-    enError:
-        'TikTok channel (@nordic.desk) returned an expired token; 1 pending run (#104) detected.',
+    enError: 'TikTok channel (@nordic.desk) returned an expired token; 1 pending run (#104) detected.',
     enHistorySummaries: {
       'h-7': 'Failed to validate demo token for channel @nordic.desk.',
     },
@@ -727,8 +674,8 @@ AutomationAgent localizeAgent(AutomationAgent agent, UiLanguage lang) {
           (d) => d == 'job_runs'
               ? 'Execuções de tarefas'
               : d.contains('score-6.1')
-                  ? d.replaceAll(' (score-6.1)', '')
-                  : d,
+              ? d.replaceAll(' (score-6.1)', '')
+              : d,
         )
         .toList();
     final cleanSteps = agent.flowSteps
@@ -751,8 +698,9 @@ AutomationAgent localizeAgent(AutomationAgent agent, UiLanguage lang) {
       pendingApprovalCount: agent.pendingApprovalCount,
       pendingApprovalSummary: agent.pendingApprovalSummary,
       lastRunAt: agent.lastRunAt,
-      lastError:
-          agent.lastError != null && map.ptError != null ? map.ptError : agent.lastError,
+      lastError: agent.lastError != null && map.ptError != null
+          ? map.ptError
+          : agent.lastError,
       limits: agent.limits,
       history: agent.history
           .map(
@@ -761,7 +709,10 @@ AutomationAgent localizeAgent(AutomationAgent agent, UiLanguage lang) {
               timestamp: h.timestamp,
               status: h.status,
               durationSec: h.durationSec,
-              summary: h.summary.replaceAll('registro is_test', 'registro de teste'),
+              summary: h.summary.replaceAll(
+                'registro is_test',
+                'registro de teste',
+              ),
               recordsAffected: h.recordsAffected,
             ),
           )
@@ -803,20 +754,15 @@ AutomationAgent localizeAgent(AutomationAgent agent, UiLanguage lang) {
 
 const Map<int, ({String ptSummary, String enSummary})> _jobRunTranslations = {
   104: (
-    ptSummary:
-        'Execução interrompida por limite de tempo (pendente — requer reconciliação antes de retomar o sistema).',
-    enSummary:
-        'Run interrupted by runner timeout (stalled — requires reconciliation before resuming the system).',
+    ptSummary: 'Execução interrompida por limite de tempo (pendente — requer reconciliação antes de retomar o sistema).',
+    enSummary: 'Run interrupted by runner timeout (stalled — requires reconciliation before resuming the system).',
   ),
   103: (
-    ptSummary:
-        'Índice de avaliação recalculado por moeda nativa (BRL, USD, EUR); campos sem dados preservados.',
-    enSummary:
-        'Evaluation index recalculated per native currency (BRL, USD, EUR); missing fields preserved.',
+    ptSummary: 'Índice de avaliação recalculado por moeda nativa (BRL, USD, EUR); campos sem dados preservados.',
+    enSummary: 'Evaluation index recalculated per native currency (BRL, USD, EUR); missing fields preserved.',
   ),
   102: (
-    ptSummary:
-        'Catálogo compartilhado deduplicado por plataforma e identificador externo.',
+    ptSummary: 'Catálogo compartilhado deduplicado por plataforma e identificador externo.',
     enSummary:
         'Shared catalog deduplicated by platform and external identifier.',
   ),
@@ -851,77 +797,60 @@ class _RiskTranslation {
 const Map<String, _RiskTranslation> _riskTranslations = {
   'R-04': _RiskTranslation(
     ptTitle: 'Autorização vinculada ao hash SHA-256 da versão',
-    ptControl:
-        'Herança zero: qualquer edição no manifesto invalida aprovação anterior e retorna peça para Em revisão.',
+    ptControl: 'Herança zero: qualquer edição no manifesto invalida aprovação anterior e retorna peça para Em revisão.',
     enTitle: 'Version-bound SHA-256 hash authorization',
-    enControl:
-        'Zero inheritance: any edit to the manifest invalidates prior approval and returns the item to In Review.',
+    enControl: 'Zero inheritance: any edit to the manifest invalidates prior approval and returns the item to In Review.',
   ),
   'R-05': _RiskTranslation(
     ptTitle: 'Stop All com bloqueio seguro e trilha permanente',
-    ptControl:
-        'Controles do sistema (Ativo / Interrompido) com registro de auditoria; retomada bloqueada enquanto houver execução pendente.',
+    ptControl: 'Controles do sistema (Ativo / Interrompido) com registro de auditoria; retomada bloqueada enquanto houver execução pendente.',
     enTitle: 'Fail-closed Stop All with permanent audit trail',
-    enControl:
-        'System controls (Active / Halted) with audit logging; resume blocked while pending runs remain.',
+    enControl: 'System controls (Active / Halted) with audit logging; resume blocked while pending runs remain.',
   ),
   'R-07': _RiskTranslation(
     ptTitle: 'Separação financeira rigorosa (Pendente vs Confirmado vs Caixa)',
-    ptControl:
-        'Reinvestimentos autorizados apenas sobre caixa realizado líquido; registros de teste permanecem isolados.',
+    ptControl: 'Reinvestimentos autorizados apenas sobre caixa realizado líquido; registros de teste permanecem isolados.',
     enTitle: 'Strict financial separation (Pending vs Confirmed vs Cash)',
-    enControl:
-        'Reinvestments authorized strictly from net realized cash; test records remain isolated.',
+    enControl: 'Reinvestments authorized strictly from net realized cash; test records remain isolated.',
   ),
   'R-08': _RiskTranslation(
     ptTitle:
         'Conformidade comercial & IA generativa (Brasil CDC/CONAR + França/UE)',
-    ptControl:
-        'Divulgações obrigatórias no manifesto e bloqueio para temas sensíveis sem autorização individual.',
+    ptControl: 'Divulgações obrigatórias no manifesto e bloqueio para temas sensíveis sem autorização individual.',
     enTitle:
         'Commercial & generative AI compliance (Brazil CDC/CONAR + France/EU)',
-    enControl:
-        'Mandatory disclosures in manifest and gate blocking sensitive topics without individual approval.',
+    enControl: 'Mandatory disclosures in manifest and gate blocking sensitive topics without individual approval.',
   ),
   'R-11': _RiskTranslation(
     ptTitle: 'Proteção contra publicação pública acidental no YouTube',
-    ptControl:
-        'Visibilidade explícita obrigatória; publicação pública bloqueada no ambiente privado (apenas privado/não listado).',
+    ptControl: 'Visibilidade explícita obrigatória; publicação pública bloqueada no ambiente privado (apenas privado/não listado).',
     enTitle: 'Guard against accidental public YouTube publishing',
-    enControl:
-        'Explicit visibility required; public visibility blocked in the private environment (private/unlisted only).',
+    enControl: 'Explicit visibility required; public visibility blocked in the private environment (private/unlisted only).',
   ),
   'R-12': _RiskTranslation(
-    ptTitle: 'Banco de dados hospedado e proveniência de automação (Condição C3)',
-    ptControl:
-        'Núcleo validado em ambiente efêmero; gravação em produção exigirá executor autorizado.',
+    ptTitle:
+        'Banco de dados hospedado e proveniência de automação (Condição C3)',
+    ptControl: 'Núcleo validado em ambiente efêmero; gravação em produção exigirá executor autorizado.',
     enTitle: 'Hosted database & automation provenance (Condition C3)',
-    enControl:
-        'Core validated in ephemeral environment; production writes require an authorized runner.',
+    enControl: 'Core validated in ephemeral environment; production writes require an authorized runner.',
   ),
   'R-24': _RiskTranslation(
     ptTitle: 'Reconciliação de execuções pendentes (Débito M2)',
-    ptControl:
-        'A reconciliação marca execuções travadas como falhas antes de liberar a retomada do sistema.',
+    ptControl: 'A reconciliação marca execuções travadas como falhas antes de liberar a retomada do sistema.',
     enTitle: 'Pending run reconciliation (Debt M2)',
-    enControl:
-        'Reconciliation marks stalled runs as failed before allowing system resume.',
+    enControl: 'Reconciliation marks stalled runs as failed before allowing system resume.',
   ),
   'R-29': _RiskTranslation(
     ptTitle: 'Atribuição real por peça via rastreamento (Protocolo V1-V5)',
-    ptControl:
-        'Métricas por conteúdo rotuladas como Estimativa [Em investigação] até validação V1–V5 no Bloco 9.',
+    ptControl: 'Métricas por conteúdo rotuladas como Estimativa [Em investigação] até validação V1–V5 no Bloco 9.',
     enTitle: 'Per-item real attribution via tracking (Protocol V1-V5)',
-    enControl:
-        'Per-content metrics labeled as Estimate [Under review] until V1–V5 validation in Block 9.',
+    enControl: 'Per-content metrics labeled as Estimate [Under review] until V1–V5 validation in Block 9.',
   ),
   'R-31': _RiskTranslation(
     ptTitle: 'Ranking de produtos sem conversão cambial prematura',
-    ptControl:
-        'O índice de avaliação ranqueia estritamente por moeda nativa e mantém campos ausentes sem dados.',
+    ptControl: 'O índice de avaliação ranqueia estritamente por moeda nativa e mantém campos ausentes sem dados.',
     enTitle: 'Product ranking without premature FX conversion',
-    enControl:
-        'The evaluation index ranks strictly by native currency and preserves missing fields as no-data.',
+    enControl: 'The evaluation index ranks strictly by native currency and preserves missing fields as no-data.',
   ),
 };
 
@@ -955,23 +884,19 @@ class _ActivityTranslation {
 
 const Map<String, _ActivityTranslation> _activityTranslations = {
   'act-1': _ActivityTranslation(
-    ptDetail:
-        'Token de leitura expirado no canal TikTok @nordic.desk e execução #104 detectada como pendente.',
+    ptDetail: 'Token de leitura expirado no canal TikTok @nordic.desk e execução #104 detectada como pendente.',
     enAction: 'Failure in Channel Health Monitor',
-    enDetail:
-        'Expired read token on TikTok @nordic.desk and run #104 flagged as pending.',
+    enDetail: 'Expired read token on TikTok @nordic.desk and run #104 flagged as pending.',
   ),
   'act-2': _ActivityTranslation(
     ptAction: 'Candidato qualificado no índice de avaliação',
     enAction: 'Candidate qualified in evaluation index',
-    enDetail:
-        'Herman Miller Embody (Refurb) scored 82/100 (USD) and awaits human approval.',
+    enDetail: 'Herman Miller Embody (Refurb) scored 82/100 (USD) and awaits human approval.',
   ),
   'act-3': _ActivityTranslation(
     ptAction: 'Autorização individual emitida (Ambiente privado · não listado)',
     enAction: 'Individual authorization issued (Private env · unlisted)',
-    enDetail:
-        'Sound Test: Banana vs Brown Switch bound to SHA-256 hash until 2026-11-22.',
+    enDetail: 'Sound Test: Banana vs Brown Switch bound to SHA-256 hash until 2026-11-22.',
     enJustification: '6 pre-send checks passed.',
   ),
   'act-4': _ActivityTranslation(
@@ -982,25 +907,19 @@ const Map<String, _ActivityTranslation> _activityTranslations = {
   ),
   'act-5': _ActivityTranslation(
     enAction: 'Commission confirmed by platform (12.1.1)',
-    enDetail:
-        r'Dell Affiliate Program confirmed R$ 5,790.00 (14 conversions). Awaiting cash payout.',
+    enDetail: r'Dell Affiliate Program confirmed R$ 5,790.00 (14 conversions). Awaiting cash payout.',
   ),
   'act-6': _ActivityTranslation(
-    ptDetail:
-        'Status alterado de Candidato para Aprovado (Nota A · Conformidade aprovada).',
+    ptDetail: 'Status alterado de Candidato para Aprovado (Nota A · Conformidade aprovada).',
     enAction: 'Product approved: Dell UltraSharp 32" 4K Monitor',
-    enDetail:
-        'Status changed from Candidate to Approved (Grade A · Compliance Approved).',
-    enJustification:
-        'High ticket with a 30-day cookie and low saturation on Brazilian YouTube.',
+    enDetail: 'Status changed from Candidate to Approved (Grade A · Compliance Approved).',
+    enJustification: 'High ticket with a 30-day cookie and low saturation on Brazilian YouTube.',
   ),
   'act-7': _ActivityTranslation(
-    ptDetail:
-        'Status alterado de Candidato para Rejeitado (Nota C · Conformidade bloqueada).',
+    ptDetail: 'Status alterado de Candidato para Rejeitado (Nota C · Conformidade bloqueada).',
     enAction: 'Product rejected: Generic 11-in-1 USB Hub',
     enDetail: 'Status changed from Candidate to Rejected (Grade C · Blocked).',
-    enJustification:
-        'Low ticket, high return rate, and misalignment with premium positioning.',
+    enJustification: 'Low ticket, high return rate, and misalignment with premium positioning.',
   ),
 };
 
@@ -1063,19 +982,15 @@ class _NotificationTranslation {
 
 const Map<String, _NotificationTranslation> _notificationTranslations = {
   'not-1': _NotificationTranslation(
-    ptMessage:
-        'Herman Miller Embody, iZotope RX 11 e 2 roteiros em revisão exigem decisão individual.',
+    ptMessage: 'Herman Miller Embody, iZotope RX 11 e 2 roteiros em revisão exigem decisão individual.',
     enTitle: '2 candidate products and 2 scripts await approval',
-    enMessage:
-        'Herman Miller Embody, iZotope RX 11, and 2 scripts in review require individual decision.',
+    enMessage: 'Herman Miller Embody, iZotope RX 11, and 2 scripts in review require individual decision.',
   ),
   'not-2': _NotificationTranslation(
     ptTitle: 'Execução pendente #104 & atenção no TikTok (@nordic.desk)',
-    ptMessage:
-        'Reconcilie as execuções pendentes no executor de lotes e revise o token do canal @nordic.desk.',
+    ptMessage: 'Reconcilie as execuções pendentes no executor de lotes e revise o token do canal @nordic.desk.',
     enTitle: 'Pending run #104 & attention on TikTok (@nordic.desk)',
-    enMessage:
-        'Reconcile pending runs in the batch runner and review the @nordic.desk channel token.',
+    enMessage: 'Reconcile pending runs in the batch runner and review the @nordic.desk channel token.',
   ),
   'not-3': _NotificationTranslation(
     enTitle: 'Payout received in cash (PartnerStack)',
@@ -1088,10 +1003,7 @@ const Map<String, _NotificationTranslation> _notificationTranslations = {
   ),
 };
 
-NotificationItem localizeNotification(
-  NotificationItem item,
-  UiLanguage lang,
-) {
+NotificationItem localizeNotification(NotificationItem item, UiLanguage lang) {
   final map = _notificationTranslations[item.id];
   if (map == null) return item;
   return NotificationItem(
@@ -1155,10 +1067,7 @@ const Map<String, _IntegrationTranslation> _integrationTranslations = {
   ),
 };
 
-IntegrationConfig localizeIntegration(
-  IntegrationConfig item,
-  UiLanguage lang,
-) {
+IntegrationConfig localizeIntegration(IntegrationConfig item, UiLanguage lang) {
   final map = _integrationTranslations[item.id];
   if (map == null || lang == UiLanguage.ptBR) return item;
   return IntegrationConfig(

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+
 import '../../core/i18n/formatters.dart';
 import '../../core/i18n/translate.dart';
 import '../../core/theme/vyron_colors.dart';
@@ -40,7 +41,8 @@ class VyronChartTimeframeToolbar extends StatelessWidget {
     required String currentIso,
     required ValueChanged<String> onPicked,
   }) async {
-    final initial = DateTime.tryParse('${currentIso}T00:00:00Z') ??
+    final initial =
+        DateTime.tryParse('${currentIso}T00:00:00Z') ??
         DateTime.utc(2026, 11, 18);
     final picked = await showDatePicker(
       context: context,
@@ -147,8 +149,8 @@ class VyronChartTimeframeToolbar extends StatelessWidget {
                         color: comparePrevious
                             ? VyronColors.electricCobalt.withValues(alpha: 0.12)
                             : (isDark
-                                ? VyronColors.obsidianBlack
-                                : palette.surface),
+                                  ? VyronColors.obsidianBlack
+                                  : palette.surface),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
                           color: comparePrevious
@@ -167,20 +169,23 @@ class VyronChartTimeframeToolbar extends StatelessWidget {
                                 : palette.textMuted,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            translate(
-                              language,
-                              comparePrevious
-                                  ? 'charts.compareActive'
-                                  : 'charts.comparePrev',
-                            ),
-                            style: TextStyle(
-                              fontFamily: VyronTypography.sans,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: comparePrevious
-                                  ? palette.cobaltText
-                                  : palette.textMuted,
+                          Flexible(
+                            child: Text(
+                              translate(
+                                language,
+                                comparePrevious
+                                    ? 'charts.compareActive'
+                                    : 'charts.comparePrev',
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: VyronTypography.sans,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: comparePrevious
+                                    ? palette.cobaltText
+                                    : palette.textMuted,
+                              ),
                             ),
                           ),
                         ],

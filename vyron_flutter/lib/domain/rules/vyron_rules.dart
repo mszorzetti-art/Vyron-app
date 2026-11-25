@@ -13,11 +13,7 @@ const Map<CurrencyCode, double> fxToBrl = {
   CurrencyCode.eur: 6.18,
 };
 
-double convertCurrency(
-  double amount,
-  CurrencyCode from,
-  CurrencyCode to,
-) {
+double convertCurrency(double amount, CurrencyCode from, CurrencyCode to) {
   if (from == to) return amount;
   final inBrl = amount * (fxToBrl[from] ?? 1.0);
   return inBrl / (fxToBrl[to] ?? 1.0);
@@ -101,15 +97,15 @@ PreSendEvaluation evaluateContentPreSendChecks(
     passed: hashMatch,
     detail: auth == null
         ? (en
-            ? 'No authorization linked to this version.'
-            : 'Nenhuma autorização vinculada a esta versão.')
+              ? 'No authorization linked to this version.'
+              : 'Nenhuma autorização vinculada a esta versão.')
         : hashMatch
-            ? (en
-                ? 'Hash intact (${recalculatedHash.substring(0, 12)}...).'
-                : 'Hash íntegro (${recalculatedHash.substring(0, 12)}...).')
-            : (en
-                ? 'Mismatch detected: content edited after authorization (zero inheritance).'
-                : 'Divergência detectada: conteúdo alterado após autorização (herança zero).'),
+        ? (en
+              ? 'Hash intact (${recalculatedHash.substring(0, 12)}...).'
+              : 'Hash íntegro (${recalculatedHash.substring(0, 12)}...).')
+        : (en
+              ? 'Mismatch detected: content edited after authorization (zero inheritance).'
+              : 'Divergência detectada: conteúdo alterado após autorização (herança zero).'),
   );
 
   // 2. Authorization active & not expired (and within offer window)
@@ -117,18 +113,20 @@ PreSendEvaluation evaluateContentPreSendChecks(
   final offerEndsMs = _parseIsoMs(item.offerEndsAt);
   final notRevoked = auth != null && auth.revoked != true;
   final notExpired = expiresMs != null && nowMs < expiresMs;
-  final withinOfferWindow = item.offerEndsAt == null ||
+  final withinOfferWindow =
+      item.offerEndsAt == null ||
       (offerEndsMs != null &&
           nowMs <= offerEndsMs &&
           (expiresMs == null || expiresMs <= offerEndsMs));
 
   final authValid = notRevoked && notExpired && withinOfferWindow;
-  final expiresFormatted =
-      auth != null ? auth.expiresAt.substring(0, 16).replaceFirst('T', ' ') : '';
+  final expiresFormatted = auth != null
+      ? auth.expiresAt.substring(0, 16).replaceFirst('T', ' ')
+      : '';
   final offerDatePrefix =
       item.offerEndsAt != null && item.offerEndsAt!.length >= 10
-          ? item.offerEndsAt!.substring(0, 10)
-          : item.offerEndsAt ?? '';
+      ? item.offerEndsAt!.substring(0, 10)
+      : item.offerEndsAt ?? '';
 
   final check2 = PreSendCheckItem(
     id: PreSendCheckId.authValid,
@@ -138,33 +136,36 @@ PreSendEvaluation evaluateContentPreSendChecks(
     passed: authValid,
     detail: auth == null
         ? (en
-            ? 'Awaiting individual authorization with expiration timestamp.'
-            : 'Aguardando autorização individual com prazo de expiração.')
+              ? 'Awaiting individual authorization with expiration timestamp.'
+              : 'Aguardando autorização individual com prazo de expiração.')
         : auth.revoked == true
-            ? (en
-                ? 'Authorization revoked: ${auth.revokedReason ?? 'No reason recorded'}.'
-                : 'Autorização revogada: ${auth.revokedReason ?? 'Sem motivo registrado'}.')
-            : !notExpired
-                ? (en
-                    ? 'Authorization expired at $expiresFormatted.'
-                    : 'Autorização expirada em $expiresFormatted.')
-                : !withinOfferWindow
-                    ? (en
-                        ? 'Offer window ($offerDatePrefix) incompatible or expired.'
-                        : 'Janela da oferta ($offerDatePrefix) incompatível ou expirada.')
-                    : (en
-                        ? 'Valid until $expiresFormatted.'
-                        : 'Válida até $expiresFormatted.'),
+        ? (en
+              ? 'Authorization revoked: ${auth.revokedReason ?? 'No reason recorded'}.'
+              : 'Autorização revogada: ${auth.revokedReason ?? 'Sem motivo registrado'}.')
+        : !notExpired
+        ? (en
+              ? 'Authorization expired at $expiresFormatted.'
+              : 'Autorização expirada em $expiresFormatted.')
+        : !withinOfferWindow
+        ? (en
+              ? 'Offer window ($offerDatePrefix) incompatible or expired.'
+              : 'Janela da oferta ($offerDatePrefix) incompatível ou expirada.')
+        : (en
+              ? 'Valid until $expiresFormatted.'
+              : 'Válida até $expiresFormatted.'),
   );
 
   // 3. Affiliate link destination verified & fresh
-  final isCommercial = item.category == ContentCategory.comercialContextual ||
+  final isCommercial =
+      item.category == ContentCategory.comercialContextual ||
       (item.productId != null && item.productId!.isNotEmpty) ||
       item.affiliateLinkUrl.trim().isNotEmpty;
   final linkVerifiedMs = _parseIsoMs(item.linkVerifiedAt);
-  final linkFresh = linkVerifiedMs != null &&
+  final linkFresh =
+      linkVerifiedMs != null &&
       (nowMs - linkVerifiedMs) / 3600000.0 <= evidenceFreshnessMaxHours;
-  final linkOk = !isCommercial ||
+  final linkOk =
+      !isCommercial ||
       (item.affiliateLinkUrl.trim().isNotEmpty &&
           item.verifiedDestinationUrl.trim().isNotEmpty &&
           linkFresh);
@@ -177,30 +178,32 @@ PreSendEvaluation evaluateContentPreSendChecks(
     passed: linkOk,
     detail: !isCommercial
         ? (en
-            ? 'Purely editorial item with no commercial link.'
-            : 'Peça puramente editorial sem link comercial.')
+              ? 'Purely editorial item with no commercial link.'
+              : 'Peça puramente editorial sem link comercial.')
         : (item.affiliateLinkUrl.trim().isEmpty ||
-                item.verifiedDestinationUrl.trim().isEmpty)
-            ? (en
-                ? 'Commercial URL or verified destination missing.'
-                : 'URL comercial ou destino verificado ausente.')
-            : !linkFresh
-                ? (en
-                    ? 'Link verification expired (> ${evidenceFreshnessMaxHours}h). Revalidate destination.'
-                    : 'Verificação de link expirada (> ${evidenceFreshnessMaxHours}h). Revalide o destino.')
-                : (en
-                    ? 'Destination verified (${item.verifiedDestinationUrl}).'
-                    : 'Destino verificado (${item.verifiedDestinationUrl}).'),
+              item.verifiedDestinationUrl.trim().isEmpty)
+        ? (en
+              ? 'Commercial URL or verified destination missing.'
+              : 'URL comercial ou destino verificado ausente.')
+        : !linkFresh
+        ? (en
+              ? 'Link verification expired (> ${evidenceFreshnessMaxHours}h). Revalidate destination.'
+              : 'Verificação de link expirada (> ${evidenceFreshnessMaxHours}h). Revalide o destino.')
+        : (en
+              ? 'Destination verified (${item.verifiedDestinationUrl}).'
+              : 'Destino verificado (${item.verifiedDestinationUrl}).'),
   );
 
   // 4. Commercial conditions, 7-point relevance, 9-point checklist & disclosures
   final condMs = _parseIsoMs(item.commercialConditionsVerifiedAt);
-  final condFresh = condMs != null &&
+  final condFresh =
+      condMs != null &&
       (nowMs - condMs) / 3600000.0 <= evidenceFreshnessMaxHours;
   final affDiscOk = !isCommercial || item.affiliateDisclosure.trim().isNotEmpty;
   final aiDiscOk =
       !item.aiDisclosureRequired || item.aiDisclosureText.trim().isNotEmpty;
-  final gatesOk = item.relevanceTestPassed &&
+  final gatesOk =
+      item.relevanceTestPassed &&
       item.editorialChecklistPassed &&
       (!isCommercial || condFresh) &&
       affDiscOk &&
@@ -223,9 +226,7 @@ PreSendEvaluation evaluateContentPreSendChecks(
     );
   }
   if (!affDiscOk) {
-    missingDetails.add(
-      en ? 'affiliate disclosure' : 'divulgação de afiliação',
-    );
+    missingDetails.add(en ? 'affiliate disclosure' : 'divulgação de afiliação');
   }
   if (!aiDiscOk) {
     missingDetails.add(
@@ -241,11 +242,11 @@ PreSendEvaluation evaluateContentPreSendChecks(
     passed: gatesOk,
     detail: gatesOk
         ? (en
-            ? 'Relevance, editorial checklist, conditions, and disclosures compliant.'
-            : 'Relevância, checklist editorial, condições e divulgações em conformidade.')
+              ? 'Relevance, editorial checklist, conditions, and disclosures compliant.'
+              : 'Relevância, checklist editorial, condições e divulgações em conformidade.')
         : (en
-            ? 'Pending: ${missingDetails.join(', ')}.'
-            : 'Pendente: ${missingDetails.join(', ')}.'),
+              ? 'Pending: ${missingDetails.join(', ')}.'
+              : 'Pendente: ${missingDetails.join(', ')}.'),
   );
 
   // 5. Risk classification & sensitive topic individual gate
@@ -262,25 +263,27 @@ PreSendEvaluation evaluateContentPreSendChecks(
     passed: riskOk,
     detail: item.unclassifiedRiskFlag
         ? (en
-            ? 'Blocked: item flagged with unclassified risk.'
-            : 'Bloqueado: item marcado com risco não classificado.')
+              ? 'Blocked: item flagged with unclassified risk.'
+              : 'Bloqueado: item marcado com risco não classificado.')
         : (hasSensitiveTopic && auth?.type != AuthorizationType.individual)
-            ? (en
-                ? 'Sensitive topic (${item.sensitiveTopic.wire}) requires individual human authorization.'
-                : 'Tema sensível (${item.sensitiveTopic.wire}) exige autorização individual humana.')
-            : hasSensitiveTopic
-                ? (en
-                    ? 'Sensitive topic (${item.sensitiveTopic.wire}) has individual authorization recorded.'
-                    : 'Tema sensível (${item.sensitiveTopic.wire}) com autorização individual registrada.')
-                : (en
-                    ? 'No unclassified risk flags.'
-                    : 'Sem sinalizadores de risco não classificado.'),
+        ? (en
+              ? 'Sensitive topic (${item.sensitiveTopic.wire}) requires individual human authorization.'
+              : 'Tema sensível (${item.sensitiveTopic.wire}) exige autorização individual humana.')
+        : hasSensitiveTopic
+        ? (en
+              ? 'Sensitive topic (${item.sensitiveTopic.wire}) has individual authorization recorded.'
+              : 'Tema sensível (${item.sensitiveTopic.wire}) com autorização individual registrada.')
+        : (en
+              ? 'No unclassified risk flags.'
+              : 'Sem sinalizadores de risco não classificado.'),
   );
 
   // 6. SystemControl ACTIVE + Automated Publishing + Environment visibility gate
-  final phaseOk = item.visibility != ContentVisibility.publicVis ||
+  final phaseOk =
+      item.visibility != ContentVisibility.publicVis ||
       systemControl.phaseBPublicAllowed;
-  final sysOk = systemControl.state == SystemControlStatus.active &&
+  final sysOk =
+      systemControl.state == SystemControlStatus.active &&
       systemControl.publishingEnabled &&
       phaseOk;
 
@@ -298,19 +301,19 @@ PreSendEvaluation evaluateContentPreSendChecks(
     passed: sysOk,
     detail: systemControl.state == SystemControlStatus.halted
         ? (en
-            ? 'System halted (${systemControl.reason}).'
-            : 'Sistema interrompido (${systemControl.reason}).')
+              ? 'System halted (${systemControl.reason}).'
+              : 'Sistema interrompido (${systemControl.reason}).')
         : !systemControl.publishingEnabled
-            ? (en
-                ? 'Automated publishing disabled (safe mode).'
-                : 'Publicação automática desligada (modo seguro).')
-            : !phaseOk
-                ? (en
-                    ? 'Public visibility is blocked in the private environment (only private/unlisted allowed).'
-                    : 'Visibilidade pública bloqueada no ambiente privado (apenas privado ou não listado).')
-                : (en
-                    ? 'System active · Visibility "$visLabel" allowed.'
-                    : "Sistema ativo · Visibilidade '$visLabel' permitida."),
+        ? (en
+              ? 'Automated publishing disabled (safe mode).'
+              : 'Publicação automática desligada (modo seguro).')
+        : !phaseOk
+        ? (en
+              ? 'Public visibility is blocked in the private environment (only private/unlisted allowed).'
+              : 'Visibilidade pública bloqueada no ambiente privado (apenas privado ou não listado).')
+        : (en
+              ? 'System active · Visibility "$visLabel" allowed.'
+              : "Sistema ativo · Visibilidade '$visLabel' permitida."),
   );
 
   final checks = [check1, check2, check3, check4, check5, check6];
@@ -381,17 +384,17 @@ ProductScoreV61Result scoreProductV61(
 
   final denominator = (price * 0.0025) > 1.0 ? (price * 0.0025) : 1.0;
   final epcComponent = (((epc / denominator) * 22).round()).clamp(0, 38);
-  final remunerationComponent =
-      ((commPct * 1.4 + (cpa > 0 ? 10 : 0)).round()).clamp(0, 26);
+  final remunerationComponent = ((commPct * 1.4 + (cpa > 0 ? 10 : 0)).round())
+      .clamp(0, 26);
 
   final cookieDays = product.cookieWindowDays;
   final cookieComponent = cookieDays == null
       ? 6
       : cookieDays >= 30
-          ? 16
-          : cookieDays >= 7
-              ? 11
-              : 6;
+      ? 16
+      : cookieDays >= 7
+      ? 11
+      : 6;
 
   final demandTrend = product.demandTrendPct;
   final trendComponent = demandTrend == null
@@ -405,7 +408,8 @@ ProductScoreV61Result scoreProductV61(
     CompetitionLevel.desconhecida => 4,
   };
 
-  final raw = epcComponent +
+  final raw =
+      epcComponent +
       remunerationComponent +
       cookieComponent +
       trendComponent +
@@ -424,10 +428,7 @@ ProductScoreV61Result scoreProductV61(
 }
 
 class CurrencyProductGroup {
-  const CurrencyProductGroup({
-    required this.currency,
-    required this.items,
-  });
+  const CurrencyProductGroup({required this.currency, required this.items});
 
   final CurrencyCode currency;
   final List<Product> items;
@@ -488,8 +489,9 @@ FinanceSummary calculateFinanceSummary(
   String referenceDate = '2026-11-18',
   bool excludeTest = true,
 }) {
-  final startDate =
-      period != null ? getPeriodStartDate(period, referenceDate) : '1970-01-01';
+  final startDate = period != null
+      ? getPeriodStartDate(period, referenceDate)
+      : '1970-01-01';
 
   var pendingCommissions = 0.0;
   var confirmedAwaitingPayout = 0.0;
@@ -535,8 +537,9 @@ FinanceSummary calculateFinanceSummary(
   final confirmedCommercialResult = confirmedAwaitingPayout + receivedCashIn;
   final netRealizedCash =
       receivedCashIn - expensesCashOut - reinvestmentsCashOut;
-  final availableReinvestmentBudget =
-      netRealizedCash > 0 ? netRealizedCash : 0.0;
+  final availableReinvestmentBudget = netRealizedCash > 0
+      ? netRealizedCash
+      : 0.0;
 
   return FinanceSummary(
     pendingCommissions: pendingCommissions,
@@ -577,8 +580,9 @@ OperationalEfficiencyMetrics computeOperationalEfficiency(
 
   return OperationalEfficiencyMetrics(
     totalHumanHours: totalHumanHours,
-    realizedCashPerHour:
-        totalHumanHours > 0 ? finance.netRealizedCash / totalHumanHours : null,
+    realizedCashPerHour: totalHumanHours > 0
+        ? finance.netRealizedCash / totalHumanHours
+        : null,
     confirmedCommercialPerHour: totalHumanHours > 0
         ? finance.confirmedCommercialResult / totalHumanHours
         : null,
@@ -630,7 +634,8 @@ ContentItem transitionContentStatus(
   final ts = timestamp ?? DateTime.now().toUtc().toIso8601String();
   final nextVersionNumber = 'v${item.versions.length + 1}.0';
   final manifestHash = computeContentItemManifestHash(item);
-  final clearAuth = nextStatus == ContentStatus.brief ||
+  final clearAuth =
+      nextStatus == ContentStatus.brief ||
       nextStatus == ContentStatus.draft ||
       nextStatus == ContentStatus.rejected;
 
@@ -638,10 +643,9 @@ ContentItem transitionContentStatus(
     status: nextStatus,
     currentManifestHash: manifestHash,
     clearAuthorization: clearAuth,
-    publishedAt:
-        nextStatus == ContentStatus.published && ts.length >= 10
-            ? ts.substring(0, 10)
-            : item.publishedAt,
+    publishedAt: nextStatus == ContentStatus.published && ts.length >= 10
+        ? ts.substring(0, 10)
+        : item.publishedAt,
     versions: [
       ContentVersion(
         version: nextVersionNumber,
@@ -815,8 +819,7 @@ List<BrandRollup> computeBrandRollups(
   bool excludeTest = true,
 }) {
   return brands.map((brand) {
-    final brandChannels =
-        channels.where((c) => c.brandId == brand.id).toList();
+    final brandChannels = channels.where((c) => c.brandId == brand.id).toList();
     final brandProducts = products
         .where(
           (p) =>
@@ -824,8 +827,7 @@ List<BrandRollup> computeBrandRollups(
               (p.brandId == brand.id || p.linkedBrandIds.contains(brand.id)),
         )
         .toList();
-    final brandContents =
-        contents.where((c) => c.brandId == brand.id).toList();
+    final brandContents = contents.where((c) => c.brandId == brand.id).toList();
     final fin = calculateFinanceSummary(
       financeEntries,
       targetCurrency,
@@ -837,11 +839,13 @@ List<BrandRollup> computeBrandRollups(
       brand: brand,
       channelsCount: brandChannels.length,
       productsCount: brandProducts.length,
-      approvedProductsCount:
-          brandProducts.where((p) => p.status == ProductStatus.approved).length,
+      approvedProductsCount: brandProducts
+          .where((p) => p.status == ProductStatus.approved)
+          .length,
       contentsCount: brandContents.length,
-      publishedContentsCount:
-          brandContents.where((c) => c.status == ContentStatus.published).length,
+      publishedContentsCount: brandContents
+          .where((c) => c.status == ContentStatus.published)
+          .length,
       totalViews30d: brandChannels.fold<int>(0, (acc, c) => acc + c.views30d),
       confirmedCommercial: fin.confirmedCommercialResult,
       receivedCash: fin.receivedCashIn,
@@ -858,8 +862,7 @@ List<ActivityEvent> filterActivities(
   PeriodFilter? period,
   String? query,
 }) {
-  final startDate =
-      period != null ? getPeriodStartDate(period) : '1970-01-01';
+  final startDate = period != null ? getPeriodStartDate(period) : '1970-01-01';
   final q = (query ?? '').trim().toLowerCase();
 
   return activities.where((ev) {
@@ -869,8 +872,9 @@ List<ActivityEvent> filterActivities(
     if (category != null && ev.category != category) {
       return false;
     }
-    final datePart =
-        ev.timestamp.length >= 10 ? ev.timestamp.substring(0, 10) : ev.timestamp;
+    final datePart = ev.timestamp.length >= 10
+        ? ev.timestamp.substring(0, 10)
+        : ev.timestamp;
     if (datePart.compareTo(startDate) < 0) {
       return false;
     }

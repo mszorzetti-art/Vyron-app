@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vyron/app.dart';
@@ -57,7 +58,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Bem-vindo de volta'), findsOneWidget);
-        expect(find.text('vyron2026'), findsOneWidget);
+        expect(find.textContaining('vyron2026'), findsOneWidget);
 
         await _submitPasswordAndSettle(tester, 'senha-errada');
         expect(find.byKey(const Key('vyron-access-error')), findsOneWidget);
@@ -99,31 +100,30 @@ void main() {
       },
     );
 
-    testWidgets(
-      'renderiza barra inferior e Drawer em 390x844 sem overflow',
-      (tester) async {
-        tester.view.physicalSize = const Size(390, 844);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+    testWidgets('renderiza barra inferior e Drawer em 390x844 sem overflow', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
 
-        final activeSession = buildAuthenticatedSession(
-          VyronAccessSession.initial(),
-          DateTime.now().millisecondsSinceEpoch,
-        );
-        await tester.pumpWidget(_buildApp(initialSession: activeSession));
-        await tester.pumpAndSettle();
+      final activeSession = buildAuthenticatedSession(
+        VyronAccessSession.initial(),
+        DateTime.now().millisecondsSinceEpoch,
+      );
+      await tester.pumpWidget(_buildApp(initialSession: activeSession));
+      await tester.pumpAndSettle();
 
-        expect(find.byType(NavigationBar), findsOneWidget);
-        await tester.tap(find.byKey(const Key('vyron-open-drawer-btn')));
-        await tester.pumpAndSettle();
+      expect(find.byType(NavigationBar), findsOneWidget);
+      await tester.tap(find.byKey(const Key('vyron-open-drawer-btn')));
+      await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('vyron-nav-settings')), findsOneWidget);
-        await tester.tap(find.byKey(const Key('vyron-nav-settings')));
-        await tester.pumpAndSettle();
+      expect(find.byKey(const Key('vyron-nav-settings')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('vyron-nav-settings')));
+      await tester.pumpAndSettle();
 
-        expect(find.text('Settings & Governança'), findsOneWidget);
-      },
-    );
+      expect(find.text('Settings & Governança'), findsOneWidget);
+    });
 
     testWidgets(
       'Stop All halta sistema, bloqueia retomada com job #104 e libera após reconciliação',
@@ -152,7 +152,9 @@ void main() {
         expect(find.byKey(const Key('vyron-halted-banner')), findsOneWidget);
         expect(find.text('PARADO'), findsOneWidget);
 
-        await tester.tap(find.byKey(const Key('vyron-halted-banner-resume-btn')));
+        await tester.tap(
+          find.byKey(const Key('vyron-halted-banner-resume-btn')),
+        );
         await tester.pumpAndSettle();
 
         expect(

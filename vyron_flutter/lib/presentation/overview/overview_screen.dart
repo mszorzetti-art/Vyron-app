@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -232,9 +233,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
 
     final selectedOverviewEntries = selectedOverviewPoint != null
         ? domain.financeEntries
-            .where((e) => selectedOverviewPoint!.entryIds.contains(e.id))
-            .map((e) => localizeFinanceEntry(e, lang))
-            .toList()
+              .where((e) => selectedOverviewPoint!.entryIds.contains(e.id))
+              .map((e) => localizeFinanceEntry(e, lang))
+              .toList()
         : const <FinanceEntry>[];
 
     BrandRollup? selectedBrandRollup;
@@ -267,38 +268,33 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
     final coverageNote = _comparePrev && !financeSeriesRes.hasPreviousData
         ? t('charts.prevNoDataNote')
         : financeSeriesRes.window.hasSparseCoverage
-            ? t('charts.coverageNote')
-            : null;
+        ? t('charts.coverageNote')
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         VyronPageHeader(
           title: t('overview.title'),
-          subtitle: t(
-            'overview.subtitle',
-            {
-              'currency': currency.wire,
-              'period': globalPeriodFilter.wire,
-            },
-          ),
+          subtitle: t('overview.subtitle', {
+            'currency': currency.wire,
+            'period': globalPeriodFilter.wire,
+          }),
           actions: [
             OutlinedButton(
               onPressed: () => navigateToVyronModule(ref, NavModule.content),
               child: Text(
-                t(
-                  'overview.cta.hashApprovals',
-                  {'count': '${pendingHashReviews.length}'},
-                ),
+                t('overview.cta.hashApprovals', {
+                  'count': '${pendingHashReviews.length}',
+                }),
               ),
             ),
             ElevatedButton(
               onPressed: () => navigateToVyronModule(ref, NavModule.products),
               child: Text(
-                t(
-                  'overview.cta.evaluateCandidates',
-                  {'count': '${productsInAnalysis.length}'},
-                ),
+                t('overview.cta.evaluateCandidates', {
+                  'count': '${productsInAnalysis.length}',
+                }),
               ),
             ),
           ],
@@ -326,23 +322,18 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         currency,
                         lang,
                       ),
-                      helper: t(
-                        'overview.kpi.netCashHelper',
-                        {
-                          'amount': formatCurrencyForLang(
-                            finance.receivedCashIn,
-                            currency,
-                            lang,
-                          ),
-                        },
-                      ),
+                      helper: t('overview.kpi.netCashHelper', {
+                        'amount': formatCurrencyForLang(
+                          finance.receivedCashIn,
+                          currency,
+                          lang,
+                        ),
+                      }),
                       tone: finance.netRealizedCash >= 0
                           ? VyronMetricTone.emerald
                           : VyronMetricTone.crimson,
-                      onTap: () => navigateToVyronModule(
-                        ref,
-                        NavModule.finance,
-                      ),
+                      onTap: () =>
+                          navigateToVyronModule(ref, NavModule.finance),
                     ),
                   ),
                   SizedBox(
@@ -354,21 +345,16 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         currency,
                         lang,
                       ),
-                      helper: t(
-                        'overview.kpi.confirmedHelper',
-                        {
-                          'amount': formatCurrencyForLang(
-                            finance.confirmedAwaitingPayout,
-                            currency,
-                            lang,
-                          ),
-                        },
-                      ),
+                      helper: t('overview.kpi.confirmedHelper', {
+                        'amount': formatCurrencyForLang(
+                          finance.confirmedAwaitingPayout,
+                          currency,
+                          lang,
+                        ),
+                      }),
                       tone: VyronMetricTone.cobalt,
-                      onTap: () => navigateToVyronModule(
-                        ref,
-                        NavModule.finance,
-                      ),
+                      onTap: () =>
+                          navigateToVyronModule(ref, NavModule.finance),
                     ),
                   ),
                   SizedBox(
@@ -382,10 +368,8 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                       ),
                       helper: t('overview.kpi.pendingHelper'),
                       tone: VyronMetricTone.amber,
-                      onTap: () => navigateToVyronModule(
-                        ref,
-                        NavModule.finance,
-                      ),
+                      onTap: () =>
+                          navigateToVyronModule(ref, NavModule.finance),
                     ),
                   ),
                   SizedBox(
@@ -395,21 +379,16 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                       value: efficiency.realizedCashPerHour != null
                           ? '${formatCurrencyForLang(efficiency.realizedCashPerHour!, currency, lang)}/h'
                           : t('common.na'),
-                      helper: t(
-                        'overview.kpi.efficiencyHelper',
-                        {
-                          'hours': formatNumberForLang(
-                            efficiency.totalHumanHours,
-                            lang,
-                            1,
-                          ),
-                        },
-                      ),
+                      helper: t('overview.kpi.efficiencyHelper', {
+                        'hours': formatNumberForLang(
+                          efficiency.totalHumanHours,
+                          lang,
+                          1,
+                        ),
+                      }),
                       tone: VyronMetricTone.neutral,
-                      onTap: () => navigateToVyronModule(
-                        ref,
-                        NavModule.analytics,
-                      ),
+                      onTap: () =>
+                          navigateToVyronModule(ref, NavModule.analytics),
                     ),
                   ),
                 ],
@@ -447,9 +426,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                             Expanded(
                               child: Text(
                                 t('overview.readiness.implementedTitle'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
+                                style: Theme.of(context).textTheme.labelLarge
                                     ?.copyWith(fontSize: 12),
                               ),
                             ),
@@ -458,12 +435,12 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         const SizedBox(height: 6),
                         Text(
                           t('overview.readiness.implementedDesc'),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontSize: 11.5,
-                                    color: palette.textMuted,
-                                    height: 1.35,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontSize: 11.5,
+                                color: palette.textMuted,
+                                height: 1.35,
+                              ),
                         ),
                       ],
                     ),
@@ -475,23 +452,20 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                       children: [
                         Text(
                           t('overview.readiness.integrationTitle'),
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
+                          style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(fontSize: 12),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          t(
-                            'overview.readiness.integrationDesc',
-                            {'count': '${pendingHashReviews.length}'},
-                          ),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontSize: 11.5,
-                                    color: palette.textMuted,
-                                    height: 1.35,
-                                  ),
+                          t('overview.readiness.integrationDesc', {
+                            'count': '${pendingHashReviews.length}',
+                          }),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontSize: 11.5,
+                                color: palette.textMuted,
+                                height: 1.35,
+                              ),
                         ),
                       ],
                     ),
@@ -503,9 +477,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                       children: [
                         Text(
                           t('overview.readiness.controlTitle'),
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
+                          style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(fontSize: 12),
                         ),
                         const SizedBox(height: 6),
@@ -519,11 +491,11 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                         const SizedBox(height: 4),
                         Text(
                           '${domain.systemControl.phaseBPublicAllowed ? t('common.publicOp') : t('common.privateEnv')} · ${domain.systemControl.publishingEnabled ? t('overview.readiness.publishingOn') : t('overview.readiness.publishingOff')}',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontSize: 11,
-                                    color: palette.textMuted,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontSize: 11,
+                                color: palette.textMuted,
+                              ),
                         ),
                       ],
                     ),
@@ -535,34 +507,28 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                       children: [
                         Text(
                           t('overview.readiness.executorTitle'),
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
+                          style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(fontSize: 12),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           orphanedJobs.isNotEmpty
-                              ? t(
-                                  'overview.readiness.orphanCount',
-                                  {'count': '${orphanedJobs.length}'},
-                                )
-                              : t(
-                                  'overview.readiness.reconciledCount',
-                                  {'count': '${domain.jobRuns.length}'},
-                                ),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontSize: 11,
-                                    color: palette.textMuted,
-                                  ),
+                              ? t('overview.readiness.orphanCount', {
+                                  'count': '${orphanedJobs.length}',
+                                })
+                              : t('overview.readiness.reconciledCount', {
+                                  'count': '${domain.jobRuns.length}',
+                                }),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontSize: 11,
+                                color: palette.textMuted,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         InkWell(
-                          onTap: () => navigateToVyronModule(
-                            ref,
-                            NavModule.settings,
-                          ),
+                          onTap: () =>
+                              navigateToVyronModule(ref, NavModule.settings),
                           child: Text(
                             t('overview.readiness.viewMatrix'),
                             style: TextStyle(
@@ -646,8 +612,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                     series: overviewSeriesConfig,
                     formatValue: (v) =>
                         formatCurrencyForLang(v, currency, lang),
-                    formatYAxis: (v) =>
-                        formatCompactNumberForLang(v, lang),
+                    formatYAxis: (v) => formatCompactNumberForLang(v, lang),
                     height: 245,
                     semanticLabel: t('overview.chart.title'),
                     selectedPointId: _selectedPointId,
@@ -655,8 +620,8 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                       setState(() {
                         _selectedPointId =
                             pt != null && _selectedPointId == pt.id
-                                ? null
-                                : pt?.id;
+                            ? null
+                            : pt?.id;
                       });
                     },
                   ),
@@ -740,26 +705,21 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                t(
-                                  'overview.brands.selectedSummary',
-                                  {
-                                    'received': formatCurrencyForLang(
-                                      selectedBrandRollup.receivedCash,
-                                      currency,
-                                      lang,
-                                    ),
-                                    'pending': formatCurrencyForLang(
-                                      selectedBrandRollup.pendingCommissions,
-                                      currency,
-                                      lang,
-                                    ),
-                                    'products':
-                                        '${selectedBrandRollup.approvedProductsCount}',
-                                  },
-                                ),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                t('overview.brands.selectedSummary', {
+                                  'received': formatCurrencyForLang(
+                                    selectedBrandRollup.receivedCash,
+                                    currency,
+                                    lang,
+                                  ),
+                                  'pending': formatCurrencyForLang(
+                                    selectedBrandRollup.pendingCommissions,
+                                    currency,
+                                    lang,
+                                  ),
+                                  'products':
+                                      '${selectedBrandRollup.approvedProductsCount}',
+                                }),
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: palette.textMuted),
                               ),
                               const SizedBox(height: 10),
@@ -768,12 +728,13 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                                 runSpacing: 8,
                                 children: [
                                   OutlinedButton(
-                                    onPressed: () => notifier
-                                        .setGlobalBrandFilter(
-                                      selectedBrandRollup!.brand.id,
+                                    onPressed: () =>
+                                        notifier.setGlobalBrandFilter(
+                                          selectedBrandRollup!.brand.id,
+                                        ),
+                                    child: Text(
+                                      t('overview.brands.isolateBrand'),
                                     ),
-                                    child:
-                                        Text(t('overview.brands.isolateBrand')),
                                   ),
                                   ElevatedButton(
                                     onPressed: () => navigateToVyronModule(
@@ -794,9 +755,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                               Expanded(
                                 child: Text(
                                   t('overview.brands.filterHint'),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(color: palette.textMuted),
                                 ),
                               ),
@@ -858,9 +817,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                   if (productsInAnalysis.isEmpty)
                     Text(
                       t('overview.products.empty'),
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
+                      style: Theme.of(context).textTheme.bodySmall
                           ?.copyWith(color: palette.textMuted),
                     )
                   else
@@ -924,9 +881,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                                       prod.qualityGrade,
                                       lang,
                                     ),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
+                                    style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(
                                           fontSize: 10.5,
                                           color: palette.textMuted,
@@ -984,9 +939,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                               children: [
                                 Text(
                                   '${brand?.name ?? item.brandId} · ${labelContentFormat(item.format, lang)}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         fontSize: 11,
                                         color: palette.textMuted,
@@ -996,9 +949,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                                 Text(
                                   loc.title,
                                   overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge
+                                  style: Theme.of(context).textTheme.labelLarge
                                       ?.copyWith(fontSize: 13),
                                 ),
                                 const SizedBox(height: 6),
@@ -1045,10 +996,8 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                   VyronSectionTitle(
                     title: t('overview.automations.title'),
                     trailing: TextButton(
-                      onPressed: () => navigateToVyronModule(
-                        ref,
-                        NavModule.automations,
-                      ),
+                      onPressed: () =>
+                          navigateToVyronModule(ref, NavModule.automations),
                       child: Text(t('overview.automations.cta')),
                     ),
                   ),
@@ -1095,19 +1044,14 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          t(
-                            'overview.automations.stateLabel',
-                            {
-                              'state': labelSystemControlState(
-                                domain.systemControl.state,
-                                lang,
-                              ),
-                            },
-                          ),
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    fontSize: 12,
-                                  ),
+                          t('overview.automations.stateLabel', {
+                            'state': labelSystemControlState(
+                              domain.systemControl.state,
+                              lang,
+                            ),
+                          }),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(fontSize: 12),
                         ),
                         const SizedBox(height: 3),
                         Text(
@@ -1115,11 +1059,11 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                             domain.systemControl.reason,
                             lang,
                           ),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontSize: 11,
-                                    color: palette.textMuted,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontSize: 11,
+                                color: palette.textMuted,
+                              ),
                         ),
                       ],
                     ),
@@ -1155,9 +1099,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                           t('overview.haltReasonCard'),
                         );
                         if (!res.ok && res.reason != null && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(res.reason!)),
-                          );
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(res.reason!)));
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -1251,8 +1195,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                                   ),
                                   DataCell(
                                     ConstrainedBox(
-                                      constraints:
-                                          const BoxConstraints(maxWidth: 220),
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 220,
+                                      ),
                                       child: Text(
                                         act.action,
                                         overflow: TextOverflow.ellipsis,
@@ -1266,8 +1211,9 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                                   ),
                                   DataCell(
                                     ConstrainedBox(
-                                      constraints:
-                                          const BoxConstraints(maxWidth: 280),
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 280,
+                                      ),
                                       child: Text(
                                         act.detail,
                                         overflow: TextOverflow.ellipsis,
@@ -1310,26 +1256,34 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  VyronStatusLabel(
-                                    status: labelActivityCategory(
-                                      act.category,
-                                      lang,
+                              SizedBox(
+                                width: double.infinity,
+                                child: Wrap(
+                                  alignment: WrapAlignment.spaceBetween,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: [
+                                    VyronStatusLabel(
+                                      status: labelActivityCategory(
+                                        act.category,
+                                        lang,
+                                      ),
+                                      statusKey: act.severity.wire,
                                     ),
-                                    statusKey: act.severity.wire,
-                                  ),
-                                  Text(
-                                    formatDateTimeForLang(act.timestamp, lang),
-                                    style: TextStyle(
-                                      fontFamily: VyronTypography.mono,
-                                      fontSize: 11,
-                                      color: palette.textMuted,
+                                    Text(
+                                      formatDateTimeForLang(
+                                        act.timestamp,
+                                        lang,
+                                      ),
+                                      style: TextStyle(
+                                        fontFamily: VyronTypography.mono,
+                                        fontSize: 11,
+                                        color: palette.textMuted,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 6),
                               Text(
@@ -1405,11 +1359,9 @@ class _OverviewPointDrilldown extends StatelessWidget {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      translate(
-                        language,
-                        'overview.chart.drillTitle',
-                        {'date': formatDateForLang(point.date, language)},
-                      ),
+                      translate(language, 'overview.chart.drillTitle', {
+                        'date': formatDateForLang(point.date, language),
+                      }),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -1427,11 +1379,9 @@ class _OverviewPointDrilldown extends StatelessWidget {
                 ),
               ),
               Text(
-                translate(
-                  language,
-                  'overview.chart.drillCount',
-                  {'count': '${entries.length}'},
-                ),
+                translate(language, 'overview.chart.drillCount', {
+                  'count': '${entries.length}',
+                }),
                 style: TextStyle(
                   fontFamily: VyronTypography.mono,
                   fontSize: 11,
@@ -1457,8 +1407,10 @@ class _OverviewPointDrilldown extends StatelessWidget {
             for (final e in entries)
               Container(
                 margin: const EdgeInsets.only(bottom: 6),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: palette.surface,
                   borderRadius: BorderRadius.circular(6),
@@ -1530,10 +1482,7 @@ class _OverviewPointDrilldown extends StatelessWidget {
 }
 
 class _OverviewQueueItemCard extends StatelessWidget {
-  const _OverviewQueueItemCard({
-    required this.child,
-    required this.onTap,
-  });
+  const _OverviewQueueItemCard({required this.child, required this.onTap});
 
   final Widget child;
   final VoidCallback onTap;
@@ -1551,10 +1500,7 @@ class _OverviewQueueItemCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         hoverColor: VyronColors.electricCobalt.withValues(alpha: 0.04),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: child,
-        ),
+        child: Padding(padding: const EdgeInsets.all(10), child: child),
       ),
     );
   }
@@ -1597,10 +1543,7 @@ class _MiniCountStat extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 10.5,
-              color: palette.textMuted,
-            ),
+            style: TextStyle(fontSize: 10.5, color: palette.textMuted),
           ),
         ],
       ),

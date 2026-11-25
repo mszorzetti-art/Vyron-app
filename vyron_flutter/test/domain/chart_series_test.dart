@@ -209,8 +209,7 @@ Product _makeProductFixture({
 
 void main() {
   group('Lote 1 — Séries de Gráficos (ChartSeries)', () {
-    test('resolveTimeWindow calcula intervalos 7d e custom de forma determinística',
-        () {
+    test('resolveTimeWindow calcula intervalos 7d e custom de forma determinística', () {
       final w7 = resolveTimeWindow(ChartTimeRange.d7);
       expect(w7.startDate, '2026-11-12');
       expect(w7.endDate, '2026-11-18');
@@ -226,178 +225,173 @@ void main() {
       expect(wCustom.days, 6);
       expect(wCustom.prevStartDate, '2026-11-04');
       expect(wCustom.prevEndDate, '2026-11-09');
-    },);
+    });
 
-    test(
-      'buildOverviewFinanceSeries isola Pendente/Confirmado/Recebido/Projeção e responde a 7d vs 30d',
-      () {
-        final res30 = buildOverviewFinanceSeries(
-          _financeFixtures,
-          CurrencyCode.brl,
-          range: ChartTimeRange.d30,
-          excludeTest: true,
-          includeProjection: true,
-        );
-        final res7 = buildOverviewFinanceSeries(
-          _financeFixtures,
-          CurrencyCode.brl,
-          range: ChartTimeRange.d7,
-          excludeTest: true,
-          includeProjection: true,
-        );
-
-        final real30 = res30.points.where((p) => !p.isProjection).toList();
-        final real7 = res7.points.where((p) => !p.isProjection).toList();
-        expect(real30.length, greaterThan(real7.length));
-
-        expect(
-          real30.any((p) => p.entryIds.contains('fin-test-1')),
-          isFalse,
-        );
-
-        final lastReal = real30.last;
-        expect(lastReal.date, '2026-11-18');
-        expect(
-          lastReal.confirmedCommercial,
-          greaterThan(lastReal.receivedCash ?? 0),
-        );
-        expect(lastReal.pendingCommissions, greaterThan(0));
-
-        final projPoint = res30.points.last;
-        expect(projPoint.isProjection, isTrue);
-        expect(projPoint.confirmedCommercial, isNull);
-        expect(projPoint.receivedCash, isNull);
-        expect(projPoint.pendingCommissions, isNull);
-        expect(
-          projPoint.projection,
-          greaterThan(lastReal.confirmedCommercial ?? 0),
-        );
-
-        expect(res7.hasPreviousData, isTrue);
-        expect(res30.hasPreviousData, isFalse);
-        expect(real30.first.previousConfirmed, isNull);
-      },
-    );
-
-    test('buildFinanceCashflowSeries filtra por marca e separa saídas vs entradas',
-        () {
-      final apexDaily = buildFinanceCashflowSeries(
+    test('buildOverviewFinanceSeries isola Pendente/Confirmado/Recebido/Projeção e responde a 7d vs 30d', () {
+      final res30 = buildOverviewFinanceSeries(
         _financeFixtures,
         CurrencyCode.brl,
-        brandId: 'brand-apex',
         range: ChartTimeRange.d30,
-        mode: SeriesAggregationMode.daily,
         excludeTest: true,
-        includeProjections: false,
+        includeProjection: true,
+      );
+      final res7 = buildOverviewFinanceSeries(
+        _financeFixtures,
+        CurrencyCode.brl,
+        range: ChartTimeRange.d7,
+        excludeTest: true,
+        includeProjection: true,
       );
 
-      final nov04 = apexDaily.points.firstWhere((p) => p.date == '2026-11-04');
-      expect(nov04.outflows, 3200);
-      expect(nov04.receivedInflow, 0);
+      final real30 = res30.points.where((p) => !p.isProjection).toList();
+      final real7 = res7.points.where((p) => !p.isProjection).toList();
+      expect(real30.length, greaterThan(real7.length));
 
-      final nov05 = apexDaily.points.firstWhere((p) => p.date == '2026-11-05');
-      expect(nov05.receivedInflow, 9420.5);
-    },);
+      expect(real30.any((p) => p.entryIds.contains('fin-test-1')), isFalse);
+
+      final lastReal = real30.last;
+      expect(lastReal.date, '2026-11-18');
+      expect(
+        lastReal.confirmedCommercial,
+        greaterThan(lastReal.receivedCash ?? 0),
+      );
+      expect(lastReal.pendingCommissions, greaterThan(0));
+
+      final projPoint = res30.points.last;
+      expect(projPoint.isProjection, isTrue);
+      expect(projPoint.confirmedCommercial, isNull);
+      expect(projPoint.receivedCash, isNull);
+      expect(projPoint.pendingCommissions, isNull);
+      expect(
+        projPoint.projection,
+        greaterThan(lastReal.confirmedCommercial ?? 0),
+      );
+
+      expect(res7.hasPreviousData, isTrue);
+      expect(res30.hasPreviousData, isFalse);
+      expect(real30.first.previousConfirmed, isNull);
+    });
 
     test(
-      'buildAnalyticsContentPoints filtra por janela sem inventar métricas inexistentes',
+      'buildFinanceCashflowSeries filtra por marca e separa saídas vs entradas',
       () {
-        final contents = [
-          _makePublishedContent(
-            id: 'cnt-1',
-            publishedAt: '2026-11-08',
-            brandId: 'brand-apex',
-            channelId: 'ch-apex-yt',
-            views: 84200,
-            clicks: 3140,
-            revenue: 8034,
-            currency: CurrencyCode.brl,
-          ),
-          _makePublishedContent(
-            id: 'cnt-4',
-            publishedAt: '2026-11-11',
-            brandId: 'brand-nordic',
-            channelId: 'ch-nordic-yt',
-            views: 112500,
-            clicks: 4290,
-            revenue: 2717,
-            currency: CurrencyCode.usd,
-          ),
-        ];
-
-        final res30 = buildAnalyticsContentPoints(
-          contents,
+        final apexDaily = buildFinanceCashflowSeries(
+          _financeFixtures,
           CurrencyCode.brl,
+          brandId: 'brand-apex',
           range: ChartTimeRange.d30,
+          mode: SeriesAggregationMode.daily,
+          excludeTest: true,
+          includeProjections: false,
         );
-        expect(res30.items.length, 2);
-        expect(res30.items[0].contentId, 'cnt-1');
-        expect(res30.items[1].contentId, 'cnt-4');
-        expect(res30.items[0].isEstimate, isTrue);
 
-        final res7 = buildAnalyticsContentPoints(
-          contents,
-          CurrencyCode.brl,
-          range: ChartTimeRange.d7,
+        final nov04 = apexDaily.points.firstWhere(
+          (p) => p.date == '2026-11-04',
         );
-        expect(res7.items.length, 0);
-        expect(res7.previousCount, 2);
+        expect(nov04.outflows, 3200);
+        expect(nov04.receivedInflow, 0);
+
+        final nov05 = apexDaily.points.firstWhere(
+          (p) => p.date == '2026-11-05',
+        );
+        expect(nov05.receivedInflow, 9420.5);
       },
     );
 
-    test(
-      'buildProductNativeCurrencyComparison isola moeda nativa e preserva null sem coerção para 0',
-      () {
-        final products = [
-          _makeProductFixture(
-            id: 'prod-izotope-rx',
-            currency: CurrencyCode.eur,
-            score: 89,
-            epcValue: 3.1,
-          ),
-          _makeProductFixture(
-            id: 'prod-unknown-epc',
-            currency: CurrencyCode.eur,
-            score: null,
-            epcValue: null,
-          ),
-          _makeProductFixture(
-            id: 'prod-keychron-q1',
-            currency: CurrencyCode.brl,
-            score: 91,
-          ),
-          _makeProductFixture(
-            id: 'prod-seed-test',
-            currency: CurrencyCode.brl,
-            score: 76,
-            isTest: true,
-          ),
-        ];
+    test('buildAnalyticsContentPoints filtra por janela sem inventar métricas inexistentes', () {
+      final contents = [
+        _makePublishedContent(
+          id: 'cnt-1',
+          publishedAt: '2026-11-08',
+          brandId: 'brand-apex',
+          channelId: 'ch-apex-yt',
+          views: 84200,
+          clicks: 3140,
+          revenue: 8034,
+          currency: CurrencyCode.brl,
+        ),
+        _makePublishedContent(
+          id: 'cnt-4',
+          publishedAt: '2026-11-11',
+          brandId: 'brand-nordic',
+          channelId: 'ch-nordic-yt',
+          views: 112500,
+          clicks: 4290,
+          revenue: 2717,
+          currency: CurrencyCode.usd,
+        ),
+      ];
 
-        final eurItems = buildProductNativeCurrencyComparison(
-          products,
-          CurrencyCode.eur,
-          ProductChartMetric.opportunityScore,
-          excludeTest: true,
-        );
-        expect(
-          eurItems.every((i) => i.product.currency == CurrencyCode.eur),
-          isTrue,
-        );
-        final missing =
-            eurItems.firstWhere((i) => i.product.id == 'prod-unknown-epc');
-        expect(missing.value, isNull);
-        expect(missing.missingData, isTrue);
-        expect(eurItems.last.product.id, 'prod-unknown-epc');
+      final res30 = buildAnalyticsContentPoints(
+        contents,
+        CurrencyCode.brl,
+        range: ChartTimeRange.d30,
+      );
+      expect(res30.items.length, 2);
+      expect(res30.items[0].contentId, 'cnt-1');
+      expect(res30.items[1].contentId, 'cnt-4');
+      expect(res30.items[0].isEstimate, isTrue);
 
-        final brlItems = buildProductNativeCurrencyComparison(
-          products,
-          CurrencyCode.brl,
-          ProductChartMetric.opportunityScore,
-          excludeTest: true,
-        );
-        expect(brlItems.any((i) => i.product.isTest), isFalse);
-      },
-    );
+      final res7 = buildAnalyticsContentPoints(
+        contents,
+        CurrencyCode.brl,
+        range: ChartTimeRange.d7,
+      );
+      expect(res7.items.length, 0);
+      expect(res7.previousCount, 2);
+    });
+
+    test('buildProductNativeCurrencyComparison isola moeda nativa e preserva null sem coerção para 0', () {
+      final products = [
+        _makeProductFixture(
+          id: 'prod-izotope-rx',
+          currency: CurrencyCode.eur,
+          score: 89,
+          epcValue: 3.1,
+        ),
+        _makeProductFixture(
+          id: 'prod-unknown-epc',
+          currency: CurrencyCode.eur,
+          score: null,
+          epcValue: null,
+        ),
+        _makeProductFixture(
+          id: 'prod-keychron-q1',
+          currency: CurrencyCode.brl,
+          score: 91,
+        ),
+        _makeProductFixture(
+          id: 'prod-seed-test',
+          currency: CurrencyCode.brl,
+          score: 76,
+          isTest: true,
+        ),
+      ];
+
+      final eurItems = buildProductNativeCurrencyComparison(
+        products,
+        CurrencyCode.eur,
+        ProductChartMetric.opportunityScore,
+        excludeTest: true,
+      );
+      expect(
+        eurItems.every((i) => i.product.currency == CurrencyCode.eur),
+        isTrue,
+      );
+      final missing = eurItems.firstWhere(
+        (i) => i.product.id == 'prod-unknown-epc',
+      );
+      expect(missing.value, isNull);
+      expect(missing.missingData, isTrue);
+      expect(eurItems.last.product.id, 'prod-unknown-epc');
+
+      final brlItems = buildProductNativeCurrencyComparison(
+        products,
+        CurrencyCode.brl,
+        ProductChartMetric.opportunityScore,
+        excludeTest: true,
+      );
+      expect(brlItems.any((i) => i.product.isTest), isFalse);
+    });
   });
 }

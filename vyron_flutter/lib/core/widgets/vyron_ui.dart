@@ -1,15 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+
 import '../i18n/translate.dart';
 import '../theme/vyron_colors.dart';
 import '../../domain/models/vyron_enums.dart';
 
-enum VyronMetricTone {
-  neutral,
-  cobalt,
-  emerald,
-  amber,
-  crimson,
-}
+enum VyronMetricTone { neutral, cobalt, emerald, amber, crimson }
 
 /// Cabeçalho padrão de módulo (título, subtítulo e ações adaptativas).
 class VyronPageHeader extends StatelessWidget {
@@ -31,9 +26,7 @@ class VyronPageHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: palette.panelBorder),
-        ),
+        border: Border(bottom: BorderSide(color: palette.panelBorder)),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -44,10 +37,8 @@ class VyronPageHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontSize: isWide ? 26 : 22,
-                      letterSpacing: -0.4,
-                    ),
+                style: Theme.of(context).textTheme.headlineMedium
+                    ?.copyWith(fontSize: isWide ? 26 : 22, letterSpacing: -0.4),
               ),
               if (subtitle != null && subtitle!.isNotEmpty) ...[
                 const SizedBox(height: 6),
@@ -55,10 +46,8 @@ class VyronPageHeader extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 680),
                   child: Text(
                     subtitle!,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: palette.textMuted,
-                          height: 1.45,
-                        ),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(color: palette.textMuted, height: 1.45),
                   ),
                 ),
               ],
@@ -93,11 +82,7 @@ class VyronPageHeader extends StatelessWidget {
             children: [
               titleBlock,
               const SizedBox(height: 14),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: actions,
-              ),
+              Wrap(spacing: 8, runSpacing: 8, children: actions),
             ],
           );
         },
@@ -106,12 +91,7 @@ class VyronPageHeader extends StatelessWidget {
   }
 }
 
-enum VyronPanelPadding {
-  none,
-  sm,
-  md,
-  lg,
-}
+enum VyronPanelPadding { none, sm, md, lg }
 
 /// Painel arquitetônico Vyron com borda de 1px e cantos de 8px.
 class VyronSurfacePanel extends StatelessWidget {
@@ -189,7 +169,9 @@ class VyronMetricBlock extends StatelessWidget {
 
     final accentBarColor = switch (tone) {
       VyronMetricTone.neutral => palette.panelBorder,
-      VyronMetricTone.cobalt => VyronColors.electricCobalt.withValues(alpha: 0.7),
+      VyronMetricTone.cobalt => VyronColors.electricCobalt.withValues(
+        alpha: 0.7,
+      ),
       VyronMetricTone.emerald => VyronColors.emerald.withValues(alpha: 0.7),
       VyronMetricTone.amber => VyronColors.amber.withValues(alpha: 0.7),
       VyronMetricTone.crimson => VyronColors.crimson.withValues(alpha: 0.7),
@@ -223,11 +205,7 @@ class VyronMetricBlock extends StatelessWidget {
                   ),
                   if (badge != null && badge!.isNotEmpty) ...[
                     const SizedBox(width: 8),
-                    VyronToneBadge(
-                      label: badge!,
-                      tone: tone,
-                      monospace: true,
-                    ),
+                    VyronToneBadge(label: badge!, tone: tone, monospace: true),
                   ],
                 ],
               ),
@@ -281,11 +259,7 @@ class VyronMetricBlock extends StatelessWidget {
 
 /// Rótulo semântico com ícone + texto equivalente ao `StatusLabel` do React.
 class VyronStatusLabel extends StatelessWidget {
-  const VyronStatusLabel({
-    super.key,
-    required this.status,
-    this.statusKey,
-  });
+  const VyronStatusLabel({super.key, required this.status, this.statusKey});
 
   final String status;
   final String? statusKey;
@@ -317,12 +291,14 @@ class VyronStatusLabel extends StatelessWidget {
         s.contains('pronto') ||
         s.contains('ready')) {
       icon = Icons.check_circle_outline_rounded;
-      color =
-          isDark ? VyronColors.emeraldDarkText : VyronColors.emeraldLightText;
+      color = isDark
+          ? VyronColors.emeraldDarkText
+          : VyronColors.emeraldLightText;
     } else if (s.contains('running') || s.contains('em execução')) {
       icon = Icons.play_circle_outline_rounded;
-      color =
-          isDark ? VyronColors.cobaltMetricDark : VyronColors.electricCobalt;
+      color = isDark
+          ? VyronColors.cobaltMetricDark
+          : VyronColors.electricCobalt;
     } else if (s.contains('confirmed') ||
         s.contains('confirmado') ||
         s.contains('in review') ||
@@ -374,8 +350,9 @@ class VyronStatusLabel extends StatelessWidget {
         s.contains('desconectado') ||
         s.contains('disconnected')) {
       icon = Icons.cancel_outlined;
-      color =
-          isDark ? VyronColors.crimsonDarkText : VyronColors.crimsonLightText;
+      color = isDark
+          ? VyronColors.crimsonDarkText
+          : VyronColors.crimsonLightText;
     }
 
     return Row(
@@ -431,8 +408,9 @@ class VyronToneBadge extends StatelessWidget {
 
     final bg = switch (tone) {
       VyronMetricTone.neutral => palette.surfaceAlt.withValues(alpha: 0.45),
-      VyronMetricTone.cobalt =>
-        VyronColors.electricCobalt.withValues(alpha: 0.12),
+      VyronMetricTone.cobalt => VyronColors.electricCobalt.withValues(
+        alpha: 0.12,
+      ),
       VyronMetricTone.emerald => VyronColors.emerald.withValues(alpha: 0.12),
       VyronMetricTone.amber => VyronColors.amber.withValues(alpha: 0.14),
       VyronMetricTone.crimson => VyronColors.crimson.withValues(alpha: 0.14),
@@ -452,8 +430,7 @@ class VyronToneBadge extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w600,
           color: fg,
-          fontFeatures:
-              monospace ? const [FontFeature.tabularFigures()] : null,
+          fontFeatures: monospace ? const [FontFeature.tabularFigures()] : null,
         ),
       ),
     );
@@ -492,9 +469,7 @@ class VyronProgressBar extends StatelessWidget {
             FractionallySizedBox(
               widthFactor: clamped,
               heightFactor: 1,
-              child: ColoredBox(
-                color: color ?? VyronColors.electricCobalt,
-              ),
+              child: ColoredBox(color: color ?? VyronColors.electricCobalt),
             ),
           ],
         ),
@@ -531,11 +506,7 @@ class VyronEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            size: 26,
-            color: palette.textMuted,
-          ),
+          Icon(Icons.warning_amber_rounded, size: 26, color: palette.textMuted),
           const SizedBox(height: 12),
           Text(
             title,
@@ -548,18 +519,13 @@ class VyronEmptyState extends StatelessWidget {
             child: Text(
               description,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: palette.textMuted,
-                    height: 1.45,
-                  ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: palette.textMuted, height: 1.45),
             ),
           ),
           if (actionLabel != null && onAction != null) ...[
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: onAction,
-              child: Text(actionLabel!),
-            ),
+            ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
           ],
         ],
       ),
@@ -568,10 +534,7 @@ class VyronEmptyState extends StatelessWidget {
 }
 
 class VyronSegmentOption<T> {
-  const VyronSegmentOption({
-    required this.value,
-    required this.label,
-  });
+  const VyronSegmentOption({required this.value, required this.label});
 
   final T value;
   final String label;
@@ -668,26 +631,19 @@ class VyronSectionTitle extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
               if (subtitle != null && subtitle!.isNotEmpty) ...[
                 const SizedBox(height: 2),
                 Text(
                   subtitle!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: palette.textMuted,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: palette.textMuted),
                 ),
               ],
             ],
           ),
         ),
-        if (trailing != null) ...[
-          const SizedBox(width: 12),
-          trailing!,
-        ],
+        if (trailing != null) ...[const SizedBox(width: 12), trailing!],
       ],
     );
   }
@@ -741,15 +697,15 @@ Future<T?> showVyronModalDialog<T>({
                         children: [
                           Text(
                             title,
-                            style: Theme.of(dialogContext).textTheme.titleMedium,
+                            style: Theme.of(dialogContext)
+                                .textTheme
+                                .titleMedium,
                           ),
                           if (subtitle != null && subtitle.isNotEmpty) ...[
                             const SizedBox(height: 4),
                             Text(
                               subtitle,
-                              style: Theme.of(dialogContext)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(dialogContext).textTheme.bodySmall
                                   ?.copyWith(color: palette.textMuted),
                             ),
                           ],
@@ -866,18 +822,20 @@ class VyronToggleSwitch extends StatelessWidget {
 
     final trackBg = value
         ? (isInteractive
-            ? VyronColors.electricCobalt
-            : VyronColors.electricCobalt.withValues(alpha: 0.45))
-        : (isDark
-            ? VyronColors.obsidianBlack
-            : VyronColors.lightSurfaceAlt);
+              ? VyronColors.electricCobalt
+              : VyronColors.electricCobalt.withValues(alpha: 0.45))
+        : (isDark ? VyronColors.obsidianBlack : VyronColors.lightSurfaceAlt);
     final trackBorder = value
-        ? VyronColors.electricCobalt.withValues(alpha: isInteractive ? 0.9 : 0.4)
+        ? VyronColors.electricCobalt.withValues(
+            alpha: isInteractive ? 0.9 : 0.4,
+          )
         : palette.border;
 
     final thumbColor = value
         ? Colors.white
-        : (isInteractive ? palette.textMuted : palette.textMuted.withValues(alpha: 0.5));
+        : (isInteractive
+              ? palette.textMuted
+              : palette.textMuted.withValues(alpha: 0.5));
 
     final switchTrack = AnimatedContainer(
       duration: const Duration(milliseconds: 160),
@@ -897,10 +855,7 @@ class VyronToggleSwitch extends StatelessWidget {
         child: Container(
           width: 16,
           height: 16,
-          decoration: BoxDecoration(
-            color: thumbColor,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: thumbColor, shape: BoxShape.circle),
         ),
       ),
     );
@@ -916,11 +871,11 @@ class VyronToggleSwitch extends StatelessWidget {
                   label,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isInteractive
-                            ? palette.textPrimary
-                            : palette.textMuted,
-                        fontWeight: value ? FontWeight.w600 : FontWeight.w500,
-                      ),
+                    color: isInteractive
+                        ? palette.textPrimary
+                        : palette.textMuted,
+                    fontWeight: value ? FontWeight.w600 : FontWeight.w500,
+                  ),
                 ),
               ),
             ],
@@ -936,20 +891,18 @@ class VyronToggleSwitch extends StatelessWidget {
                     Text(
                       label,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontSize: 13,
-                            color: isInteractive
-                                ? palette.textPrimary
-                                : palette.textMuted,
-                          ),
+                        fontSize: 13,
+                        color: isInteractive
+                            ? palette.textPrimary
+                            : palette.textMuted,
+                      ),
                     ),
                     if (subtitle != null && subtitle!.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         subtitle!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: palette.textMuted,
-                              fontSize: 11,
-                            ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: palette.textMuted, fontSize: 11),
                       ),
                     ],
                   ],
@@ -986,8 +939,8 @@ class VyronToggleSwitch extends StatelessWidget {
               color: value && compact
                   ? VyronColors.electricCobalt.withValues(alpha: 0.08)
                   : (compact
-                      ? palette.surface
-                      : palette.surfaceAlt.withValues(alpha: 0.22)),
+                        ? palette.surface
+                        : palette.surfaceAlt.withValues(alpha: 0.22)),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: value && compact
@@ -1037,8 +990,9 @@ class VyronFeedbackBanner extends StatelessWidget {
     final bg = switch (tone) {
       VyronMetricTone.crimson => VyronColors.crimson.withValues(alpha: 0.12),
       VyronMetricTone.amber => VyronColors.amber.withValues(alpha: 0.12),
-      VyronMetricTone.cobalt =>
-        VyronColors.electricCobalt.withValues(alpha: 0.12),
+      VyronMetricTone.cobalt => VyronColors.electricCobalt.withValues(
+        alpha: 0.12,
+      ),
       VyronMetricTone.emerald => VyronColors.emerald.withValues(alpha: 0.12),
       VyronMetricTone.neutral => palette.surfaceAlt.withValues(alpha: 0.35),
     };
@@ -1069,10 +1023,7 @@ class VyronFeedbackBanner extends StatelessWidget {
             ),
           ),
           if (onDismiss != null)
-            TextButton(
-              onPressed: onDismiss,
-              child: Text(dismissLabel ?? 'OK'),
-            ),
+            TextButton(onPressed: onDismiss, child: Text(dismissLabel ?? 'OK')),
         ],
       ),
     );

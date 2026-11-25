@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../application/state/vyron_access_notifier.dart';
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/security/vyron_access_rules.dart';
@@ -34,10 +35,7 @@ abstract final class VyronRoutes {
   static const String settings = '/settings';
 }
 
-String vyronModulePath(
-  NavModule module, {
-  String? entityId,
-}) {
+String vyronModulePath(NavModule module, {String? entityId}) {
   final base = switch (module) {
     NavModule.overview => VyronRoutes.overview,
     NavModule.brands => VyronRoutes.brands,
@@ -145,7 +143,9 @@ final vyronRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) {
           return AdaptiveShell(
             onNavigateModule: (module) {
-              ref.read(vyronStateProvider.notifier).navigate(
+              ref
+                  .read(vyronStateProvider.notifier)
+                  .navigate(
                     module,
                     brandId: null,
                     setBrandId: module == NavModule.brands,
@@ -164,30 +164,29 @@ final vyronRouterProvider = Provider<GoRouter>((ref) {
           );
         },
         routes: [
-          GoRoute(
-            path: '/',
-            redirect: (_, __) => VyronRoutes.overview,
-          ),
+          GoRoute(path: '/', redirect: (_, __) => VyronRoutes.overview),
           GoRoute(
             path: VyronRoutes.overview,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const OverviewScreen(),
+              child: const _VyronModuleScrollView(child: OverviewScreen()),
             ),
           ),
           GoRoute(
             path: VyronRoutes.brands,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const BrandsScreen(),
+              child: const _VyronModuleScrollView(child: BrandsScreen()),
             ),
             routes: [
               GoRoute(
                 path: ':brandId',
                 pageBuilder: (context, state) => NoTransitionPage<void>(
                   key: state.pageKey,
-                  child: BrandsScreen(
-                    brandId: state.pathParameters['brandId'],
+                  child: _VyronModuleScrollView(
+                    child: BrandsScreen(
+                      brandId: state.pathParameters['brandId'],
+                    ),
                   ),
                 ),
               ),
@@ -197,15 +196,17 @@ final vyronRouterProvider = Provider<GoRouter>((ref) {
             path: VyronRoutes.products,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const ProductsScreen(),
+              child: const _VyronModuleScrollView(child: ProductsScreen()),
             ),
             routes: [
               GoRoute(
                 path: ':productId',
                 pageBuilder: (context, state) => NoTransitionPage<void>(
                   key: state.pageKey,
-                  child: ProductsScreen(
-                    productId: state.pathParameters['productId'],
+                  child: _VyronModuleScrollView(
+                    child: ProductsScreen(
+                      productId: state.pathParameters['productId'],
+                    ),
                   ),
                 ),
               ),
@@ -215,15 +216,17 @@ final vyronRouterProvider = Provider<GoRouter>((ref) {
             path: VyronRoutes.content,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const ContentScreen(),
+              child: const _VyronModuleScrollView(child: ContentScreen()),
             ),
             routes: [
               GoRoute(
                 path: ':contentId',
                 pageBuilder: (context, state) => NoTransitionPage<void>(
                   key: state.pageKey,
-                  child: ContentScreen(
-                    contentId: state.pathParameters['contentId'],
+                  child: _VyronModuleScrollView(
+                    child: ContentScreen(
+                      contentId: state.pathParameters['contentId'],
+                    ),
                   ),
                 ),
               ),
@@ -233,36 +236,38 @@ final vyronRouterProvider = Provider<GoRouter>((ref) {
             path: VyronRoutes.channels,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const ChannelsScreen(),
+              child: const _VyronModuleScrollView(child: ChannelsScreen()),
             ),
           ),
           GoRoute(
             path: VyronRoutes.analytics,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const AnalyticsScreen(),
+              child: const _VyronModuleScrollView(child: AnalyticsScreen()),
             ),
           ),
           GoRoute(
             path: VyronRoutes.finance,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const FinanceScreen(),
+              child: const _VyronModuleScrollView(child: FinanceScreen()),
             ),
           ),
           GoRoute(
             path: VyronRoutes.automations,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const AutomationsScreen(),
+              child: const _VyronModuleScrollView(child: AutomationsScreen()),
             ),
             routes: [
               GoRoute(
                 path: ':automationId',
                 pageBuilder: (context, state) => NoTransitionPage<void>(
                   key: state.pageKey,
-                  child: AutomationsScreen(
-                    automationId: state.pathParameters['automationId'],
+                  child: _VyronModuleScrollView(
+                    child: AutomationsScreen(
+                      automationId: state.pathParameters['automationId'],
+                    ),
                   ),
                 ),
               ),
@@ -272,21 +277,21 @@ final vyronRouterProvider = Provider<GoRouter>((ref) {
             path: VyronRoutes.activity,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const ActivityScreen(),
+              child: const _VyronModuleScrollView(child: ActivityScreen()),
             ),
           ),
           GoRoute(
             path: VyronRoutes.notifications,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const NotificationsScreen(),
+              child: const _VyronModuleScrollView(child: NotificationsScreen()),
             ),
           ),
           GoRoute(
             path: VyronRoutes.settings,
             pageBuilder: (context, state) => NoTransitionPage<void>(
               key: state.pageKey,
-              child: const SettingsScreen(),
+              child: const _VyronModuleScrollView(child: SettingsScreen()),
             ),
           ),
         ],
@@ -315,7 +320,9 @@ void navigateToVyronModule(
   bool setAutomationId = false,
   ContentSubView? contentSubView,
 }) {
-  ref.read(vyronStateProvider.notifier).navigate(
+  ref
+      .read(vyronStateProvider.notifier)
+      .navigate(
         module,
         brandId: brandId,
         setBrandId: setBrandId,
@@ -338,5 +345,23 @@ void navigateToVyronModule(
   final router = GoRouter.maybeOf(ref.context);
   if (router != null) {
     router.go(vyronModulePath(module, entityId: entityId));
+  }
+}
+
+class _VyronModuleScrollView extends StatelessWidget {
+  const _VyronModuleScrollView({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isWide = MediaQuery.sizeOf(context).width >= 960;
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(
+        horizontal: isWide ? 24 : 16,
+        vertical: isWide ? 22 : 16,
+      ),
+      child: child,
+    );
   }
 }

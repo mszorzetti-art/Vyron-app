@@ -1,19 +1,29 @@
-node_modules/
-build/
-dist/
-coverage/
+# Ambiente local e ferramentas
 .DS_Store
 *.log
-.env*
-!.env.example
 
-# Android signing secrets & local Gradle build caches (never commit keystores/passwords)
+# Flutter / Dart
+vyron_flutter/.dart_tool/
+vyron_flutter/.flutter-plugins
+vyron_flutter/.flutter-plugins-dependencies
+vyron_flutter/build/
+vyron_flutter/coverage/
+
+# Android / Gradle e segredos de assinatura (NUNCA fazer commit de keystores/senhas)
 *.jks
 *.keystore
-android/keystore.properties
-android/.gradle/
-android/app/build/
-android/build/
-android/local.properties
-android/capacitor-cordova-android-plugins/build/
+vyron_flutter/android/keystore.properties
+vyron_flutter/android/local.properties
+vyron_flutter/android/.gradle/
+vyron_flutter/android/app/build/
+vyron_flutter/android/build/
+apk-flutter-output/
 
+# iOS local build / Pods
+vyron_flutter/ios/Pods/
+vyron_flutter/ios/.symlinks/
+vyron_flutter/ios/Flutter/Flutter.framework
+vyron_flutter/ios/Flutter/Flutter.podspec
+vyron_flutter/ios/Flutter/ephemeral/
+vyron_flutter/ios/Runner.xcworkspace/xcuserdata/
+vyron_flutter/ios/Runner.xcodeproj/xcuserdata/

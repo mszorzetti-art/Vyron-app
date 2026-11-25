@@ -64,8 +64,9 @@ String formatNumberForLang(
   UiLanguage lang = UiLanguage.ptBR,
   int fractionDigits = 1,
 ]) {
-  final normalized =
-      double.parse(value.toStringAsFixed(fractionDigits)) == 0.0 ? 0.0 : value;
+  final normalized = double.parse(value.toStringAsFixed(fractionDigits)) == 0.0
+      ? 0.0
+      : value;
   final isNegative = normalized < 0;
   final formatted = _formatPositiveGrouped(
     normalized.abs(),
@@ -75,17 +76,10 @@ String formatNumberForLang(
   return '${isNegative ? '-' : ''}$formatted';
 }
 
-String formatIntegerForLang(
-  num value, [
-  UiLanguage lang = UiLanguage.ptBR,
-]) {
+String formatIntegerForLang(num value, [UiLanguage lang = UiLanguage.ptBR]) {
   final rounded = value.round();
   final isNegative = rounded < 0;
-  final formatted = _formatPositiveGrouped(
-    rounded.abs().toDouble(),
-    lang,
-    0,
-  );
+  final formatted = _formatPositiveGrouped(rounded.abs().toDouble(), lang, 0);
   return '${isNegative ? '-' : ''}$formatted';
 }
 
@@ -128,7 +122,9 @@ class _DateParts {
 }
 
 final RegExp _dateOnlyRegex = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$');
-final RegExp _isoMatchRegex = RegExp(r'^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})');
+final RegExp _isoMatchRegex = RegExp(
+  r'^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})',
+);
 
 _DateParts? _parseIsoParts(String input) {
   final trimmed = input.trim();
@@ -164,10 +160,7 @@ _DateParts? _parseIsoParts(String input) {
 /// Formats calendar dates strictly per regional convention without shifting days across timezones:
 /// - PT-BR: DD/MM/YYYY
 /// - EN-US: MM/DD/YYYY
-String formatDateForLang(
-  String isoOrYmd, [
-  UiLanguage lang = UiLanguage.ptBR,
-]) {
+String formatDateForLang(String isoOrYmd, [UiLanguage lang = UiLanguage.ptBR]) {
   if (isoOrYmd.isEmpty) return '-';
   final parts = _parseIsoParts(isoOrYmd);
   if (parts == null) return isoOrYmd;
@@ -177,10 +170,7 @@ String formatDateForLang(
   return '${parts.day}/${parts.month}/${parts.year}';
 }
 
-String formatDateTimeForLang(
-  String iso, [
-  UiLanguage lang = UiLanguage.ptBR,
-]) {
+String formatDateTimeForLang(String iso, [UiLanguage lang = UiLanguage.ptBR]) {
   if (iso.isEmpty) return '-';
   final parts = _parseIsoParts(iso);
   if (parts == null) return iso;

@@ -1,5 +1,7 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
+
 import '../../core/i18n/formatters.dart';
 import '../../domain/models/vyron_enums.dart';
 
@@ -76,11 +78,7 @@ class VyronComparisonBarItem {
 
 @immutable
 class ChartYTick {
-  const ChartYTick({
-    required this.ratio,
-    required this.value,
-    required this.y,
-  });
+  const ChartYTick({required this.ratio, required this.value, required this.y});
 
   final double ratio;
   final double value;
@@ -98,8 +96,8 @@ class TimeSeriesChartGeometry {
     this.padRight = 18.0,
     this.padTop = 18.0,
     this.padBottom = 28.0,
-  })  : innerWidth = math.max(1.0, size.width - padLeft - padRight),
-        innerHeight = math.max(1.0, size.height - padTop - padBottom) {
+  }) : innerWidth = math.max(1.0, size.width - padLeft - padRight),
+       innerHeight = math.max(1.0, size.height - padTop - padBottom) {
     final allValues = <double>[];
     for (final pt in points) {
       for (final s in visibleSeries) {
@@ -110,7 +108,9 @@ class TimeSeriesChartGeometry {
       }
     }
 
-    final rawMin = allValues.isEmpty ? 0.0 : math.min(0.0, allValues.reduce(math.min));
+    final rawMin = allValues.isEmpty
+        ? 0.0
+        : math.min(0.0, allValues.reduce(math.min));
     final rawMax = allValues.isEmpty
         ? 100.0
         : math.max(1.0, allValues.reduce(math.max));
@@ -250,11 +250,7 @@ String? computePointDeltaText({
   return '$sign${fmt(diff.abs())}$pctStr';
 }
 
-enum VyronChartDisplayMode {
-  line,
-  bar,
-  table,
-}
+enum VyronChartDisplayMode { line, bar, table }
 
 @immutable
 class MonotoneCubicSegment {
@@ -347,4 +343,3 @@ List<MonotoneCubicSegment> computeMonotoneCubicSegments(List<Offset> points) {
   }
   return segments;
 }
-

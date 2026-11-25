@@ -1,5 +1,7 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
+
 import '../../core/i18n/translate.dart';
 import '../../core/theme/vyron_colors.dart';
 import '../../domain/models/vyron_enums.dart';
@@ -52,9 +54,8 @@ class _VyronInteractiveComparisonChartState
         child: Text(
           widget.emptyMessage ?? translate(lang, 'charts.noComparisonBars'),
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: palette.textMuted,
-              ),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: palette.textMuted),
         ),
       );
     }
@@ -208,8 +209,8 @@ class _VyronInteractiveComparisonChartState
                 fontWeight: FontWeight.w600,
                 color: isMissing
                     ? (isDark
-                        ? VyronColors.amberDarkText
-                        : VyronColors.amberLightText)
+                          ? VyronColors.amberDarkText
+                          : VyronColors.amberLightText)
                     : palette.textPrimary,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
@@ -222,9 +223,7 @@ class _VyronInteractiveComparisonChartState
           width: double.infinity,
           child: isMissing
               ? CustomPaint(
-                  painter: _DashedMissingTrackPainter(
-                    color: palette.border,
-                  ),
+                  painter: _DashedMissingTrackPainter(color: palette.border),
                 )
               : ClipRRect(
                   borderRadius: BorderRadius.circular(4),
@@ -243,7 +242,8 @@ class _VyronInteractiveComparisonChartState
                         heightFactor: 1,
                         alignment: Alignment.centerLeft,
                         child: Opacity(
-                          opacity: (isSelected ||
+                          opacity:
+                              (isSelected ||
                                   isHovered ||
                                   widget.selectedId == null)
                               ? 1.0
@@ -387,9 +387,8 @@ class _ComparisonDataTable extends StatelessWidget {
             InkWell(
               onTap: onSelect == null
                   ? null
-                  : () => onSelect!(
-                        selectedId == items[i].id ? null : items[i],
-                      ),
+                  : () =>
+                        onSelect!(selectedId == items[i].id ? null : items[i]),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,

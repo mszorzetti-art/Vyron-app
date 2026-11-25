@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'vyron_access_rules.dart';
 
 /// Contrato de armazenamento criptografado para credenciais e sessão Vyron Access.
@@ -34,15 +36,14 @@ class InMemoryAccessStorage implements VyronAccessStorage {
 /// e iOS Keychain (sem fallback inseguro em texto plano).
 class FlutterSecureAccessStorage implements VyronAccessStorage {
   FlutterSecureAccessStorage({FlutterSecureStorage? storage})
-      : _storage = storage ??
-            const FlutterSecureStorage(
-              aOptions: AndroidOptions(
-                encryptedSharedPreferences: true,
-              ),
-              iOptions: IOSOptions(
-                accessibility: KeychainAccessibility.first_unlock_this_device,
-              ),
-            );
+    : _storage =
+          storage ??
+          const FlutterSecureStorage(
+            aOptions: AndroidOptions(encryptedSharedPreferences: true),
+            iOptions: IOSOptions(
+              accessibility: KeychainAccessibility.first_unlock_this_device,
+            ),
+          );
 
   static const String sessionStorageKey = 'vyron_access_session_v2';
 

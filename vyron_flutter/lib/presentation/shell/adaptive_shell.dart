@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_access_notifier.dart';
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/seed_translations.dart';
@@ -26,10 +27,7 @@ class _NavItemSpec {
 }
 
 class _NavGroupSpec {
-  const _NavGroupSpec({
-    required this.labelKey,
-    required this.items,
-  });
+  const _NavGroupSpec({required this.labelKey, required this.items});
 
   final String labelKey;
   final List<_NavItemSpec> items;
@@ -124,11 +122,7 @@ String moduleLabelKey(NavModule module) {
   };
 }
 
-enum _OwnerMenuAction {
-  lock,
-  settings,
-  logout,
-}
+enum _OwnerMenuAction { lock, settings, logout }
 
 /// Shell adaptativo oficial do Vyron:
 /// - Desktop/Tablet (>= 960px): Sidebar fixa lateral 248px + Top Header + Área principal.
@@ -157,10 +151,7 @@ class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
     }
   }
 
-  List<String> _buildBreadcrumbs(
-    VyronAppState appState,
-    UiLanguage lang,
-  ) {
+  List<String> _buildBreadcrumbs(VyronAppState appState, UiLanguage lang) {
     final items = <String>[
       translate(lang, moduleLabelKey(appState.activeModule)),
     ];
@@ -242,11 +233,8 @@ class _AdaptiveShellState extends ConsumerState<AdaptiveShell> {
       showCloseButton: !isWide,
       onCloseDrawer: () => Navigator.of(context).pop(),
       onSelectModule: _navigateAndCloseDrawer,
-      onOpenControlModal: (mode) => _openControlModal(
-        mode,
-        lang,
-        domain.settings.ownerName,
-      ),
+      onOpenControlModal: (mode) =>
+          _openControlModal(mode, lang, domain.settings.ownerName),
       onLock: () {
         if (_scaffoldKey.currentState?.isDrawerOpen == true) {
           Navigator.of(context).pop();
@@ -415,11 +403,10 @@ class _VyronSidebarContent extends StatelessWidget {
 
     final statusColor = isHalted
         ? (isDark ? VyronColors.crimsonDarkText : VyronColors.crimsonLightText)
-        : (isDark
-            ? VyronColors.emeraldDarkText
-            : VyronColors.emeraldLightText);
-    final statusDotColor =
-        isHalted ? VyronColors.crimsonDarkText : VyronColors.emerald;
+        : (isDark ? VyronColors.emeraldDarkText : VyronColors.emeraldLightText);
+    final statusDotColor = isHalted
+        ? VyronColors.crimsonDarkText
+        : VyronColors.emerald;
 
     return ColoredBox(
       color: palette.sidebarBackground,
@@ -430,9 +417,7 @@ class _VyronSidebarContent extends StatelessWidget {
             height: 56,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: palette.panelBorder),
-              ),
+              border: Border(bottom: BorderSide(color: palette.panelBorder)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -440,9 +425,9 @@ class _VyronSidebarContent extends StatelessWidget {
                 InkWell(
                   onTap: () => onSelectModule(NavModule.overview),
                   borderRadius: BorderRadius.circular(6),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: const VyronWordmark(
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4),
+                    child: VyronWordmark(
                       markSize: 22,
                       fontSize: 13,
                       variant: VyronMarkVariant.cobalt,
@@ -486,13 +471,14 @@ class _VyronSidebarContent extends StatelessWidget {
                       icon: item.icon,
                       label: translate(language, item.labelKey),
                       active: activeModule == item.module,
-                      count: item.module == NavModule.notifications &&
+                      count:
+                          item.module == NavModule.notifications &&
                               unreadCount > 0
                           ? unreadCount
                           : item.module == NavModule.automations &&
-                                  pendingApprovals > 0
-                              ? pendingApprovals
-                              : null,
+                                pendingApprovals > 0
+                          ? pendingApprovals
+                          : null,
                       onTap: () => onSelectModule(item.module),
                     ),
                 ],
@@ -502,9 +488,7 @@ class _VyronSidebarContent extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: palette.panelBorder),
-              ),
+              border: Border(top: BorderSide(color: palette.panelBorder)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -599,8 +583,9 @@ class _VyronSidebarContent extends StatelessWidget {
                                 : VyronColors.crimsonLightButton,
                             foregroundColor: Colors.white,
                             side: BorderSide(
-                              color: VyronColors.crimsonDarkText
-                                  .withValues(alpha: 0.25),
+                              color: VyronColors.crimsonDarkText.withValues(
+                                alpha: 0.25,
+                              ),
                             ),
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                           ),
@@ -652,9 +637,7 @@ class _VyronSidebarContent extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.only(top: 10),
                   decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: palette.panelBorder),
-                    ),
+                    border: Border(top: BorderSide(color: palette.panelBorder)),
                   ),
                   child: Row(
                     children: [
@@ -881,9 +864,7 @@ class _VyronTopHeader extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: isWide ? 20 : 12),
       decoration: BoxDecoration(
         color: palette.background,
-        border: Border(
-          bottom: BorderSide(color: palette.panelBorder),
-        ),
+        border: Border(bottom: BorderSide(color: palette.panelBorder)),
       ),
       child: Row(
         children: [
@@ -936,9 +917,7 @@ class _VyronTopHeader extends StatelessWidget {
                 Icon(
                   isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
                   size: 15,
-                  color: isDark
-                      ? VyronColors.titanium
-                      : VyronColors.graphite,
+                  color: isDark ? VyronColors.titanium : VyronColors.graphite,
                 ),
                 if (showThemeText) ...[
                   const SizedBox(width: 6),
@@ -961,11 +940,9 @@ class _VyronTopHeader extends StatelessWidget {
           const SizedBox(width: 6),
           _HeaderPillButton(
             key: const Key('vyron-header-notifications-btn'),
-            tooltip: translate(
-              language,
-              'nav.notificationsAria',
-              {'count': unreadCount},
-            ),
+            tooltip: translate(language, 'nav.notificationsAria', {
+              'count': unreadCount,
+            }),
             onTap: onOpenNotifications,
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -994,11 +971,9 @@ class _VyronTopHeader extends StatelessWidget {
           const SizedBox(width: 6),
           PopupMenuButton<_OwnerMenuAction>(
             key: const Key('vyron-owner-menu-btn'),
-            tooltip: translate(
-              language,
-              'nav.ownerMenuAria',
-              {'name': ownerName},
-            ),
+            tooltip: translate(language, 'nav.ownerMenuAria', {
+              'name': ownerName,
+            }),
             color: palette.surface,
             offset: const Offset(0, 40),
             shape: RoundedRectangleBorder(
@@ -1183,11 +1158,7 @@ class _BreadcrumbBar extends StatelessWidget {
               color: palette.textMuted,
             ),
           ),
-          Icon(
-            Icons.chevron_right_rounded,
-            size: 16,
-            color: palette.textMuted,
-          ),
+          Icon(Icons.chevron_right_rounded, size: 16, color: palette.textMuted),
         ],
         Flexible(
           child: items.length > 1
@@ -1195,15 +1166,18 @@ class _BreadcrumbBar extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (showPrefix) ...[
-                      InkWell(
-                        onTap: onTapFirst,
-                        borderRadius: BorderRadius.circular(4),
-                        child: Text(
-                          items.first,
-                          style: TextStyle(
-                            fontFamily: VyronTypography.sans,
-                            fontSize: 13,
-                            color: palette.textMuted,
+                      Flexible(
+                        child: InkWell(
+                          onTap: onTapFirst,
+                          borderRadius: BorderRadius.circular(4),
+                          child: Text(
+                            items.first,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: VyronTypography.sans,
+                              fontSize: 13,
+                              color: palette.textMuted,
+                            ),
                           ),
                         ),
                       ),
@@ -1263,17 +1237,11 @@ class _MobileBrandFilterBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: palette.background,
-        border: Border(
-          bottom: BorderSide(color: palette.panelBorder),
-        ),
+        border: Border(bottom: BorderSide(color: palette.panelBorder)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.filter_list_rounded,
-            size: 15,
-            color: palette.textMuted,
-          ),
+          Icon(Icons.filter_list_rounded, size: 15, color: palette.textMuted),
           const SizedBox(width: 8),
           Expanded(
             child: _BrandDropdownBox(
@@ -1308,8 +1276,8 @@ class _BrandDropdownBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.vyronColors;
-    final hasMatch = selectedBrandId == 'all' ||
-        brands.any((b) => b.id == selectedBrandId);
+    final hasMatch =
+        selectedBrandId == 'all' || brands.any((b) => b.id == selectedBrandId);
     final effectiveValue = hasMatch ? selectedBrandId : 'all';
 
     return Container(
@@ -1348,10 +1316,7 @@ class _BrandDropdownBox extends StatelessWidget {
             for (final brand in brands)
               DropdownMenuItem<String>(
                 value: brand.id,
-                child: Text(
-                  brand.name,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: Text(brand.name, overflow: TextOverflow.ellipsis),
               ),
           ],
           onChanged: (value) {
@@ -1364,10 +1329,7 @@ class _BrandDropdownBox extends StatelessWidget {
 }
 
 class _PeriodDropdownBox extends StatelessWidget {
-  const _PeriodDropdownBox({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _PeriodDropdownBox({required this.selected, required this.onChanged});
 
   final PeriodFilter selected;
   final ValueChanged<PeriodFilter> onChanged;
@@ -1464,8 +1426,9 @@ class _HaltedSystemBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDark ? VyronColors.crimsonDarkText : VyronColors.crimsonLightText;
+    final textColor = isDark
+        ? VyronColors.crimsonDarkText
+        : VyronColors.crimsonLightText;
 
     return Container(
       key: const Key('vyron-halted-banner'),
@@ -1487,19 +1450,13 @@ class _HaltedSystemBanner extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.gpp_maybe_outlined,
-                size: 16,
-                color: textColor,
-              ),
+              Icon(Icons.gpp_maybe_outlined, size: 16, color: textColor),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  translate(
-                    language,
-                    'controls.haltedBanner',
-                    {'reason': reason},
-                  ),
+                  translate(language, 'controls.haltedBanner', {
+                    'reason': reason,
+                  }),
                   style: TextStyle(
                     fontFamily: VyronTypography.sans,
                     fontSize: 12,
@@ -1514,8 +1471,9 @@ class _HaltedSystemBanner extends StatelessWidget {
             key: const Key('vyron-halted-banner-resume-btn'),
             onPressed: onResumeTap,
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  isDark ? VyronColors.crimson : VyronColors.crimsonLightButton,
+              backgroundColor: isDark
+                  ? VyronColors.crimson
+                  : VyronColors.crimsonLightButton,
               foregroundColor: Colors.white,
               minimumSize: const Size(0, 32),
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1562,9 +1520,7 @@ class _VyronMobileBottomNav extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: palette.sidebarBackground,
-        border: Border(
-          top: BorderSide(color: palette.panelBorder),
-        ),
+        border: Border(top: BorderSide(color: palette.panelBorder)),
       ),
       child: NavigationBar(
         height: 64,

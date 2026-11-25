@@ -8,28 +8,30 @@ import 'package:vyron/domain/rules/vyron_rules.dart';
 
 void main() {
   group('Lote 3 — Seed Data oficial & integridade de domínio', () {
-    test('reproduz exatamente contagens e identidade do estado seed oficial',
-        () {
-      final seed = buildInitialVyronState();
+    test(
+      'reproduz exatamente contagens e identidade do estado seed oficial',
+      () {
+        final seed = buildInitialVyronState();
 
-      expect(seed.brands.length, 4);
-      expect(seed.products.length, 10);
-      expect(seed.channels.length, 8);
-      expect(seed.contents.length, 8);
-      expect(seed.financeEntries.length, 14);
-      expect(seed.automations.length, 6);
-      expect(seed.jobRuns.length, 4);
-      expect(seed.risks.length, 9);
-      expect(seed.activities.length, 7);
-      expect(seed.notifications.length, 4);
+        expect(seed.brands.length, 4);
+        expect(seed.products.length, 10);
+        expect(seed.channels.length, 8);
+        expect(seed.contents.length, 8);
+        expect(seed.financeEntries.length, 14);
+        expect(seed.automations.length, 6);
+        expect(seed.jobRuns.length, 4);
+        expect(seed.risks.length, 9);
+        expect(seed.activities.length, 7);
+        expect(seed.notifications.length, 4);
 
-      expect(seed.settings.ownerName, OwnerProfile.name);
-      expect(seed.settings.ownerEmail, OwnerProfile.email);
-      expect(seed.settings.integrations.length, 7);
-      expect(seed.systemControl.state, SystemControlStatus.active);
-      expect(seed.systemControl.publishingEnabled, isFalse);
-      expect(seed.systemControl.phaseBPublicAllowed, isFalse);
-    });
+        expect(seed.settings.ownerName, OwnerProfile.name);
+        expect(seed.settings.ownerEmail, OwnerProfile.email);
+        expect(seed.settings.integrations.length, 7);
+        expect(seed.systemControl.state, SystemControlStatus.active);
+        expect(seed.systemControl.publishingEnabled, isFalse);
+        expect(seed.systemControl.phaseBPublicAllowed, isFalse);
+      },
+    );
 
     test('calcula hashes SHA-256 idênticos nas peças seed autorizadas', () {
       final seed = buildInitialVyronState();
@@ -38,22 +40,10 @@ void main() {
       final cnt4 = seed.contents.firstWhere((c) => c.id == 'cnt-4');
 
       expect(cnt1.currentManifestHash.length, 64);
-      expect(
-        cnt1.currentManifestHash,
-        computeContentItemManifestHash(cnt1),
-      );
-      expect(
-        cnt1.authorization?.authorizedHash,
-        cnt1.currentManifestHash,
-      );
-      expect(
-        cnt4.authorization?.authorizedHash,
-        cnt4.currentManifestHash,
-      );
-      expect(
-        cnt3.authorization?.authorizedHash,
-        cnt3.currentManifestHash,
-      );
+      expect(cnt1.currentManifestHash, computeContentItemManifestHash(cnt1));
+      expect(cnt1.authorization?.authorizedHash, cnt1.currentManifestHash);
+      expect(cnt4.authorization?.authorizedHash, cnt4.currentManifestHash);
+      expect(cnt3.authorization?.authorizedHash, cnt3.currentManifestHash);
 
       // Em Fase A com publicação habilitada, cnt-3 (unlisted) passa todas as 6 travas
       final preSendCnt3 = evaluateContentPreSendChecks(
@@ -87,8 +77,9 @@ void main() {
 
     test('preserva campos nulos explícitos e isola registros isTest', () {
       final seed = buildInitialVyronState();
-      final unknown =
-          seed.products.firstWhere((p) => p.id == 'prod-unknown-epc');
+      final unknown = seed.products.firstWhere(
+        (p) => p.id == 'prod-unknown-epc',
+      );
 
       expect(unknown.epcValue, isNull);
       expect(unknown.cookieWindowDays, isNull);
@@ -114,44 +105,47 @@ void main() {
       );
     });
 
-    test('gera séries de gráficos sobre o estado seed sem coerção ou mistura FX',
-        () {
-      final seed = buildInitialVyronState();
+    test(
+      'gera séries de gráficos sobre o estado seed sem coerção ou mistura FX',
+      () {
+        final seed = buildInitialVyronState();
 
-      final overview30 = buildOverviewFinanceSeries(
-        seed.financeEntries,
-        CurrencyCode.brl,
-        range: ChartTimeRange.d30,
-        excludeTest: true,
-        includeProjection: true,
-      );
-      final realPoints =
-          overview30.points.where((p) => !p.isProjection).toList();
-      expect(
-        realPoints.any((p) => p.entryIds.contains('fin-test-1')),
-        isFalse,
-      );
-      expect(overview30.points.last.isProjection, isTrue);
+        final overview30 = buildOverviewFinanceSeries(
+          seed.financeEntries,
+          CurrencyCode.brl,
+          range: ChartTimeRange.d30,
+          excludeTest: true,
+          includeProjection: true,
+        );
+        final realPoints = overview30.points
+            .where((p) => !p.isProjection)
+            .toList();
+        expect(
+          realPoints.any((p) => p.entryIds.contains('fin-test-1')),
+          isFalse,
+        );
+        expect(overview30.points.last.isProjection, isTrue);
 
-      final analytics30 = buildAnalyticsContentPoints(
-        seed.contents,
-        CurrencyCode.brl,
-        range: ChartTimeRange.d30,
-      );
-      expect(analytics30.items.length, 2);
-      expect(analytics30.items.map((e) => e.contentId), ['cnt-1', 'cnt-4']);
+        final analytics30 = buildAnalyticsContentPoints(
+          seed.contents,
+          CurrencyCode.brl,
+          range: ChartTimeRange.d30,
+        );
+        expect(analytics30.items.length, 2);
+        expect(analytics30.items.map((e) => e.contentId), ['cnt-1', 'cnt-4']);
 
-      final eurRanking = buildProductNativeCurrencyComparison(
-        seed.products,
-        CurrencyCode.eur,
-        ProductChartMetric.opportunityScore,
-        excludeTest: true,
-      );
-      expect(eurRanking.length, 2);
-      expect(eurRanking.first.product.id, 'prod-izotope-rx');
-      expect(eurRanking.last.product.id, 'prod-unknown-epc');
-      expect(eurRanking.last.missingData, isTrue);
-      expect(eurRanking.last.value, isNull);
-    });
+        final eurRanking = buildProductNativeCurrencyComparison(
+          seed.products,
+          CurrencyCode.eur,
+          ProductChartMetric.opportunityScore,
+          excludeTest: true,
+        );
+        expect(eurRanking.length, 2);
+        expect(eurRanking.first.product.id, 'prod-izotope-rx');
+        expect(eurRanking.last.product.id, 'prod-unknown-epc');
+        expect(eurRanking.last.missingData, isTrue);
+        expect(eurRanking.last.value, isNull);
+      },
+    );
   });
 }

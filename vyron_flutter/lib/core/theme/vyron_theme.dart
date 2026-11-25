@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+
 import 'vyron_colors.dart';
 
 abstract final class VyronTheme {
@@ -8,7 +9,9 @@ abstract final class VyronTheme {
 
   static ThemeData _build(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    final palette = isDark ? VyronPaletteExtension.dark : VyronPaletteExtension.light;
+    final palette = isDark
+        ? VyronPaletteExtension.dark
+        : VyronPaletteExtension.light;
 
     final colorScheme = ColorScheme(
       brightness: brightness,
@@ -16,7 +19,9 @@ abstract final class VyronTheme {
       onPrimary: Colors.white,
       secondary: palette.surfaceAlt,
       onSecondary: palette.textPrimary,
-      error: isDark ? VyronColors.crimsonDarkText : VyronColors.crimsonLightText,
+      error: isDark
+          ? VyronColors.crimsonDarkText
+          : VyronColors.crimsonLightText,
       onError: Colors.white,
       surface: palette.surface,
       onSurface: palette.textPrimary,
@@ -129,8 +134,13 @@ abstract final class VyronTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? VyronColors.obsidianBlack : VyronColors.lightSurface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        fillColor: isDark
+            ? VyronColors.obsidianBlack
+            : VyronColors.lightSurface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
           borderSide: BorderSide(color: palette.border),
@@ -141,7 +151,10 @@ abstract final class VyronTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: VyronColors.electricCobalt, width: 1.5),
+          borderSide: const BorderSide(
+            color: VyronColors.electricCobalt,
+            width: 1.5,
+          ),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -154,9 +167,7 @@ abstract final class VyronTheme {
             fontWeight: FontWeight.w500,
             fontSize: 13,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
       ),
       extensions: [palette],

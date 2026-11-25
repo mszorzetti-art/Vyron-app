@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/crypto/vyron_crypto.dart';
 import '../../data/seed_data.dart';
 import '../../data/storage/atomic_state_storage.dart';
@@ -476,11 +478,7 @@ class OwnerSettingsPatch {
 
 @immutable
 class PipelineRunResult {
-  const PipelineRunResult({
-    required this.ok,
-    required this.message,
-    this.job,
-  });
+  const PipelineRunResult({required this.ok, required this.message, this.job});
 
   final bool ok;
   final String message;
@@ -489,10 +487,7 @@ class PipelineRunResult {
 
 @immutable
 class ResumeControlResult {
-  const ResumeControlResult({
-    required this.ok,
-    this.reason,
-  });
+  const ResumeControlResult({required this.ok, this.reason});
 
   final bool ok;
   final String? reason;
@@ -503,23 +498,18 @@ final vyronStateStorageProvider = Provider<VyronStateStorage>(
 );
 
 final vyronStateProvider =
-    StateNotifierProvider<VyronStateNotifier, VyronAppState>(
-  (ref) {
-    final notifier = VyronStateNotifier(
-      storage: ref.watch(vyronStateStorageProvider),
-    );
-    unawaited(notifier.hydrate());
-    return notifier;
-  },
-);
+    StateNotifierProvider<VyronStateNotifier, VyronAppState>((ref) {
+      final notifier = VyronStateNotifier(
+        storage: ref.watch(vyronStateStorageProvider),
+      );
+      unawaited(notifier.hydrate());
+      return notifier;
+    });
 
 class VyronStateNotifier extends StateNotifier<VyronAppState> {
-  VyronStateNotifier({
-    required VyronStateStorage storage,
-    DateTime Function()? nowUtc,
-  })  : _storage = storage,
-        _nowUtc = nowUtc ?? (() => DateTime.now().toUtc()),
-        super(VyronAppState(domain: buildInitialVyronState()));
+  VyronStateNotifier({required this._storage, DateTime Function()? nowUtc})
+    : _nowUtc = nowUtc ?? (() => DateTime.now().toUtc()),
+      super(VyronAppState(domain: buildInitialVyronState()));
 
   final VyronStateStorage _storage;
   final DateTime Function() _nowUtc;
@@ -535,10 +525,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
   Future<void> hydrate() async {
     final loaded = await _storage.loadState();
     if (!mounted) return;
-    state = state.copyWith(
-      domain: loaded,
-      isHydrated: true,
-    );
+    state = state.copyWith(domain: loaded, isHydrated: true);
   }
 
   void _commitDomain(VyronState nextDomain) {
@@ -565,7 +552,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       action: action,
       detail: detail,
       justification: justification,
-      actor: actor ??
+      actor:
+          actor ??
           (prev.settings.uiLanguage == UiLanguage.enUS
               ? 'Owner'
               : 'Proprietário'),
@@ -586,7 +574,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     bool setAutomationId = false,
     ContentSubView? contentSubView,
   }) {
-    final hasAnyOption = setBrandId ||
+    final hasAnyOption =
+        setBrandId ||
         setProductId ||
         setContentId ||
         setAutomationId ||
@@ -601,8 +590,9 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
         clearSelectedProductId: setProductId && productId == null,
         selectedContentId: setContentId ? contentId : state.selectedContentId,
         clearSelectedContentId: setContentId && contentId == null,
-        selectedAutomationId:
-            setAutomationId ? automationId : state.selectedAutomationId,
+        selectedAutomationId: setAutomationId
+            ? automationId
+            : state.selectedAutomationId,
         clearSelectedAutomationId: setAutomationId && automationId == null,
         contentSubView: contentSubView ?? state.contentSubView,
       );
@@ -648,9 +638,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
   void setTheme(VyronThemeMode theme) {
     final prev = state.domain;
     _commitDomain(
-      prev.copyWith(
-        settings: prev.settings.copyWith(theme: theme),
-      ),
+      prev.copyWith(settings: prev.settings.copyWith(theme: theme)),
     );
   }
 
@@ -702,10 +690,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     );
   }
 
-  void toggleSystemFlags({
-    bool? publishingEnabled,
-    bool? phaseBPublicAllowed,
-  }) {
+  void toggleSystemFlags({bool? publishingEnabled, bool? phaseBPublicAllowed}) {
     final prev = state.domain;
     final en = prev.settings.uiLanguage == UiLanguage.enUS;
     final nextControl = prev.systemControl.copyWith(
@@ -736,7 +721,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
   Brand createBrand(BrandCreateInput input) {
     final en = _langNow == UiLanguage.enUS;
     final now = _nowUtc();
-    final isEurope = input.market.contains('França') ||
+    final isEurope =
+        input.market.contains('França') ||
         input.market.contains('France') ||
         input.market.contains('Europa') ||
         input.market.contains('EU');
@@ -749,11 +735,13 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       segment: input.segment,
       market: input.market,
       language: input.language,
-      timezone: input.timezone ?? (isEurope ? 'Europe/Paris' : 'America/Sao_Paulo'),
+      timezone:
+          input.timezone ?? (isEurope ? 'Europe/Paris' : 'America/Sao_Paulo'),
       publishWindow: input.publishWindow ?? '18:00-21:00',
       archetype: input.archetype ?? BrandArchetype.hibrida,
       validationStage: input.validationStage ?? ValidationStage.exploracao,
-      pillars: input.pillars ??
+      pillars:
+          input.pillars ??
           (en
               ? const [
                   'Technical Diagnosis',
@@ -786,7 +774,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
           action: isEn
               ? 'Brand created: ${newBrand.name}'
               : 'Marca criada: ${newBrand.name}',
-          detail: '${newBrand.niche} (${newBrand.market} · ${newBrand.timezone})',
+          detail:
+              '${newBrand.niche} (${newBrand.market} · ${newBrand.timezone})',
           severity: ActivitySeverity.success,
         ),
       ),
@@ -828,8 +817,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
           prev,
           brandId: id,
           category: ActivityCategory.sistema,
-          action:
-              isEn ? 'Brand profile updated' : 'Dados da marca atualizados',
+          action: isEn ? 'Brand profile updated' : 'Dados da marca atualizados',
           detail: isEn
               ? 'Identity parameters, IANA timezone, validation stage, or editorial pillars updated.'
               : 'Parâmetros de identidade, fuso IANA, estágio ou pilares atualizados.',
@@ -839,11 +827,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     );
   }
 
-  void changeBrandStatus(
-    String id,
-    BrandStatus status,
-    String justification,
-  ) {
+  void changeBrandStatus(String id, BrandStatus status, String justification) {
     final prev = state.domain;
     final isEn = prev.settings.uiLanguage == UiLanguage.enUS;
     Brand? target;
@@ -885,7 +869,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     final nowIso = now.toIso8601String();
     final tempProd = Product(
       id: 'prod-${now.millisecondsSinceEpoch.toRadixString(36)}-${_nextSuffix()}',
-      externalId: input.externalId ??
+      externalId:
+          input.externalId ??
           'CAT-${now.millisecondsSinceEpoch.toRadixString(36).toUpperCase()}',
       brandId: input.brandId,
       linkedBrandIds: input.linkedBrandIds ?? [input.brandId],
@@ -901,7 +886,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       epcValue: input.epcValue,
       cookieWindowDays: input.cookieWindowDays,
       opportunityScore: input.opportunityScore,
-      dataConfidence: input.dataConfidence ??
+      dataConfidence:
+          input.dataConfidence ??
           (input.epcValue == null
               ? DataConfidence.baixa
               : DataConfidence.media),
@@ -914,8 +900,9 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       evidence: [
         ProductEvidence(
           id: 'ev-${now.millisecondsSinceEpoch}-${_nextSuffix()}',
-          sourceName:
-              en ? 'Manual Entry (Owner)' : 'Cadastro Manual (Proprietário)',
+          sourceName: en
+              ? 'Manual Entry (Owner)'
+              : 'Cadastro Manual (Proprietário)',
           url: 'https://vyron.internal',
           summary: en
               ? 'Product registered in shared catalog (${input.platform}).'
@@ -1070,7 +1057,9 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     }
 
     final title = prod != null
-        ? (en ? 'Technical Review: ${prod.name}' : 'Análise Técnica: ${prod.name}')
+        ? (en
+              ? 'Technical Review: ${prod.name}'
+              : 'Análise Técnica: ${prod.name}')
         : (en ? 'New Product Content Plan' : 'Nova Pauta de Produto');
 
     return createContent(
@@ -1081,11 +1070,11 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
         title: title,
         description: prod != null
             ? (en
-                ? 'Rigorous evaluation of ${prod.name} with market evidence and transparent disclosure.'
-                : 'Avaliação criteriosa de ${prod.name} com evidências de mercado e divulgação transparente.')
+                  ? 'Rigorous evaluation of ${prod.name} with market evidence and transparent disclosure.'
+                  : 'Avaliação criteriosa de ${prod.name} com evidências de mercado e divulgação transparente.')
             : (en
-                ? 'Content plan generated from catalog.'
-                : 'Pauta gerada a partir do catálogo.'),
+                  ? 'Content plan generated from catalog.'
+                  : 'Pauta gerada a partir do catálogo.'),
         format: format,
         category: ContentCategory.comercialContextual,
         visibility: ContentVisibility.privateVis,
@@ -1094,11 +1083,11 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
         scheduledDate: '2026-11-26',
         brief: prod != null
             ? (en
-                ? 'Explore the value proposition of ${prod.name} (${prod.platform}, commission ${prod.commissionRatePct ?? 'N/A'}%).'
-                : 'Explorar proposta de valor de ${prod.name} (${prod.platform}, comissão ${prod.commissionRatePct ?? 'N/D'}%).')
+                  ? 'Explore the value proposition of ${prod.name} (${prod.platform}, commission ${prod.commissionRatePct ?? 'N/A'}%).'
+                  : 'Explorar proposta de valor de ${prod.name} (${prod.platform}, comissão ${prod.commissionRatePct ?? 'N/D'}%).')
             : (en
-                ? 'Content plan created from catalog.'
-                : 'Planejamento criado a partir do catálogo.'),
+                  ? 'Content plan created from catalog.'
+                  : 'Planejamento criado a partir do catálogo.'),
         angleIdea: en
             ? 'Technical demonstration with verified evidence and objective comparison.'
             : 'Demonstrativo técnico com evidências reais e comparação objetiva.',
@@ -1108,10 +1097,10 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
         affiliateLinkUrl: prod != null
             ? 'https://vyron.link/${prod.externalId.toLowerCase()}'
             : '',
-        verifiedDestinationUrl:
-            prod != null && prod.evidence.isNotEmpty ? prod.evidence.first.url : '',
-        linkVerifiedAt:
-            prod != null && prod.evidence.isNotEmpty ? nowIso : '',
+        verifiedDestinationUrl: prod != null && prod.evidence.isNotEmpty
+            ? prod.evidence.first.url
+            : '',
+        linkVerifiedAt: prod != null && prod.evidence.isNotEmpty ? nowIso : '',
         commercialConditionsVerifiedAt: prod != null ? nowIso : '',
         affiliateDisclosure: en
             ? 'Advertising / Affiliate links: we may earn a commission at no extra cost.'
@@ -1152,7 +1141,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       commercialConditionsVerifiedAt:
           input.commercialConditionsVerifiedAt ?? '',
       offerEndsAt: input.offerEndsAt,
-      affiliateDisclosure: input.affiliateDisclosure ??
+      affiliateDisclosure:
+          input.affiliateDisclosure ??
           (en
               ? 'Content with potential commercial relationship. Transparent disclosure applied.'
               : 'Conteúdo com possível vínculo comercial. Transparência conforme CDC/CONAR.'),
@@ -1259,7 +1249,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     );
 
     final newHash = computeContentItemManifestHash(merged);
-    final manifestChanged = merged.brandId != target.brandId ||
+    final manifestChanged =
+        merged.brandId != target.brandId ||
         merged.channelId != target.channelId ||
         merged.productId != target.productId ||
         merged.title != target.title ||
@@ -1278,8 +1269,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     final hadAuth = target.authorization != null;
     final nextStatus =
         manifestChanged && target.status == ContentStatus.approved
-            ? ContentStatus.inReview
-            : merged.status;
+        ? ContentStatus.inReview
+        : merged.status;
 
     var nextVersions = merged.versions;
     if (versionNote != null || (manifestChanged && hadAuth)) {
@@ -1288,7 +1279,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
           version: 'v${target.versions.length + 1}.0',
           manifestHash: newHash,
           author: isEn ? 'Owner' : 'Proprietário',
-          note: versionNote ??
+          note:
+              versionNote ??
               (isEn
                   ? 'Manifest modified: prior authorization invalidated (zero inheritance).'
                   : 'Manifesto alterado: autorização anterior invalidada (herança zero).'),
@@ -1358,9 +1350,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
 
     _commitDomain(
       prev.copyWith(
-        contents: prev.contents
-            .map((c) => c.id == id ? updated : c)
-            .toList(),
+        contents: prev.contents.map((c) => c.id == id ? updated : c).toList(),
         activities: _appendActivity(
           prev,
           brandId: target.brandId,
@@ -1372,7 +1362,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
               ? 'Moved from ${target.status.wire} to ${nextStatus.wire}.'
               : 'Movido de ${target.status.wire} para ${nextStatus.wire}.',
           justification: note,
-          severity: nextStatus == ContentStatus.published ||
+          severity:
+              nextStatus == ContentStatus.published ||
                   nextStatus == ContentStatus.approved
               ? ActivitySeverity.success
               : ActivitySeverity.info,
@@ -1408,8 +1399,9 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       }
     }
     final expiresAt = computedExpiry.toIso8601String();
-    final normalizedActor =
-        actor.trim().isNotEmpty ? actor.trim() : (isEn ? 'Owner' : 'Proprietário');
+    final normalizedActor = actor.trim().isNotEmpty
+        ? actor.trim()
+        : (isEn ? 'Owner' : 'Proprietário');
 
     final auth = ContentAuthorization(
       type: AuthorizationType.individual,
@@ -1438,8 +1430,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
           note: (note != null && note.trim().isNotEmpty)
               ? note.trim()
               : (isEn
-                  ? 'Individual authorization bound to hash ${hash.substring(0, 12)}...'
-                  : 'Autorização individual vinculada ao hash ${hash.substring(0, 12)}...'),
+                    ? 'Individual authorization bound to hash ${hash.substring(0, 12)}...'
+                    : 'Autorização individual vinculada ao hash ${hash.substring(0, 12)}...'),
           feedbackCategory: FeedbackCategory.aprovacao,
           timestamp: now.toIso8601String(),
           scriptSnapshot: target.script,
@@ -1450,9 +1442,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
 
     _commitDomain(
       prev.copyWith(
-        contents: prev.contents
-            .map((c) => c.id == id ? updated : c)
-            .toList(),
+        contents: prev.contents.map((c) => c.id == id ? updated : c).toList(),
         activities: _appendActivity(
           prev,
           brandId: target.brandId,
@@ -1466,8 +1456,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
           justification: (note != null && note.isNotEmpty)
               ? note
               : (isEn
-                  ? 'Individual human verification across all 6 pre-send checks.'
-                  : 'Verificação humana individual das 6 travas pré-envio.'),
+                    ? 'Individual human verification across all 6 pre-send checks.'
+                    : 'Verificação humana individual das 6 travas pré-envio.'),
           actor: auth.actor,
           severity: ActivitySeverity.success,
         ),
@@ -1490,8 +1480,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     final resolvedReason = reason.trim().isNotEmpty
         ? reason.trim()
         : (isEn
-            ? 'Manually revoked by owner.'
-            : 'Revogada manualmente pelo proprietário.');
+              ? 'Manually revoked by owner.'
+              : 'Revogada manualmente pelo proprietário.');
 
     _commitDomain(
       prev.copyWith(
@@ -1546,11 +1536,12 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
             .map(
               (c) => c.id == id
                   ? c.copyWith(
-                      verifiedDestinationUrl: c.verifiedDestinationUrl.isNotEmpty
+                      verifiedDestinationUrl:
+                          c.verifiedDestinationUrl.isNotEmpty
                           ? c.verifiedDestinationUrl
                           : (c.affiliateLinkUrl.isNotEmpty
-                              ? c.affiliateLinkUrl
-                              : 'https://destino-verificado.demo'),
+                                ? c.affiliateLinkUrl
+                                : 'https://destino-verificado.demo'),
                       linkVerifiedAt: nowIso,
                       commercialConditionsVerifiedAt: nowIso,
                     )
@@ -1600,9 +1591,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
 
     _commitDomain(
       prev.copyWith(
-        contents: prev.contents
-            .map((c) => c.id == id ? updated : c)
-            .toList(),
+        contents: prev.contents.map((c) => c.id == id ? updated : c).toList(),
         activities: _appendActivity(
           prev,
           brandId: target.brandId,
@@ -1780,16 +1769,19 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
                           status: nextState == AgentRunState.running
                               ? AgentExecutionStatus.success
                               : AgentExecutionStatus.paused,
-                          durationSec: nextState == AgentRunState.running ? 6 : 0,
+                          durationSec: nextState == AgentRunState.running
+                              ? 6
+                              : 0,
                           summary: nextState == AgentRunState.running
                               ? (isEn
-                                  ? 'Demo execution started respecting policy limits.'
-                                  : 'Execução demonstrativa iniciada respeitando políticas de limite.')
+                                    ? 'Demo execution started respecting policy limits.'
+                                    : 'Execução demonstrativa iniciada respeitando políticas de limite.')
                               : (isEn
-                                  ? 'Agent manually paused by owner.'
-                                  : 'Agente pausado manualmente pelo proprietário.'),
-                          recordsAffected:
-                              nextState == AgentRunState.running ? 3 : 0,
+                                    ? 'Agent manually paused by owner.'
+                                    : 'Agente pausado manualmente pelo proprietário.'),
+                          recordsAffected: nextState == AgentRunState.running
+                              ? 3
+                              : 0,
                         ),
                         ...a.history,
                       ],
@@ -1924,8 +1916,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     }
 
     final nowIso = _nowUtc().toIso8601String();
-    final nextId =
-        (prev.jobRuns.isNotEmpty ? prev.jobRuns.first.id : 100) + 1;
+    final nextId = (prev.jobRuns.isNotEmpty ? prev.jobRuns.first.id : 100) + 1;
     final realProducts = prev.products.where((p) => !p.isTest).toList();
     final job = JobRun(
       id: nextId,
@@ -1937,14 +1928,15 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       recordsProcessed: realProducts.length,
       summary: mode == JobMode.dryRun
           ? (en
-              ? 'Simulation completed without persistent writes (${realProducts.length} products evaluated per currency).'
-              : 'Simulação concluída sem gravação persistente (${realProducts.length} produtos avaliados por moeda).')
+                ? 'Simulation completed without persistent writes (${realProducts.length} products evaluated per currency).'
+                : 'Simulação concluída sem gravação persistente (${realProducts.length} produtos avaliados por moeda).')
           : (en
-              ? 'Commit executed updating the evaluation index across ${realProducts.length} real products.'
-              : 'Gravação executada recalculando o índice de avaliação em ${realProducts.length} produtos reais.'),
+                ? 'Commit executed updating the evaluation index across ${realProducts.length} real products.'
+                : 'Gravação executada recalculando o índice de avaliação em ${realProducts.length} produtos reais.'),
     );
 
-    final updatedProducts = mode == JobMode.commit &&
+    final updatedProducts =
+        mode == JobMode.commit &&
             (taskName == JobTaskName.productsScore ||
                 taskName == JobTaskName.pipelineRun)
         ? prev.products.map((p) {
@@ -1986,8 +1978,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       olderThanMinutes: 30,
       language: lang,
     );
-    final nextId =
-        (res.updated.isNotEmpty ? res.updated.first.id : 100) + 1;
+    final nextId = (res.updated.isNotEmpty ? res.updated.first.id : 100) + 1;
     final reconcileRun = JobRun(
       id: nextId,
       taskName: JobTaskName.jobsReconcile,
@@ -1998,11 +1989,11 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       recordsProcessed: res.reconciledIds.length,
       summary: res.reconciledIds.isNotEmpty
           ? (en
-              ? 'Reconciled ${res.reconciledIds.length} pending run(s): #${res.reconciledIds.join(', #')}.'
-              : 'Reconciliadas ${res.reconciledIds.length} execução(ões) pendente(s): #${res.reconciledIds.join(', #')}.')
+                ? 'Reconciled ${res.reconciledIds.length} pending run(s): #${res.reconciledIds.join(', #')}.'
+                : 'Reconciliadas ${res.reconciledIds.length} execução(ões) pendente(s): #${res.reconciledIds.join(', #')}.')
           : (en
-              ? 'No pending runs found.'
-              : 'Nenhuma execução pendente encontrada.'),
+                ? 'No pending runs found.'
+                : 'Nenhuma execução pendente encontrada.'),
     );
 
     _commitDomain(
@@ -2035,16 +2026,17 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
       language: lang,
     );
 
-    final resolvedActor =
-        actor.trim().isNotEmpty ? actor.trim() : (en ? 'Owner' : 'Proprietário');
+    final resolvedActor = actor.trim().isNotEmpty
+        ? actor.trim()
+        : (en ? 'Owner' : 'Proprietário');
     final resolvedReason = reason.trim().isNotEmpty
         ? reason.trim()
         : (en ? 'Immediate halt triggered.' : 'Interrupção imediata acionada.');
     final resolvedJustification = reason.trim().isNotEmpty
         ? reason.trim()
         : (en
-            ? 'Owner emergency command.'
-            : 'Comando de emergência do proprietário.');
+              ? 'Owner emergency command.'
+              : 'Comando de emergência do proprietário.');
 
     final alertNotif = NotificationItem(
       id: 'not-stop-${now.millisecondsSinceEpoch}-${_nextSuffix()}',
@@ -2097,8 +2089,9 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     final prev = state.domain;
     final lang = prev.settings.uiLanguage;
     final en = lang == UiLanguage.enUS;
-    final resolvedActor =
-        actor.trim().isNotEmpty ? actor.trim() : (en ? 'Owner' : 'Proprietário');
+    final resolvedActor = actor.trim().isNotEmpty
+        ? actor.trim()
+        : (en ? 'Owner' : 'Proprietário');
 
     final gate = canResumeSystemControl(prev.jobRuns, language: lang);
     if (!gate.allowed) {
@@ -2110,7 +2103,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
             action: en
                 ? 'Resume attempt blocked'
                 : 'Tentativa de retomada bloqueada',
-            detail: gate.reason ??
+            detail:
+                gate.reason ??
                 (en
                     ? 'Pending runs still exist.'
                     : 'Existem execuções pendentes.'),
@@ -2131,8 +2125,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
           reason: reason.trim().isNotEmpty
               ? reason.trim()
               : (en
-                  ? 'System resumed after verification.'
-                  : 'Sistema retomado após verificação.'),
+                    ? 'System resumed after verification.'
+                    : 'Sistema retomado após verificação.'),
           updatedAt: nowIso,
         ),
         settings: prev.settings.copyWith(
@@ -2151,8 +2145,8 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
           justification: reason.trim().isNotEmpty
               ? reason.trim()
               : (en
-                  ? 'Explicit resume by owner.'
-                  : 'Retomada explícita pelo proprietário.'),
+                    ? 'Explicit resume by owner.'
+                    : 'Retomada explícita pelo proprietário.'),
           actor: resolvedActor,
           severity: ActivitySeverity.success,
         ),
@@ -2175,7 +2169,9 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     final en = _langNow == UiLanguage.enUS;
     return resumeSystemControl(
       en ? 'Owner' : 'Proprietário',
-      en ? 'Resume requested by owner.' : 'Liberação solicitada pelo proprietário.',
+      en
+          ? 'Resume requested by owner.'
+          : 'Liberação solicitada pelo proprietário.',
     );
   }
 
@@ -2205,8 +2201,9 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
     final prev = state.domain;
     _commitDomain(
       prev.copyWith(
-        notifications:
-            prev.notifications.map((n) => n.copyWith(read: true)).toList(),
+        notifications: prev.notifications
+            .map((n) => n.copyWith(read: true))
+            .toList(),
       ),
     );
   }
@@ -2220,8 +2217,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
             (
               type: NotificationType.commissionReceived,
               title: 'New settlement received (Amazon BR)',
-              message:
-                  'Payout of R\$ 1,840.00 confirmed in Apex Hardware Lab demo statement.',
+              message: 'Payout of R\$ 1,840.00 confirmed in Apex Hardware Lab demo statement.',
               targetModule: NavModule.finance,
               targetId: null,
               brandId: 'brand-apex',
@@ -2230,8 +2226,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
             (
               type: NotificationType.opportunity,
               title: 'Opportunity detected in DSP Audio',
-              message:
-                  '+21% surge in searches for compact Thunderbolt interfaces for creators.',
+              message: '+21% surge in searches for compact Thunderbolt interfaces for creators.',
               targetModule: NavModule.products,
               targetId: null,
               brandId: 'brand-kinetix',
@@ -2240,8 +2235,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
             (
               type: NotificationType.approvalPending,
               title: 'Script ready for SHA-256 hash approval',
-              message:
-                  '4K Monitor for Code & Design awaits individual authorization.',
+              message: '4K Monitor for Code & Design awaits individual authorization.',
               targetModule: NavModule.content,
               targetId: 'cnt-2',
               brandId: 'brand-apex',
@@ -2252,8 +2246,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
             (
               type: NotificationType.commissionReceived,
               title: 'Nova liquidação recebida (Amazon BR)',
-              message:
-                  'Repasse de R\$ 1.840,00 confirmado no extrato demonstrativo da Apex Hardware Lab.',
+              message: 'Repasse de R\$ 1.840,00 confirmado no extrato demonstrativo da Apex Hardware Lab.',
               targetModule: NavModule.finance,
               targetId: null,
               brandId: 'brand-apex',
@@ -2262,8 +2255,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
             (
               type: NotificationType.opportunity,
               title: 'Oportunidade detectada em Áudio DSP',
-              message:
-                  'Subida de +21% em buscas por interfaces Thunderbolt compactas para criadores.',
+              message: 'Subida de +21% em buscas por interfaces Thunderbolt compactas para criadores.',
               targetModule: NavModule.products,
               targetId: null,
               brandId: 'brand-kinetix',
@@ -2272,8 +2264,7 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
             (
               type: NotificationType.approvalPending,
               title: 'Roteiro pronto para aprovação por hash SHA-256',
-              message:
-                  'Monitor 4K para Código e Design aguarda autorização individual no ambiente privado.',
+              message: 'Monitor 4K para Código e Design aguarda autorização individual no ambiente privado.',
               targetModule: NavModule.content,
               targetId: 'cnt-2',
               brandId: 'brand-apex',
@@ -2315,9 +2306,6 @@ class VyronStateNotifier extends StateNotifier<VyronAppState> {
   Future<void> resetDemoData() async {
     await _storage.clearState();
     if (!mounted) return;
-    state = VyronAppState(
-      domain: buildInitialVyronState(),
-      isHydrated: true,
-    );
+    state = VyronAppState(domain: buildInitialVyronState(), isHydrated: true);
   }
 }

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -57,11 +59,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       translate(lang, 'analytics.csv.stage'),
       translate(lang, 'analytics.csv.views'),
       translate(lang, 'analytics.csv.approvedProducts'),
-      translate(
-        lang,
-        'analytics.csv.confirmedCommercial',
-        {'currency': currency.wire},
-      ),
+      translate(lang, 'analytics.csv.confirmedCommercial', {
+        'currency': currency.wire,
+      }),
     ].join(',');
 
     final rows = brandRollups.map(
@@ -77,11 +77,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final csvContent = [header, ...rows].join('\n');
     unawaited(Clipboard.setData(ClipboardData(text: csvContent)));
     setState(() {
-      _exportNotice = translate(
-        lang,
-        'analytics.exportNotice',
-        {'period': period.wire},
-      );
+      _exportNotice = translate(lang, 'analytics.exportNotice', {
+        'period': period.wire,
+      });
     });
   }
 
@@ -115,7 +113,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         )
         .toList();
 
-    final effectiveChannelFilter = _channelFilter == 'all' ||
+    final effectiveChannelFilter =
+        _channelFilter == 'all' ||
             filteredChannels.any((c) => c.id == _channelFilter)
         ? _channelFilter
         : 'all';
@@ -141,8 +140,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       brandId: globalBrandFilter,
     );
 
-    final totalTraffic =
-        filteredChannels.fold<int>(0, (acc, c) => acc + c.views30d);
+    final totalTraffic = filteredChannels.fold<int>(
+      0,
+      (acc, c) => acc + c.views30d,
+    );
     final totalClicks = filteredContents.fold<int>(
       0,
       (acc, c) => acc + (c.metrics?.clicks ?? 0),
@@ -151,8 +152,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       0,
       (acc, c) => acc + (c.metrics?.conversions ?? 0),
     );
-    final conversionRate =
-        totalClicks > 0 ? (totalConversions / totalClicks) * 100.0 : 2.9;
+    final conversionRate = totalClicks > 0
+        ? (totalConversions / totalClicks) * 100.0
+        : 2.9;
 
     final brandRollups = computeBrandRollups(
       domain.brands,
@@ -300,10 +302,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       ),
     ];
 
-    final mlEventsCount = domain.products.fold<int>(
-          0,
-          (acc, p) => acc + p.decisions.length,
-        ) +
+    final mlEventsCount =
+        domain.products.fold<int>(0, (acc, p) => acc + p.decisions.length) +
         domain.activities.length;
 
     return Column(
@@ -362,10 +362,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   child: VyronMetricBlock(
                     label: t('analytics.kpi.traffic'),
                     value: formatCompactNumberForLang(totalTraffic, lang),
-                    helper: t(
-                      'analytics.kpi.window',
-                      {'period': globalPeriodFilter.wire},
-                    ),
+                    helper: t('analytics.kpi.window', {
+                      'period': globalPeriodFilter.wire,
+                    }),
                     tone: VyronMetricTone.cobalt,
                   ),
                 ),
@@ -626,10 +625,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         Expanded(
                           child: _AttrCell(
                             label: t('analytics.ml.samples'),
-                            value: t(
-                              'analytics.ml.eventsCount',
-                              {'count': '$mlEventsCount'},
-                            ),
+                            value: t('analytics.ml.eventsCount', {
+                              'count': '$mlEventsCount',
+                            }),
                           ),
                         ),
                         Expanded(
@@ -664,11 +662,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                anomaliesPanel,
-                const SizedBox(height: 18),
-                mlPanel,
-              ],
+              children: [anomaliesPanel, const SizedBox(height: 18), mlPanel],
             );
           },
         ),
@@ -842,10 +836,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                   VyronSegmentOption(
                     value: AnalyticsMetricKey.epc,
-                    label: t(
-                      'analytics.chart.metricEpc',
-                      {'currency': currency.wire},
-                    ),
+                    label: t('analytics.chart.metricEpc', {
+                      'currency': currency.wire,
+                    }),
                   ),
                 ],
               ),
@@ -927,10 +920,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             points: analyticsPoints,
             series: seriesConfigs,
             formatValue: formatVal,
-            semanticLabel: t(
-              'charts.timeSeriesAria',
-              {'label': t('analytics.chart.title')},
-            ),
+            semanticLabel: t('charts.timeSeriesAria', {
+              'label': t('analytics.chart.title'),
+            }),
             selectedPointId: _selectedContentPointId,
             onSelectPoint: (pt, _) =>
                 setState(() => _selectedContentPointId = pt?.id),
@@ -1108,11 +1100,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           '${selectedRow.channel.growthPct30d >= 0 ? '+' : ''}${formatPercentForLang(selectedRow.channel.growthPct30d, lang, 1)}',
                       color: selectedRow.channel.growthPct30d >= 0
                           ? (isDark
-                              ? VyronColors.emeraldDarkText
-                              : VyronColors.emeraldLightText)
+                                ? VyronColors.emeraldDarkText
+                                : VyronColors.emeraldLightText)
                           : (isDark
-                              ? VyronColors.crimsonDarkText
-                              : VyronColors.crimsonLightText),
+                                ? VyronColors.crimsonDarkText
+                                : VyronColors.crimsonLightText),
                     ),
                   ),
                 ],
@@ -1133,10 +1125,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     required bool isDark,
     required String Function(String, [Map<String, String>?]) t,
   }) {
-    final amberColor =
-        isDark ? VyronColors.amberDarkText : VyronColors.amberLightText;
-    final emeraldColor =
-        isDark ? VyronColors.emeraldDarkText : VyronColors.emeraldLightText;
+    final amberColor = isDark
+        ? VyronColors.amberDarkText
+        : VyronColors.amberLightText;
+    final emeraldColor = isDark
+        ? VyronColors.emeraldDarkText
+        : VyronColors.emeraldLightText;
 
     return VyronSurfacePanel(
       child: Column(
@@ -1163,8 +1157,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         final c = filteredContents[idx];
                         final loc = localizeContentDisplay(c, lang);
                         final m = c.metrics!;
-                        final rev =
-                            convertCurrency(m.revenueGenerated, m.currency, currency);
+                        final rev = convertCurrency(
+                          m.revenueGenerated,
+                          m.currency,
+                          currency,
+                        );
                         final attrLabel = labelAttributionStatus(
                           m.attributionStatus,
                           lang,
@@ -1174,8 +1171,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           decoration: idx < filteredContents.length - 1
                               ? BoxDecoration(
                                   border: Border(
-                                    bottom:
-                                        BorderSide(color: palette.panelBorder),
+                                    bottom: BorderSide(
+                                      color: palette.panelBorder,
+                                    ),
                                   ),
                                 )
                               : null,
@@ -1217,14 +1215,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                 children: [
                                   Expanded(
                                     child: _AttrCell(
-                                      label: t('analytics.attribution.colViewsRet'),
+                                      label: t(
+                                        'analytics.attribution.colViewsRet',
+                                      ),
                                       value:
                                           '${formatCompactNumberForLang(m.views, lang)} (${formatPercentForLang(m.retention30sPct, lang, 0)})',
                                     ),
                                   ),
                                   Expanded(
                                     child: _AttrCell(
-                                      label: t('analytics.attribution.colClicks'),
+                                      label: t(
+                                        'analytics.attribution.colClicks',
+                                      ),
                                       value: formatCompactNumberForLang(
                                         m.clicks,
                                         lang,
@@ -1335,9 +1337,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           ],
                         ),
                       ),
-                      for (var idx = 0;
-                          idx < filteredContents.length;
-                          idx++) ...[
+                      for (
+                        var idx = 0;
+                        idx < filteredContents.length;
+                        idx++
+                      ) ...[
                         () {
                           final c = filteredContents[idx];
                           final loc = localizeContentDisplay(c, lang);
@@ -1463,18 +1467,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   TextStyle _thStyle(VyronPaletteExtension palette) => TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: palette.textMuted,
-      );
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    color: palette.textMuted,
+  );
 }
 
 class _AttrCell extends StatelessWidget {
-  const _AttrCell({
-    required this.label,
-    required this.value,
-    this.color,
-  });
+  const _AttrCell({required this.label, required this.value, this.color});
 
   final String label;
   final String value;

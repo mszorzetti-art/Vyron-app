@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/translate.dart';
 import '../../core/theme/vyron_colors.dart';
@@ -30,10 +31,8 @@ Future<void> showSystemControlModal({
           ? 'controls.modal.haltSubtitle'
           : 'controls.modal.resumeSubtitle',
     ),
-    builder: (_) => _SystemControlModalBody(
-      mode: mode,
-      initialActor: initialActor,
-    ),
+    builder: (_) =>
+        _SystemControlModalBody(mode: mode, initialActor: initialActor),
   );
 }
 
@@ -94,7 +93,8 @@ class _SystemControlModalBodyState
     if (!res.ok) {
       setState(() {
         _error =
-            res.reason ?? translate(lang, 'controls.modal.resumeBlockedDefault');
+            res.reason ??
+            translate(lang, 'controls.modal.resumeBlockedDefault');
       });
       return;
     }
@@ -145,9 +145,8 @@ class _SystemControlModalBodyState
                 const SizedBox(height: 6),
                 Text(
                   resumeGate.reason ?? '',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: palette.textPrimary,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: palette.textPrimary),
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
@@ -172,9 +171,8 @@ class _SystemControlModalBodyState
         ],
         Text(
           translate(lang, 'controls.modal.actorLabel'),
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: palette.textPrimary,
-              ),
+          style: Theme.of(context).textTheme.labelMedium
+              ?.copyWith(color: palette.textPrimary),
         ),
         const SizedBox(height: 6),
         TextField(
@@ -185,9 +183,8 @@ class _SystemControlModalBodyState
         const SizedBox(height: 14),
         Text(
           translate(lang, 'controls.modal.reasonLabel'),
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: palette.textPrimary,
-              ),
+          style: Theme.of(context).textTheme.labelMedium
+              ?.copyWith(color: palette.textPrimary),
         ),
         const SizedBox(height: 6),
         TextField(
@@ -247,8 +244,8 @@ class _SystemControlModalBodyState
               style: ElevatedButton.styleFrom(
                 backgroundColor: widget.mode == SystemControlModalMode.halt
                     ? (isDark
-                        ? VyronColors.crimson
-                        : VyronColors.crimsonLightButton)
+                          ? VyronColors.crimson
+                          : VyronColors.crimsonLightButton)
                     : VyronColors.electricCobalt,
                 foregroundColor: Colors.white,
               ),

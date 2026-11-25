@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/security/secure_access_storage.dart';
 import '../../core/security/vyron_access_rules.dart';
 
@@ -47,10 +49,7 @@ class AccessLoginResult {
 
 @immutable
 class AccessPasswordChangeResult {
-  const AccessPasswordChangeResult({
-    required this.ok,
-    this.errorCode,
-  });
+  const AccessPasswordChangeResult({required this.ok, this.errorCode});
 
   final bool ok;
   final AccessErrorCode? errorCode;
@@ -61,29 +60,28 @@ final vyronAccessStorageProvider = Provider<VyronAccessStorage>(
 );
 
 final vyronAccessProvider =
-    StateNotifierProvider<VyronAccessNotifier, VyronAccessControllerState>(
-  (ref) {
-    final notifier = VyronAccessNotifier(
-      storage: ref.watch(vyronAccessStorageProvider),
-    );
-    unawaited(notifier.hydrate());
-    return notifier;
-  },
-);
+    StateNotifierProvider<VyronAccessNotifier, VyronAccessControllerState>((
+      ref,
+    ) {
+      final notifier = VyronAccessNotifier(
+        storage: ref.watch(vyronAccessStorageProvider),
+      );
+      unawaited(notifier.hydrate());
+      return notifier;
+    });
 
 class VyronAccessNotifier extends StateNotifier<VyronAccessControllerState> {
   VyronAccessNotifier({
-    required VyronAccessStorage storage,
+    required this._storage,
     int Function()? nowMs,
     this.pbkdf2Iterations = defaultPbkdf2Iterations,
-  })  : _storage = storage,
-        _nowMs = nowMs ?? (() => DateTime.now().millisecondsSinceEpoch),
-        super(
-          VyronAccessControllerState(
-            session: VyronAccessSession.initial(),
-            isHydrating: true,
-          ),
-        ) {
+  }) : _nowMs = nowMs ?? (() => DateTime.now().millisecondsSinceEpoch),
+       super(
+         VyronAccessControllerState(
+           session: VyronAccessSession.initial(),
+           isHydrating: true,
+         ),
+       ) {
     _lastTouchMs = _nowMs();
   }
 
@@ -98,10 +96,7 @@ class VyronAccessNotifier extends StateNotifier<VyronAccessControllerState> {
     final evaluated = evaluatePersistedSession(loaded, _nowMs());
     if (!mounted) return;
     _lastTouchMs = _nowMs();
-    state = state.copyWith(
-      session: evaluated,
-      isHydrating: false,
-    );
+    state = state.copyWith(session: evaluated, isHydrating: false);
     await _storage.saveSession(evaluated);
   }
 
@@ -142,24 +137,15 @@ class VyronAccessNotifier extends StateNotifier<VyronAccessControllerState> {
     final now = _nowMs();
     _lastTouchMs = now;
     final authenticatedSession = buildAuthenticatedSession(upgraded, now);
-    state = state.copyWith(
-      session: authenticatedSession,
-      isVerifying: false,
-    );
+    state = state.copyWith(session: authenticatedSession, isVerifying: false);
     await _storage.saveSession(authenticatedSession);
-    return AccessLoginResult(
-      ok: true,
-      wasLocked: current.locked,
-    );
+    return AccessLoginResult(ok: true, wasLocked: current.locked);
   }
 
   void lock([LockReason reason = LockReason.manual]) {
     final prev = state.session;
     if (!prev.authenticated) return;
-    final next = prev.copyWith(
-      locked: true,
-      lockReason: reason,
-    );
+    final next = prev.copyWith(locked: true, lockReason: reason);
     state = state.copyWith(session: next);
     unawaited(_storage.saveSession(next));
   }
@@ -183,8 +169,9 @@ class VyronAccessNotifier extends StateNotifier<VyronAccessControllerState> {
     final prev = state.session;
     final next = prev.copyWith(
       idleTimeoutMinutes: safeMinutes,
-      lastActivityAt:
-          prev.authenticated && !prev.locked ? _nowMs() : prev.lastActivityAt,
+      lastActivityAt: prev.authenticated && !prev.locked
+          ? _nowMs()
+          : prev.lastActivityAt,
     );
     state = state.copyWith(session: next);
     unawaited(_storage.saveSession(next));
@@ -196,8 +183,10 @@ class VyronAccessNotifier extends StateNotifier<VyronAccessControllerState> {
   ) async {
     final prev = state.session;
     state = state.copyWith(isVerifying: true);
-    final currentValid =
-        await verifyAccessCredentialAsync(currentPassword, prev.verifier);
+    final currentValid = await verifyAccessCredentialAsync(
+      currentPassword,
+      prev.verifier,
+    );
     if (!mounted) {
       return const AccessPasswordChangeResult(ok: false);
     }
@@ -213,10 +202,7 @@ class VyronAccessNotifier extends StateNotifier<VyronAccessControllerState> {
     final newErr = validateNewPassword(newPassword);
     if (newErr != null) {
       state = state.copyWith(isVerifying: false);
-      return AccessPasswordChangeResult(
-        ok: false,
-        errorCode: newErr,
-      );
+      return AccessPasswordChangeResult(ok: false, errorCode: newErr);
     }
 
     final nextVerifier = await createPbkdf2VerifierAsync(
@@ -231,10 +217,7 @@ class VyronAccessNotifier extends StateNotifier<VyronAccessControllerState> {
       verifier: nextVerifier,
       usingDefaultCredential: newPassword == 'vyron2026',
     );
-    state = state.copyWith(
-      session: next,
-      isVerifying: false,
-    );
+    state = state.copyWith(session: next, isVerifying: false);
     await _storage.saveSession(next);
     return const AccessPasswordChangeResult(ok: true);
   }

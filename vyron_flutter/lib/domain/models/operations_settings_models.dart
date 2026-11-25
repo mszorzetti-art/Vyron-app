@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import 'brand_product_models.dart';
 import 'content_channel_finance_models.dart';
 import 'vyron_enums.dart';
@@ -18,18 +19,20 @@ class AgentPolicyLimits {
   final List<String> allowedModules;
 
   Map<String, dynamic> toJson() => {
-        'requireHumanApproval': requireHumanApproval,
-        'maxActionsPerDay': maxActionsPerDay,
-        'maxDailySpendBRL': maxDailySpendBRL,
-        'allowedModules': allowedModules,
-      };
+    'requireHumanApproval': requireHumanApproval,
+    'maxActionsPerDay': maxActionsPerDay,
+    'maxDailySpendBRL': maxDailySpendBRL,
+    'allowedModules': allowedModules,
+  };
 
   factory AgentPolicyLimits.fromJson(Map<String, dynamic> json) =>
       AgentPolicyLimits(
         requireHumanApproval: json['requireHumanApproval'] as bool? ?? true,
         maxActionsPerDay: (json['maxActionsPerDay'] as num).toInt(),
         maxDailySpendBRL: (json['maxDailySpendBRL'] as num).toDouble(),
-        allowedModules: List<String>.from(json['allowedModules'] as List<dynamic>),
+        allowedModules: List<String>.from(
+          json['allowedModules'] as List<dynamic>,
+        ),
       );
 }
 
@@ -52,13 +55,13 @@ class AgentExecutionLog {
   final int recordsAffected;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'timestamp': timestamp,
-        'status': status.wire,
-        'durationSec': durationSec,
-        'summary': summary,
-        'recordsAffected': recordsAffected,
-      };
+    'id': id,
+    'timestamp': timestamp,
+    'status': status.wire,
+    'durationSec': durationSec,
+    'summary': summary,
+    'recordsAffected': recordsAffected,
+  };
 
   factory AgentExecutionLog.fromJson(Map<String, dynamic> json) =>
       AgentExecutionLog(
@@ -139,25 +142,26 @@ class AutomationAgent {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'category': category.wire,
-        'autonomyLevel': autonomyLevel,
-        'responsibility': responsibility,
-        'state': state.wire,
-        'brandScope': brandScope,
-        'dependencies': dependencies,
-        'flowSteps': flowSteps,
-        'pendingApprovalCount': pendingApprovalCount,
-        if (pendingApprovalSummary != null)
-          'pendingApprovalSummary': pendingApprovalSummary,
-        'lastRunAt': lastRunAt,
-        if (lastError != null) 'lastError': lastError,
-        'limits': limits.toJson(),
-        'history': history.map((e) => e.toJson()).toList(),
-      };
+    'id': id,
+    'name': name,
+    'category': category.wire,
+    'autonomyLevel': autonomyLevel,
+    'responsibility': responsibility,
+    'state': state.wire,
+    'brandScope': brandScope,
+    'dependencies': dependencies,
+    'flowSteps': flowSteps,
+    'pendingApprovalCount': pendingApprovalCount,
+    if (pendingApprovalSummary != null)
+      'pendingApprovalSummary': pendingApprovalSummary,
+    'lastRunAt': lastRunAt,
+    if (lastError != null) 'lastError': lastError,
+    'limits': limits.toJson(),
+    'history': history.map((e) => e.toJson()).toList(),
+  };
 
-  factory AutomationAgent.fromJson(Map<String, dynamic> json) => AutomationAgent(
+  factory AutomationAgent.fromJson(Map<String, dynamic> json) =>
+      AutomationAgent(
         id: json['id'] as String,
         name: json['name'] as String,
         category: AgentCategory.fromWire(json['category'] as String?),
@@ -171,7 +175,9 @@ class AutomationAgent {
         pendingApprovalSummary: json['pendingApprovalSummary'] as String?,
         lastRunAt: json['lastRunAt'] as String,
         lastError: json['lastError'] as String?,
-        limits: AgentPolicyLimits.fromJson(json['limits'] as Map<String, dynamic>),
+        limits: AgentPolicyLimits.fromJson(
+          json['limits'] as Map<String, dynamic>,
+        ),
         history: (json['history'] as List<dynamic>)
             .map((e) => AgentExecutionLog.fromJson(e as Map<String, dynamic>))
             .toList(),
@@ -223,28 +229,28 @@ class JobRun {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'taskName': taskName.wire,
-        'mode': mode.wire,
-        'status': status.wire,
-        'startedAt': startedAt,
-        if (finishedAt != null) 'finishedAt': finishedAt,
-        'recordsProcessed': recordsProcessed,
-        'summary': summary,
-        if (error != null) 'error': error,
-      };
+    'id': id,
+    'taskName': taskName.wire,
+    'mode': mode.wire,
+    'status': status.wire,
+    'startedAt': startedAt,
+    if (finishedAt != null) 'finishedAt': finishedAt,
+    'recordsProcessed': recordsProcessed,
+    'summary': summary,
+    if (error != null) 'error': error,
+  };
 
   factory JobRun.fromJson(Map<String, dynamic> json) => JobRun(
-        id: (json['id'] as num).toInt(),
-        taskName: JobTaskName.fromWire(json['taskName'] as String?),
-        mode: JobMode.fromWire(json['mode'] as String?),
-        status: JobRunStatus.fromWire(json['status'] as String?),
-        startedAt: json['startedAt'] as String,
-        finishedAt: json['finishedAt'] as String?,
-        recordsProcessed: (json['recordsProcessed'] as num).toInt(),
-        summary: json['summary'] as String,
-        error: json['error'] as String?,
-      );
+    id: (json['id'] as num).toInt(),
+    taskName: JobTaskName.fromWire(json['taskName'] as String?),
+    mode: JobMode.fromWire(json['mode'] as String?),
+    status: JobRunStatus.fromWire(json['status'] as String?),
+    startedAt: json['startedAt'] as String,
+    finishedAt: json['finishedAt'] as String?,
+    recordsProcessed: (json['recordsProcessed'] as num).toInt(),
+    summary: json['summary'] as String,
+    error: json['error'] as String?,
+  );
 }
 
 @immutable
@@ -284,13 +290,13 @@ class SystemControlState {
   }
 
   Map<String, dynamic> toJson() => {
-        'state': state.wire,
-        'actor': actor,
-        'reason': reason,
-        'updatedAt': updatedAt,
-        'publishingEnabled': publishingEnabled,
-        'phaseBPublicAllowed': phaseBPublicAllowed,
-      };
+    'state': state.wire,
+    'actor': actor,
+    'reason': reason,
+    'updatedAt': updatedAt,
+    'publishingEnabled': publishingEnabled,
+    'phaseBPublicAllowed': phaseBPublicAllowed,
+  };
 
   factory SystemControlState.fromJson(Map<String, dynamic> json) =>
       SystemControlState(
@@ -320,12 +326,12 @@ class RiskRegisterEntry {
   final RiskStatus status;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'priority': priority.wire,
-        'title': title,
-        'controlSummary': controlSummary,
-        'status': status.wire,
-      };
+    'id': id,
+    'priority': priority.wire,
+    'title': title,
+    'controlSummary': controlSummary,
+    'status': status.wire,
+  };
 
   factory RiskRegisterEntry.fromJson(Map<String, dynamic> json) =>
       RiskRegisterEntry(
@@ -362,28 +368,28 @@ class ActivityEvent {
   final ActivitySeverity severity;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'timestamp': timestamp,
-        if (brandId != null) 'brandId': brandId,
-        'category': category.wire,
-        'action': action,
-        'detail': detail,
-        if (justification != null) 'justification': justification,
-        'actor': actor,
-        'severity': severity.wire,
-      };
+    'id': id,
+    'timestamp': timestamp,
+    if (brandId != null) 'brandId': brandId,
+    'category': category.wire,
+    'action': action,
+    'detail': detail,
+    if (justification != null) 'justification': justification,
+    'actor': actor,
+    'severity': severity.wire,
+  };
 
   factory ActivityEvent.fromJson(Map<String, dynamic> json) => ActivityEvent(
-        id: json['id'] as String,
-        timestamp: json['timestamp'] as String,
-        brandId: json['brandId'] as String?,
-        category: ActivityCategory.fromWire(json['category'] as String?),
-        action: json['action'] as String,
-        detail: json['detail'] as String,
-        justification: json['justification'] as String?,
-        actor: json['actor'] as String,
-        severity: ActivitySeverity.fromWire(json['severity'] as String?),
-      );
+    id: json['id'] as String,
+    timestamp: json['timestamp'] as String,
+    brandId: json['brandId'] as String?,
+    category: ActivityCategory.fromWire(json['category'] as String?),
+    action: json['action'] as String,
+    detail: json['detail'] as String,
+    justification: json['justification'] as String?,
+    actor: json['actor'] as String,
+    severity: ActivitySeverity.fromWire(json['severity'] as String?),
+  );
 }
 
 @immutable
@@ -413,30 +419,30 @@ class NotificationItem {
   final bool? actionRequired;
 
   NotificationItem copyWith({bool? read}) => NotificationItem(
-        id: id,
-        type: type,
-        title: title,
-        message: message,
-        timestamp: timestamp,
-        read: read ?? this.read,
-        targetModule: targetModule,
-        targetId: targetId,
-        brandId: brandId,
-        actionRequired: actionRequired,
-      );
+    id: id,
+    type: type,
+    title: title,
+    message: message,
+    timestamp: timestamp,
+    read: read ?? this.read,
+    targetModule: targetModule,
+    targetId: targetId,
+    brandId: brandId,
+    actionRequired: actionRequired,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'type': type.wire,
-        'title': title,
-        'message': message,
-        'timestamp': timestamp,
-        'read': read,
-        'targetModule': targetModule.wire,
-        if (targetId != null) 'targetId': targetId,
-        if (brandId != null) 'brandId': brandId,
-        if (actionRequired != null) 'actionRequired': actionRequired,
-      };
+    'id': id,
+    'type': type.wire,
+    'title': title,
+    'message': message,
+    'timestamp': timestamp,
+    'read': read,
+    'targetModule': targetModule.wire,
+    if (targetId != null) 'targetId': targetId,
+    if (brandId != null) 'brandId': brandId,
+    if (actionRequired != null) 'actionRequired': actionRequired,
+  };
 
   factory NotificationItem.fromJson(Map<String, dynamic> json) =>
       NotificationItem(
@@ -472,13 +478,13 @@ class IntegrationConfig {
   final String? note;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'category': category,
-        'status': status.wire,
-        'lastChecked': lastChecked,
-        if (note != null) 'note': note,
-      };
+    'id': id,
+    'name': name,
+    'category': category,
+    'status': status.wire,
+    'lastChecked': lastChecked,
+    if (note != null) 'note': note,
+  };
 
   factory IntegrationConfig.fromJson(Map<String, dynamic> json) =>
       IntegrationConfig(
@@ -528,13 +534,13 @@ class NotificationPrefs {
   }
 
   Map<String, dynamic> toJson() => {
-        'financialAlerts': financialAlerts,
-        'commissionsReceived': commissionsReceived,
-        'opportunities': opportunities,
-        'pendingApprovals': pendingApprovals,
-        'automationFailures': automationFailures,
-        'operationalEvents': operationalEvents,
-      };
+    'financialAlerts': financialAlerts,
+    'commissionsReceived': commissionsReceived,
+    'opportunities': opportunities,
+    'pendingApprovals': pendingApprovals,
+    'automationFailures': automationFailures,
+    'operationalEvents': operationalEvents,
+  };
 
   factory NotificationPrefs.fromJson(Map<String, dynamic> json) =>
       NotificationPrefs(
@@ -615,7 +621,8 @@ class OwnerSettings {
       requireApprovalForPublish:
           requireApprovalForPublish ?? this.requireApprovalForPublish,
       requireApprovalForProductStatus:
-          requireApprovalForProductStatus ?? this.requireApprovalForProductStatus,
+          requireApprovalForProductStatus ??
+          this.requireApprovalForProductStatus,
       defaultAuthValidityHours:
           defaultAuthValidityHours ?? this.defaultAuthValidityHours,
       evidenceFreshnessMaxHours:
@@ -626,51 +633,51 @@ class OwnerSettings {
   }
 
   Map<String, dynamic> toJson() => {
-        'ownerName': ownerName,
-        'ownerEmail': ownerEmail,
-        'roleLabel': roleLabel,
-        'theme': theme.wire,
-        'uiLanguage': uiLanguage.wire,
-        'baseCurrency': baseCurrency.wire,
-        'globalAutonomyEnabled': globalAutonomyEnabled,
-        'emergencyStopActive': emergencyStopActive,
-        'maxGlobalDailySpendBRL': maxGlobalDailySpendBRL,
-        'requireApprovalForPublish': requireApprovalForPublish,
-        'requireApprovalForProductStatus': requireApprovalForProductStatus,
-        'defaultAuthValidityHours': defaultAuthValidityHours,
-        'evidenceFreshnessMaxHours': evidenceFreshnessMaxHours,
-        'notificationPrefs': notificationPrefs.toJson(),
-        'integrations': integrations.map((e) => e.toJson()).toList(),
-      };
+    'ownerName': ownerName,
+    'ownerEmail': ownerEmail,
+    'roleLabel': roleLabel,
+    'theme': theme.wire,
+    'uiLanguage': uiLanguage.wire,
+    'baseCurrency': baseCurrency.wire,
+    'globalAutonomyEnabled': globalAutonomyEnabled,
+    'emergencyStopActive': emergencyStopActive,
+    'maxGlobalDailySpendBRL': maxGlobalDailySpendBRL,
+    'requireApprovalForPublish': requireApprovalForPublish,
+    'requireApprovalForProductStatus': requireApprovalForProductStatus,
+    'defaultAuthValidityHours': defaultAuthValidityHours,
+    'evidenceFreshnessMaxHours': evidenceFreshnessMaxHours,
+    'notificationPrefs': notificationPrefs.toJson(),
+    'integrations': integrations.map((e) => e.toJson()).toList(),
+  };
 
   factory OwnerSettings.fromJson(Map<String, dynamic> json) => OwnerSettings(
-        ownerName: OwnerProfile.normalizeOwnerName(json['ownerName'] as String?),
-        ownerEmail: (json['ownerEmail'] as String?)?.isNotEmpty == true
-            ? json['ownerEmail'] as String
-            : OwnerProfile.email,
-        roleLabel: json['roleLabel'] as String? ?? OwnerProfile.roleLabel,
-        theme: VyronThemeMode.fromWire(json['theme'] as String?),
-        uiLanguage: UiLanguage.fromWire(json['uiLanguage'] as String?),
-        baseCurrency: CurrencyCode.fromWire(json['baseCurrency'] as String?),
-        globalAutonomyEnabled: json['globalAutonomyEnabled'] as bool? ?? false,
-        emergencyStopActive: json['emergencyStopActive'] as bool? ?? false,
-        maxGlobalDailySpendBRL:
-            (json['maxGlobalDailySpendBRL'] as num?)?.toDouble() ?? 0,
-        requireApprovalForPublish:
-            json['requireApprovalForPublish'] as bool? ?? true,
-        requireApprovalForProductStatus:
-            json['requireApprovalForProductStatus'] as bool? ?? true,
-        defaultAuthValidityHours:
-            (json['defaultAuthValidityHours'] as num?)?.toInt() ?? 24,
-        evidenceFreshnessMaxHours:
-            (json['evidenceFreshnessMaxHours'] as num?)?.toInt() ?? 48,
-        notificationPrefs: NotificationPrefs.fromJson(
-          json['notificationPrefs'] as Map<String, dynamic>,
-        ),
-        integrations: (json['integrations'] as List<dynamic>)
-            .map((e) => IntegrationConfig.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+    ownerName: OwnerProfile.normalizeOwnerName(json['ownerName'] as String?),
+    ownerEmail: (json['ownerEmail'] as String?)?.isNotEmpty == true
+        ? json['ownerEmail'] as String
+        : OwnerProfile.email,
+    roleLabel: json['roleLabel'] as String? ?? OwnerProfile.roleLabel,
+    theme: VyronThemeMode.fromWire(json['theme'] as String?),
+    uiLanguage: UiLanguage.fromWire(json['uiLanguage'] as String?),
+    baseCurrency: CurrencyCode.fromWire(json['baseCurrency'] as String?),
+    globalAutonomyEnabled: json['globalAutonomyEnabled'] as bool? ?? false,
+    emergencyStopActive: json['emergencyStopActive'] as bool? ?? false,
+    maxGlobalDailySpendBRL:
+        (json['maxGlobalDailySpendBRL'] as num?)?.toDouble() ?? 0,
+    requireApprovalForPublish:
+        json['requireApprovalForPublish'] as bool? ?? true,
+    requireApprovalForProductStatus:
+        json['requireApprovalForProductStatus'] as bool? ?? true,
+    defaultAuthValidityHours:
+        (json['defaultAuthValidityHours'] as num?)?.toInt() ?? 24,
+    evidenceFreshnessMaxHours:
+        (json['evidenceFreshnessMaxHours'] as num?)?.toInt() ?? 48,
+    notificationPrefs: NotificationPrefs.fromJson(
+      json['notificationPrefs'] as Map<String, dynamic>,
+    ),
+    integrations: (json['integrations'] as List<dynamic>)
+        .map((e) => IntegrationConfig.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
 }
 
 @immutable
@@ -734,56 +741,54 @@ class VyronState {
   }
 
   Map<String, dynamic> toJson() => {
-        'brands': brands.map((e) => e.toJson()).toList(),
-        'products': products.map((e) => e.toJson()).toList(),
-        'contents': contents.map((e) => e.toJson()).toList(),
-        'channels': channels.map((e) => e.toJson()).toList(),
-        'financeEntries': financeEntries.map((e) => e.toJson()).toList(),
-        'automations': automations.map((e) => e.toJson()).toList(),
-        'jobRuns': jobRuns.map((e) => e.toJson()).toList(),
-        'systemControl': systemControl.toJson(),
-        'risks': risks.map((e) => e.toJson()).toList(),
-        'activities': activities.map((e) => e.toJson()).toList(),
-        'notifications': notifications.map((e) => e.toJson()).toList(),
-        'settings': settings.toJson(),
-      };
+    'brands': brands.map((e) => e.toJson()).toList(),
+    'products': products.map((e) => e.toJson()).toList(),
+    'contents': contents.map((e) => e.toJson()).toList(),
+    'channels': channels.map((e) => e.toJson()).toList(),
+    'financeEntries': financeEntries.map((e) => e.toJson()).toList(),
+    'automations': automations.map((e) => e.toJson()).toList(),
+    'jobRuns': jobRuns.map((e) => e.toJson()).toList(),
+    'systemControl': systemControl.toJson(),
+    'risks': risks.map((e) => e.toJson()).toList(),
+    'activities': activities.map((e) => e.toJson()).toList(),
+    'notifications': notifications.map((e) => e.toJson()).toList(),
+    'settings': settings.toJson(),
+  };
 
   factory VyronState.fromJson(Map<String, dynamic> json) => VyronState(
-        brands: (json['brands'] as List<dynamic>)
-            .map((e) => Brand.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        products: (json['products'] as List<dynamic>)
-            .map((e) => Product.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        contents: (json['contents'] as List<dynamic>)
-            .map((e) => ContentItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        channels: (json['channels'] as List<dynamic>)
-            .map((e) => Channel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        financeEntries: (json['financeEntries'] as List<dynamic>)
-            .map((e) => FinanceEntry.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        automations: (json['automations'] as List<dynamic>)
-            .map((e) => AutomationAgent.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        jobRuns: (json['jobRuns'] as List<dynamic>)
-            .map((e) => JobRun.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        systemControl: SystemControlState.fromJson(
-          json['systemControl'] as Map<String, dynamic>,
-        ),
-        risks: (json['risks'] as List<dynamic>)
-            .map((e) => RiskRegisterEntry.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        activities: (json['activities'] as List<dynamic>)
-            .map((e) => ActivityEvent.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        notifications: (json['notifications'] as List<dynamic>)
-            .map((e) => NotificationItem.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        settings: OwnerSettings.fromJson(
-          json['settings'] as Map<String, dynamic>,
-        ),
-      );
+    brands: (json['brands'] as List<dynamic>)
+        .map((e) => Brand.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    products: (json['products'] as List<dynamic>)
+        .map((e) => Product.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    contents: (json['contents'] as List<dynamic>)
+        .map((e) => ContentItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    channels: (json['channels'] as List<dynamic>)
+        .map((e) => Channel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    financeEntries: (json['financeEntries'] as List<dynamic>)
+        .map((e) => FinanceEntry.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    automations: (json['automations'] as List<dynamic>)
+        .map((e) => AutomationAgent.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    jobRuns: (json['jobRuns'] as List<dynamic>)
+        .map((e) => JobRun.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    systemControl: SystemControlState.fromJson(
+      json['systemControl'] as Map<String, dynamic>,
+    ),
+    risks: (json['risks'] as List<dynamic>)
+        .map((e) => RiskRegisterEntry.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    activities: (json['activities'] as List<dynamic>)
+        .map((e) => ActivityEvent.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    notifications: (json['notifications'] as List<dynamic>)
+        .map((e) => NotificationItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    settings: OwnerSettings.fromJson(json['settings'] as Map<String, dynamic>),
+  );
 }

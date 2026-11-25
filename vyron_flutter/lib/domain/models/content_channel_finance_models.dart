@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import 'vyron_enums.dart';
 
 @immutable
@@ -18,20 +19,20 @@ class DossierSource {
   final String consultedAt;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'claim': claim,
-        'sourceTitle': sourceTitle,
-        'level': level,
-        'consultedAt': consultedAt,
-      };
+    'id': id,
+    'claim': claim,
+    'sourceTitle': sourceTitle,
+    'level': level,
+    'consultedAt': consultedAt,
+  };
 
   factory DossierSource.fromJson(Map<String, dynamic> json) => DossierSource(
-        id: json['id'] as String,
-        claim: json['claim'] as String,
-        sourceTitle: json['sourceTitle'] as String,
-        level: (json['level'] as num).toInt(),
-        consultedAt: json['consultedAt'] as String,
-      );
+    id: json['id'] as String,
+    claim: json['claim'] as String,
+    sourceTitle: json['sourceTitle'] as String,
+    level: (json['level'] as num).toInt(),
+    consultedAt: json['consultedAt'] as String,
+  );
 }
 
 @immutable
@@ -55,25 +56,26 @@ class ContentVersion {
   final String scriptSnapshot;
 
   Map<String, dynamic> toJson() => {
-        'version': version,
-        'manifestHash': manifestHash,
-        'author': author,
-        'note': note,
-        if (feedbackCategory != null) 'feedbackCategory': feedbackCategory!.wire,
-        'timestamp': timestamp,
-        'scriptSnapshot': scriptSnapshot,
-      };
+    'version': version,
+    'manifestHash': manifestHash,
+    'author': author,
+    'note': note,
+    if (feedbackCategory != null) 'feedbackCategory': feedbackCategory!.wire,
+    'timestamp': timestamp,
+    'scriptSnapshot': scriptSnapshot,
+  };
 
   factory ContentVersion.fromJson(Map<String, dynamic> json) => ContentVersion(
-        version: json['version'] as String,
-        manifestHash: json['manifestHash'] as String,
-        author: json['author'] as String,
-        note: json['note'] as String,
-        feedbackCategory:
-            FeedbackCategory.fromWire(json['feedbackCategory'] as String?),
-        timestamp: json['timestamp'] as String,
-        scriptSnapshot: json['scriptSnapshot'] as String,
-      );
+    version: json['version'] as String,
+    manifestHash: json['manifestHash'] as String,
+    author: json['author'] as String,
+    note: json['note'] as String,
+    feedbackCategory: FeedbackCategory.fromWire(
+      json['feedbackCategory'] as String?,
+    ),
+    timestamp: json['timestamp'] as String,
+    scriptSnapshot: json['scriptSnapshot'] as String,
+  );
 }
 
 @immutable
@@ -129,17 +131,17 @@ class ContentAuthorization {
   }
 
   Map<String, dynamic> toJson() => {
-        'type': type.wire,
-        'authorizedHash': authorizedHash,
-        'actor': actor,
-        'authorizedAt': authorizedAt,
-        'expiresAt': expiresAt,
-        'rulesVersion': rulesVersion,
-        'evidenceVerifiedAt': evidenceVerifiedAt,
-        if (offerEndsAt != null) 'offerEndsAt': offerEndsAt,
-        if (revoked != null) 'revoked': revoked,
-        if (revokedReason != null) 'revokedReason': revokedReason,
-      };
+    'type': type.wire,
+    'authorizedHash': authorizedHash,
+    'actor': actor,
+    'authorizedAt': authorizedAt,
+    'expiresAt': expiresAt,
+    'rulesVersion': rulesVersion,
+    'evidenceVerifiedAt': evidenceVerifiedAt,
+    if (offerEndsAt != null) 'offerEndsAt': offerEndsAt,
+    if (revoked != null) 'revoked': revoked,
+    if (revokedReason != null) 'revokedReason': revokedReason,
+  };
 
   factory ContentAuthorization.fromJson(Map<String, dynamic> json) =>
       ContentAuthorization(
@@ -181,29 +183,30 @@ class ContentMetrics {
   final AttributionStatus attributionStatus;
 
   Map<String, dynamic> toJson() => {
-        'views': views,
-        'retention30sPct': retention30sPct,
-        'avgViewPct': avgViewPct,
-        'clicks': clicks,
-        'conversions': conversions,
-        'revenueGenerated': revenueGenerated,
-        'currency': currency.wire,
-        'trackingSrc': trackingSrc,
-        'attributionStatus': attributionStatus.wire,
-      };
+    'views': views,
+    'retention30sPct': retention30sPct,
+    'avgViewPct': avgViewPct,
+    'clicks': clicks,
+    'conversions': conversions,
+    'revenueGenerated': revenueGenerated,
+    'currency': currency.wire,
+    'trackingSrc': trackingSrc,
+    'attributionStatus': attributionStatus.wire,
+  };
 
   factory ContentMetrics.fromJson(Map<String, dynamic> json) => ContentMetrics(
-        views: (json['views'] as num).toInt(),
-        retention30sPct: (json['retention30sPct'] as num).toDouble(),
-        avgViewPct: (json['avgViewPct'] as num).toDouble(),
-        clicks: (json['clicks'] as num).toInt(),
-        conversions: (json['conversions'] as num).toInt(),
-        revenueGenerated: (json['revenueGenerated'] as num).toDouble(),
-        currency: CurrencyCode.fromWire(json['currency'] as String?),
-        trackingSrc: json['trackingSrc'] as String,
-        attributionStatus:
-            AttributionStatus.fromWire(json['attributionStatus'] as String?),
-      );
+    views: (json['views'] as num).toInt(),
+    retention30sPct: (json['retention30sPct'] as num).toDouble(),
+    avgViewPct: (json['avgViewPct'] as num).toDouble(),
+    clicks: (json['clicks'] as num).toInt(),
+    conversions: (json['conversions'] as num).toInt(),
+    revenueGenerated: (json['revenueGenerated'] as num).toDouble(),
+    currency: CurrencyCode.fromWire(json['currency'] as String?),
+    trackingSrc: json['trackingSrc'] as String,
+    attributionStatus: AttributionStatus.fromWire(
+      json['attributionStatus'] as String?,
+    ),
+  );
 }
 
 @immutable
@@ -341,7 +344,8 @@ class ContentItem {
       angleIdea: angleIdea ?? this.angleIdea,
       script: script ?? this.script,
       affiliateLinkUrl: affiliateLinkUrl ?? this.affiliateLinkUrl,
-      verifiedDestinationUrl: verifiedDestinationUrl ?? this.verifiedDestinationUrl,
+      verifiedDestinationUrl:
+          verifiedDestinationUrl ?? this.verifiedDestinationUrl,
       linkVerifiedAt: linkVerifiedAt ?? this.linkVerifiedAt,
       commercialConditionsVerifiedAt:
           commercialConditionsVerifiedAt ?? this.commercialConditionsVerifiedAt,
@@ -356,100 +360,101 @@ class ContentItem {
       dossier: dossier ?? this.dossier,
       references: references ?? this.references,
       currentManifestHash: currentManifestHash ?? this.currentManifestHash,
-      authorization:
-          clearAuthorization ? null : (authorization ?? this.authorization),
+      authorization: clearAuthorization
+          ? null
+          : (authorization ?? this.authorization),
       versions: versions ?? this.versions,
       metrics: metrics ?? this.metrics,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'brandId': brandId,
-        'channelId': channelId,
-        if (productId != null) 'productId': productId,
-        'title': title,
-        'description': description,
-        'format': format.wire,
-        'category': category.wire,
-        'visibility': visibility.wire,
-        'analysisMethod': analysisMethod.wire,
-        'sensitiveTopic': sensitiveTopic.wire,
-        'unclassifiedRiskFlag': unclassifiedRiskFlag,
-        'status': status.wire,
-        'scheduledDate': scheduledDate,
-        if (publishedAt != null) 'publishedAt': publishedAt,
-        'brief': brief,
-        'angleIdea': angleIdea,
-        'script': script,
-        'affiliateLinkUrl': affiliateLinkUrl,
-        'verifiedDestinationUrl': verifiedDestinationUrl,
-        'linkVerifiedAt': linkVerifiedAt,
-        'commercialConditionsVerifiedAt': commercialConditionsVerifiedAt,
-        if (offerEndsAt != null) 'offerEndsAt': offerEndsAt,
-        'affiliateDisclosure': affiliateDisclosure,
-        'aiDisclosureRequired': aiDisclosureRequired,
-        'aiDisclosureText': aiDisclosureText,
-        'relevanceTestPassed': relevanceTestPassed,
-        'editorialChecklistPassed': editorialChecklistPassed,
-        'humanHoursLogged': humanHoursLogged,
-        'dossier': dossier.map((e) => e.toJson()).toList(),
-        'references': references,
-        'currentManifestHash': currentManifestHash,
-        'authorization': authorization?.toJson(),
-        'versions': versions.map((e) => e.toJson()).toList(),
-        if (metrics != null) 'metrics': metrics!.toJson(),
-      };
+    'id': id,
+    'brandId': brandId,
+    'channelId': channelId,
+    if (productId != null) 'productId': productId,
+    'title': title,
+    'description': description,
+    'format': format.wire,
+    'category': category.wire,
+    'visibility': visibility.wire,
+    'analysisMethod': analysisMethod.wire,
+    'sensitiveTopic': sensitiveTopic.wire,
+    'unclassifiedRiskFlag': unclassifiedRiskFlag,
+    'status': status.wire,
+    'scheduledDate': scheduledDate,
+    if (publishedAt != null) 'publishedAt': publishedAt,
+    'brief': brief,
+    'angleIdea': angleIdea,
+    'script': script,
+    'affiliateLinkUrl': affiliateLinkUrl,
+    'verifiedDestinationUrl': verifiedDestinationUrl,
+    'linkVerifiedAt': linkVerifiedAt,
+    'commercialConditionsVerifiedAt': commercialConditionsVerifiedAt,
+    if (offerEndsAt != null) 'offerEndsAt': offerEndsAt,
+    'affiliateDisclosure': affiliateDisclosure,
+    'aiDisclosureRequired': aiDisclosureRequired,
+    'aiDisclosureText': aiDisclosureText,
+    'relevanceTestPassed': relevanceTestPassed,
+    'editorialChecklistPassed': editorialChecklistPassed,
+    'humanHoursLogged': humanHoursLogged,
+    'dossier': dossier.map((e) => e.toJson()).toList(),
+    'references': references,
+    'currentManifestHash': currentManifestHash,
+    'authorization': authorization?.toJson(),
+    'versions': versions.map((e) => e.toJson()).toList(),
+    if (metrics != null) 'metrics': metrics!.toJson(),
+  };
 
   factory ContentItem.fromJson(Map<String, dynamic> json) => ContentItem(
-        id: json['id'] as String,
-        brandId: json['brandId'] as String,
-        channelId: json['channelId'] as String,
-        productId: json['productId'] as String?,
-        title: json['title'] as String,
-        description: json['description'] as String,
-        format: ContentFormat.fromWire(json['format'] as String?),
-        category: ContentCategory.fromWire(json['category'] as String?),
-        visibility: ContentVisibility.fromWire(json['visibility'] as String?),
-        analysisMethod: AnalysisMethod.fromWire(json['analysisMethod'] as String?),
-        sensitiveTopic: SensitiveTopic.fromWire(json['sensitiveTopic'] as String?),
-        unclassifiedRiskFlag: json['unclassifiedRiskFlag'] as bool? ?? false,
-        status: ContentStatus.fromWire(json['status'] as String?),
-        scheduledDate: json['scheduledDate'] as String,
-        publishedAt: json['publishedAt'] as String?,
-        brief: json['brief'] as String,
-        angleIdea: json['angleIdea'] as String,
-        script: json['script'] as String,
-        affiliateLinkUrl: json['affiliateLinkUrl'] as String,
-        verifiedDestinationUrl: json['verifiedDestinationUrl'] as String,
-        linkVerifiedAt: json['linkVerifiedAt'] as String,
-        commercialConditionsVerifiedAt:
-            json['commercialConditionsVerifiedAt'] as String,
-        offerEndsAt: json['offerEndsAt'] as String?,
-        affiliateDisclosure: json['affiliateDisclosure'] as String,
-        aiDisclosureRequired: json['aiDisclosureRequired'] as bool? ?? false,
-        aiDisclosureText: json['aiDisclosureText'] as String,
-        relevanceTestPassed: json['relevanceTestPassed'] as bool? ?? false,
-        editorialChecklistPassed:
-            json['editorialChecklistPassed'] as bool? ?? false,
-        humanHoursLogged: (json['humanHoursLogged'] as num).toDouble(),
-        dossier: (json['dossier'] as List<dynamic>)
-            .map((e) => DossierSource.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        references: List<String>.from(json['references'] as List<dynamic>),
-        currentManifestHash: json['currentManifestHash'] as String,
-        authorization: json['authorization'] == null
-            ? null
-            : ContentAuthorization.fromJson(
-                json['authorization'] as Map<String, dynamic>,
-              ),
-        versions: (json['versions'] as List<dynamic>)
-            .map((e) => ContentVersion.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        metrics: json['metrics'] == null
-            ? null
-            : ContentMetrics.fromJson(json['metrics'] as Map<String, dynamic>),
-      );
+    id: json['id'] as String,
+    brandId: json['brandId'] as String,
+    channelId: json['channelId'] as String,
+    productId: json['productId'] as String?,
+    title: json['title'] as String,
+    description: json['description'] as String,
+    format: ContentFormat.fromWire(json['format'] as String?),
+    category: ContentCategory.fromWire(json['category'] as String?),
+    visibility: ContentVisibility.fromWire(json['visibility'] as String?),
+    analysisMethod: AnalysisMethod.fromWire(json['analysisMethod'] as String?),
+    sensitiveTopic: SensitiveTopic.fromWire(json['sensitiveTopic'] as String?),
+    unclassifiedRiskFlag: json['unclassifiedRiskFlag'] as bool? ?? false,
+    status: ContentStatus.fromWire(json['status'] as String?),
+    scheduledDate: json['scheduledDate'] as String,
+    publishedAt: json['publishedAt'] as String?,
+    brief: json['brief'] as String,
+    angleIdea: json['angleIdea'] as String,
+    script: json['script'] as String,
+    affiliateLinkUrl: json['affiliateLinkUrl'] as String,
+    verifiedDestinationUrl: json['verifiedDestinationUrl'] as String,
+    linkVerifiedAt: json['linkVerifiedAt'] as String,
+    commercialConditionsVerifiedAt:
+        json['commercialConditionsVerifiedAt'] as String,
+    offerEndsAt: json['offerEndsAt'] as String?,
+    affiliateDisclosure: json['affiliateDisclosure'] as String,
+    aiDisclosureRequired: json['aiDisclosureRequired'] as bool? ?? false,
+    aiDisclosureText: json['aiDisclosureText'] as String,
+    relevanceTestPassed: json['relevanceTestPassed'] as bool? ?? false,
+    editorialChecklistPassed:
+        json['editorialChecklistPassed'] as bool? ?? false,
+    humanHoursLogged: (json['humanHoursLogged'] as num).toDouble(),
+    dossier: (json['dossier'] as List<dynamic>)
+        .map((e) => DossierSource.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    references: List<String>.from(json['references'] as List<dynamic>),
+    currentManifestHash: json['currentManifestHash'] as String,
+    authorization: json['authorization'] == null
+        ? null
+        : ContentAuthorization.fromJson(
+            json['authorization'] as Map<String, dynamic>,
+          ),
+    versions: (json['versions'] as List<dynamic>)
+        .map((e) => ContentVersion.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    metrics: json['metrics'] == null
+        ? null
+        : ContentMetrics.fromJson(json['metrics'] as Map<String, dynamic>),
+  );
 }
 
 @immutable
@@ -515,45 +520,45 @@ class Channel {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'brandId': brandId,
-        'name': name,
-        'handle': handle,
-        'platform': platform.wire,
-        'language': language,
-        'advancedFeaturesUnlocked': advancedFeaturesUnlocked,
-        'integrationStatus': integrationStatus.wire,
-        'followers': followers,
-        'growthPct30d': growthPct30d,
-        'views30d': views30d,
-        'reach30d': reach30d,
-        'engagementRatePct': engagementRatePct,
-        if (shortsToLongPct != null) 'shortsToLongPct': shortsToLongPct,
-        'publications30d': publications30d,
-        'lastSyncAt': lastSyncAt,
-      };
+    'id': id,
+    'brandId': brandId,
+    'name': name,
+    'handle': handle,
+    'platform': platform.wire,
+    'language': language,
+    'advancedFeaturesUnlocked': advancedFeaturesUnlocked,
+    'integrationStatus': integrationStatus.wire,
+    'followers': followers,
+    'growthPct30d': growthPct30d,
+    'views30d': views30d,
+    'reach30d': reach30d,
+    'engagementRatePct': engagementRatePct,
+    if (shortsToLongPct != null) 'shortsToLongPct': shortsToLongPct,
+    'publications30d': publications30d,
+    'lastSyncAt': lastSyncAt,
+  };
 
   factory Channel.fromJson(Map<String, dynamic> json) => Channel(
-        id: json['id'] as String,
-        brandId: json['brandId'] as String,
-        name: json['name'] as String,
-        handle: json['handle'] as String,
-        platform: ChannelPlatform.fromWire(json['platform'] as String?),
-        language: json['language'] as String,
-        advancedFeaturesUnlocked:
-            json['advancedFeaturesUnlocked'] as bool? ?? false,
-        integrationStatus: ChannelIntegrationStatus.fromWire(
-          json['integrationStatus'] as String?,
-        ),
-        followers: (json['followers'] as num).toInt(),
-        growthPct30d: (json['growthPct30d'] as num).toDouble(),
-        views30d: (json['views30d'] as num).toInt(),
-        reach30d: (json['reach30d'] as num).toInt(),
-        engagementRatePct: (json['engagementRatePct'] as num).toDouble(),
-        shortsToLongPct: (json['shortsToLongPct'] as num?)?.toDouble(),
-        publications30d: (json['publications30d'] as num).toInt(),
-        lastSyncAt: json['lastSyncAt'] as String,
-      );
+    id: json['id'] as String,
+    brandId: json['brandId'] as String,
+    name: json['name'] as String,
+    handle: json['handle'] as String,
+    platform: ChannelPlatform.fromWire(json['platform'] as String?),
+    language: json['language'] as String,
+    advancedFeaturesUnlocked:
+        json['advancedFeaturesUnlocked'] as bool? ?? false,
+    integrationStatus: ChannelIntegrationStatus.fromWire(
+      json['integrationStatus'] as String?,
+    ),
+    followers: (json['followers'] as num).toInt(),
+    growthPct30d: (json['growthPct30d'] as num).toDouble(),
+    views30d: (json['views30d'] as num).toInt(),
+    reach30d: (json['reach30d'] as num).toInt(),
+    engagementRatePct: (json['engagementRatePct'] as num).toDouble(),
+    shortsToLongPct: (json['shortsToLongPct'] as num?)?.toDouble(),
+    publications30d: (json['publications30d'] as num).toInt(),
+    lastSyncAt: json['lastSyncAt'] as String,
+  );
 }
 
 @immutable
@@ -591,36 +596,36 @@ class FinanceEntry {
   final bool isProjection;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'brandId': brandId,
-        if (productId != null) 'productId': productId,
-        'platform': platform,
-        'description': description,
-        'type': type.wire,
-        'stage': stage.wire,
-        'amount': amount,
-        'currency': currency.wire,
-        if (fxRateToBRL != null) 'fxRateToBRL': fxRateToBRL,
-        if (fxSource != null) 'fxSource': fxSource,
-        'date': date,
-        'isTest': isTest,
-        'isProjection': isProjection,
-      };
+    'id': id,
+    'brandId': brandId,
+    if (productId != null) 'productId': productId,
+    'platform': platform,
+    'description': description,
+    'type': type.wire,
+    'stage': stage.wire,
+    'amount': amount,
+    'currency': currency.wire,
+    if (fxRateToBRL != null) 'fxRateToBRL': fxRateToBRL,
+    if (fxSource != null) 'fxSource': fxSource,
+    'date': date,
+    'isTest': isTest,
+    'isProjection': isProjection,
+  };
 
   factory FinanceEntry.fromJson(Map<String, dynamic> json) => FinanceEntry(
-        id: json['id'] as String,
-        brandId: json['brandId'] as String,
-        productId: json['productId'] as String?,
-        platform: json['platform'] as String,
-        description: json['description'] as String,
-        type: FinanceEntryType.fromWire(json['type'] as String?),
-        stage: CommissionStage.fromWire(json['stage'] as String?),
-        amount: (json['amount'] as num).toDouble(),
-        currency: CurrencyCode.fromWire(json['currency'] as String?),
-        fxRateToBRL: (json['fxRateToBRL'] as num?)?.toDouble(),
-        fxSource: json['fxSource'] as String?,
-        date: json['date'] as String,
-        isTest: json['isTest'] as bool? ?? false,
-        isProjection: json['isProjection'] as bool? ?? false,
-      );
+    id: json['id'] as String,
+    brandId: json['brandId'] as String,
+    productId: json['productId'] as String?,
+    platform: json['platform'] as String,
+    description: json['description'] as String,
+    type: FinanceEntryType.fromWire(json['type'] as String?),
+    stage: CommissionStage.fromWire(json['stage'] as String?),
+    amount: (json['amount'] as num).toDouble(),
+    currency: CurrencyCode.fromWire(json['currency'] as String?),
+    fxRateToBRL: (json['fxRateToBRL'] as num?)?.toDouble(),
+    fxSource: json['fxSource'] as String?,
+    date: json['date'] as String,
+    isTest: json['isTest'] as bool? ?? false,
+    isProjection: json['isProjection'] as bool? ?? false,
+  );
 }

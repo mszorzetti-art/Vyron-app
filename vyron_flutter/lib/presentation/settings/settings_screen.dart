@@ -1,6 +1,8 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_access_notifier.dart';
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
@@ -130,15 +132,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final lang = settings.uiLanguage;
     final palette = context.vyronColors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isHalted = domain.systemControl.state == SystemControlStatus.halted ||
+    final isHalted =
+        domain.systemControl.state == SystemControlStatus.halted ||
         settings.emergencyStopActive;
 
     _syncControllers(settings);
 
-    final localizedRisks =
-        domain.risks.map((r) => localizeRisk(r, lang)).toList();
-    final localizedIntegrations =
-        settings.integrations.map((i) => localizeIntegration(i, lang)).toList();
+    final localizedRisks = domain.risks
+        .map((r) => localizeRisk(r, lang))
+        .toList();
+    final localizedIntegrations = settings.integrations
+        .map((i) => localizeIntegration(i, lang))
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -152,9 +157,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onPressed: () async {
                 await notifier.resetDemoData();
                 if (!mounted) return;
-                _syncControllers(
-                  ref.read(vyronStateProvider).domain.settings,
-                );
+                _syncControllers(ref.read(vyronStateProvider).domain.settings);
                 setState(() {
                   _haltNotice = '';
                   _reconcileNotice = '';
@@ -190,11 +193,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           Text(
                             translate(lang, 'settings.ownerNameLabel'),
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: palette.textMuted,
-                                      fontSize: 11,
-                                    ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: palette.textMuted,
+                                  fontSize: 11,
+                                ),
                           ),
                           const SizedBox(height: 6),
                           TextField(
@@ -212,11 +215,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           Text(
                             translate(lang, 'settings.ownerEmailLabel'),
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: palette.textMuted,
-                                      fontSize: 11,
-                                    ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: palette.textMuted,
+                                  fontSize: 11,
+                                ),
                           ),
                           const SizedBox(height: 6),
                           TextField(
@@ -328,18 +331,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: domain.systemControl.publishingEnabled,
                     title: translate(lang, 'settings.publishingLabel'),
                     subtitle: translate(lang, 'settings.publishingDesc'),
-                    onChanged: (v) => notifier.toggleSystemFlags(
-                      publishingEnabled: v,
-                    ),
+                    onChanged: (v) =>
+                        notifier.toggleSystemFlags(publishingEnabled: v),
                   ),
                   const SizedBox(height: 8),
                   _PolicyCheckboxBox(
                     value: domain.systemControl.phaseBPublicAllowed,
                     title: translate(lang, 'settings.publicAllowedLabel'),
                     subtitle: translate(lang, 'settings.publicAllowedDesc'),
-                    onChanged: (v) => notifier.toggleSystemFlags(
-                      phaseBPublicAllowed: v,
-                    ),
+                    onChanged: (v) =>
+                        notifier.toggleSystemFlags(phaseBPublicAllowed: v),
                   ),
                   const SizedBox(height: 12),
                   LayoutBuilder(
@@ -358,13 +359,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  translate(
-                                    lang,
-                                    'settings.authValidityLabel',
-                                  ),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  translate(lang, 'settings.authValidityLabel'),
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: palette.textMuted,
                                         fontSize: 11,
@@ -380,8 +376,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     if (parsed != null) {
                                       notifier.updateSettings(
                                         OwnerSettingsPatch(
-                                          defaultAuthValidityHours:
-                                              math.max(1, parsed),
+                                          defaultAuthValidityHours: math.max(
+                                            1,
+                                            parsed,
+                                          ),
                                         ),
                                       );
                                     }
@@ -400,9 +398,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     lang,
                                     'settings.evidenceFreshnessLabel',
                                   ),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: palette.textMuted,
                                         fontSize: 11,
@@ -418,8 +414,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     if (parsed != null) {
                                       notifier.updateSettings(
                                         OwnerSettingsPatch(
-                                          evidenceFreshnessMaxHours:
-                                              math.max(1, parsed),
+                                          evidenceFreshnessMaxHours: math.max(
+                                            1,
+                                            parsed,
+                                          ),
                                         ),
                                       );
                                     }
@@ -438,9 +436,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     lang,
                                     'settings.maxDailySpendLabel',
                                   ),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: palette.textMuted,
                                         fontSize: 11,
@@ -452,8 +448,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   focusNode: _maxSpendFocus,
                                   keyboardType:
                                       const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
+                                        decimal: true,
+                                      ),
                                   onChanged: (raw) {
                                     final parsed = double.tryParse(
                                       raw.trim().replaceAll(',', '.'),
@@ -461,8 +457,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     if (parsed != null) {
                                       notifier.updateSettings(
                                         OwnerSettingsPatch(
-                                          maxGlobalDailySpendBRL:
-                                              math.max(0.0, parsed),
+                                          maxGlobalDailySpendBRL: math.max(
+                                            0.0,
+                                            parsed,
+                                          ),
                                         ),
                                       );
                                     }
@@ -484,8 +482,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       color: isHalted
                           ? VyronColors.crimson.withValues(alpha: 0.1)
                           : (isDark
-                              ? VyronColors.obsidianBlack.withValues(alpha: 0.65)
-                              : palette.surfaceAlt.withValues(alpha: 0.45)),
+                                ? VyronColors.obsidianBlack.withValues(
+                                    alpha: 0.65,
+                                  )
+                                : palette.surfaceAlt.withValues(alpha: 0.45)),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: isHalted
@@ -509,8 +509,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 children: [
                                   Text(
                                     translate(lang, 'settings.emergencyTitle', {
-                                      'controls':
-                                          translate(lang, 'controls.title'),
+                                      'controls': translate(
+                                        lang,
+                                        'controls.title',
+                                      ),
                                       'state': labelSystemControlState(
                                         domain.systemControl.state,
                                         lang,
@@ -522,17 +524,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       fontWeight: FontWeight.w600,
                                       color: isHalted
                                           ? (isDark
-                                              ? VyronColors.crimsonDarkText
-                                              : VyronColors.crimsonLightText)
+                                                ? VyronColors.crimsonDarkText
+                                                : VyronColors.crimsonLightText)
                                           : palette.textPrimary,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     translate(lang, 'settings.emergencyDesc'),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
+                                    style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(color: palette.textMuted),
                                   ),
                                 ],
@@ -550,7 +550,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     _reconcileNotice = '';
                                     if (!res.ok) {
                                       _haltNoticeError = true;
-                                      _haltNotice = res.reason ??
+                                      _haltNotice =
+                                          res.reason ??
                                           translate(
                                             lang,
                                             'settings.resumeBlockedFallback',
@@ -583,8 +584,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 backgroundColor: isHalted
                                     ? VyronColors.electricCobalt
                                     : (isDark
-                                        ? VyronColors.crimson
-                                        : VyronColors.crimsonLightButton),
+                                          ? VyronColors.crimson
+                                          : VyronColors.crimsonLightButton),
                                 foregroundColor: Colors.white,
                               ),
                               child: Text(
@@ -603,17 +604,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           Text(
                             _haltNotice,
                             key: const Key('settings-halt-notice'),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: _haltNoticeError
                                       ? (isDark
-                                          ? VyronColors.amberDarkText
-                                          : VyronColors.amberLightText)
+                                            ? VyronColors.amberDarkText
+                                            : VyronColors.amberLightText)
                                       : (isDark
-                                          ? VyronColors.emeraldDarkText
-                                          : VyronColors.emeraldLightText),
+                                            ? VyronColors.emeraldDarkText
+                                            : VyronColors.emeraldLightText),
                                 ),
                           ),
                           if (_haltNoticeError &&
@@ -648,9 +647,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           const SizedBox(height: 10),
                           Text(
                             _reconcileNotice,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
                                   color: isDark
                                       ? VyronColors.emeraldDarkText
@@ -676,11 +673,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               );
             }
             return Column(
-              children: [
-                profileCard,
-                const SizedBox(height: 14),
-                policiesCard,
-              ],
+              children: [profileCard, const SizedBox(height: 14), policiesCard],
             );
           },
         ),
@@ -708,9 +701,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 2),
                       Text(
                         translate(lang, 'settings.arch.subtitle'),
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
+                        style: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(color: palette.textMuted),
                       ),
                     ],
@@ -809,53 +800,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Wrap(
-                                      spacing: 8,
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      children: [
-                                        Text(
-                                          r.id,
-                                          style: TextStyle(
-                                            fontFamily: VyronTypography.mono,
-                                            fontSize: 12,
-                                            color: palette.textMuted,
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: Wrap(
+                                    alignment: WrapAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    runSpacing: 6,
+                                    children: [
+                                      Wrap(
+                                        spacing: 8,
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
+                                        children: [
+                                          Text(
+                                            r.id,
+                                            style: TextStyle(
+                                              fontFamily: VyronTypography.mono,
+                                              fontSize: 12,
+                                              color: palette.textMuted,
+                                            ),
                                           ),
-                                        ),
-                                        VyronToneBadge(
-                                          label: r.priority.wire,
-                                          tone: r.priority == RiskPriority.p0
-                                              ? VyronMetricTone.crimson
-                                              : r.priority == RiskPriority.p1
-                                                  ? VyronMetricTone.amber
-                                                  : VyronMetricTone.neutral,
-                                        ),
-                                      ],
-                                    ),
-                                    VyronStatusLabel(
-                                      status: labelRiskStatus(r.status, lang),
-                                      statusKey: r.status.wire,
-                                    ),
-                                  ],
+                                          VyronToneBadge(
+                                            label: r.priority.wire,
+                                            tone: r.priority == RiskPriority.p0
+                                                ? VyronMetricTone.crimson
+                                                : r.priority == RiskPriority.p1
+                                                ? VyronMetricTone.amber
+                                                : VyronMetricTone.neutral,
+                                          ),
+                                        ],
+                                      ),
+                                      VyronStatusLabel(
+                                        status: labelRiskStatus(r.status, lang),
+                                        statusKey: r.status.wire,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   r.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
+                                  style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(fontSize: 13),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   r.controlSummary,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
+                                  style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(color: palette.textMuted),
                                 ),
                               ],
@@ -880,9 +873,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               width: 52,
                               child: Text(
                                 translate(lang, 'settings.risks.colId'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
+                                style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(color: palette.textMuted),
                               ),
                             ),
@@ -890,9 +881,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               width: 78,
                               child: Text(
                                 translate(lang, 'settings.risks.colPriority'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
+                                style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(color: palette.textMuted),
                               ),
                             ),
@@ -900,9 +889,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               flex: 3,
                               child: Text(
                                 translate(lang, 'settings.risks.colRisk'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
+                                style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(color: palette.textMuted),
                               ),
                             ),
@@ -910,9 +897,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               flex: 4,
                               child: Text(
                                 translate(lang, 'settings.risks.colControl'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
+                                style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(color: palette.textMuted),
                               ),
                             ),
@@ -920,9 +905,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               width: 160,
                               child: Text(
                                 translate(lang, 'common.status'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
+                                style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(color: palette.textMuted),
                               ),
                             ),
@@ -935,8 +918,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: palette.panelBorder
-                                    .withValues(alpha: 0.5),
+                                color: palette.panelBorder.withValues(
+                                  alpha: 0.5,
+                                ),
                               ),
                             ),
                           ),
@@ -963,8 +947,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     tone: r.priority == RiskPriority.p0
                                         ? VyronMetricTone.crimson
                                         : r.priority == RiskPriority.p1
-                                            ? VyronMetricTone.amber
-                                            : VyronMetricTone.neutral,
+                                        ? VyronMetricTone.amber
+                                        : VyronMetricTone.neutral,
                                   ),
                                 ),
                               ),
@@ -974,9 +958,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   padding: const EdgeInsets.only(right: 10),
                                   child: Text(
                                     r.title,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
+                                    style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(
                                           color: palette.textPrimary,
                                           fontWeight: FontWeight.w500,
@@ -990,9 +972,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   padding: const EdgeInsets.only(right: 10),
                                   child: Text(
                                     r.controlSummary,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
+                                    style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(color: palette.textMuted),
                                   ),
                                 ),
@@ -1042,9 +1022,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           translate(lang, 'settings.access.subtitle', {
                             'name': settings.ownerName,
                           }),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: palette.textMuted),
                         ),
                       ],
@@ -1056,8 +1034,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       OutlinedButton.icon(
                         key: const Key('settings-lock-vyron-btn'),
-                        onPressed: () =>
-                            accessNotifier.lock(LockReason.manual),
+                        onPressed: () => accessNotifier.lock(LockReason.manual),
                         icon: const Icon(Icons.lock_outline_rounded, size: 15),
                         label: Text(translate(lang, 'nav.lockVyron')),
                       ),
@@ -1088,26 +1065,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       children: [
                         Text(
                           translate(lang, 'settings.access.autoLockLabel'),
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontSize: 13,
-                                  ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontSize: 13),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           translate(lang, 'settings.access.autoLockDesc'),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: palette.textMuted,
-                                    fontSize: 11,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: palette.textMuted,
+                                fontSize: 11,
+                              ),
                         ),
                         const SizedBox(height: 10),
                         VyronDropdownField<int>(
                           key: const Key('settings-idle-timeout-dropdown'),
-                          value: idleTimeoutValues.contains(
-                            accessState.session.idleTimeoutMinutes,
-                          )
+                          value:
+                              idleTimeoutValues.contains(
+                                accessState.session.idleTimeoutMinutes,
+                              )
                               ? accessState.session.idleTimeoutMinutes
                               : defaultIdleTimeoutMinutes,
                           items: [
@@ -1139,10 +1115,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       children: [
                         Text(
                           translate(lang, 'settings.access.updatePwdTitle'),
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontSize: 13,
-                                  ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontSize: 13),
                         ),
                         const SizedBox(height: 10),
                         LayoutBuilder(
@@ -1207,16 +1181,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           Text(
                             _pwdMsg,
                             key: const Key('settings-pwd-feedback'),
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: _pwdMsgError
-                                          ? (isDark
-                                              ? VyronColors.crimsonDarkText
-                                              : VyronColors.crimsonLightText)
-                                          : (isDark
-                                              ? VyronColors.emeraldDarkText
-                                              : VyronColors.emeraldLightText),
-                                    ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: _pwdMsgError
+                                      ? (isDark
+                                            ? VyronColors.crimsonDarkText
+                                            : VyronColors.crimsonLightText)
+                                      : (isDark
+                                            ? VyronColors.emeraldDarkText
+                                            : VyronColors.emeraldLightText),
+                                ),
                           ),
                         ],
                       ],
@@ -1263,13 +1237,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   const SizedBox(height: 10),
                   _NotifPrefTile(
-                    label:
-                        translate(lang, 'settings.notifPrefs.financialAlerts'),
+                    label: translate(
+                      lang,
+                      'settings.notifPrefs.financialAlerts',
+                    ),
                     value: settings.notificationPrefs.financialAlerts,
                     onChanged: (v) => notifier.updateSettings(
                       OwnerSettingsPatch(
-                        notificationPrefs: settings.notificationPrefs
-                            .copyWith(financialAlerts: v),
+                        notificationPrefs: settings.notificationPrefs.copyWith(
+                          financialAlerts: v,
+                        ),
                       ),
                     ),
                   ),
@@ -1281,8 +1258,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: settings.notificationPrefs.commissionsReceived,
                     onChanged: (v) => notifier.updateSettings(
                       OwnerSettingsPatch(
-                        notificationPrefs: settings.notificationPrefs
-                            .copyWith(commissionsReceived: v),
+                        notificationPrefs: settings.notificationPrefs.copyWith(
+                          commissionsReceived: v,
+                        ),
                       ),
                     ),
                   ),
@@ -1291,19 +1269,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: settings.notificationPrefs.opportunities,
                     onChanged: (v) => notifier.updateSettings(
                       OwnerSettingsPatch(
-                        notificationPrefs: settings.notificationPrefs
-                            .copyWith(opportunities: v),
+                        notificationPrefs: settings.notificationPrefs.copyWith(
+                          opportunities: v,
+                        ),
                       ),
                     ),
                   ),
                   _NotifPrefTile(
-                    label:
-                        translate(lang, 'settings.notifPrefs.pendingApprovals'),
+                    label: translate(
+                      lang,
+                      'settings.notifPrefs.pendingApprovals',
+                    ),
                     value: settings.notificationPrefs.pendingApprovals,
                     onChanged: (v) => notifier.updateSettings(
                       OwnerSettingsPatch(
-                        notificationPrefs: settings.notificationPrefs
-                            .copyWith(pendingApprovals: v),
+                        notificationPrefs: settings.notificationPrefs.copyWith(
+                          pendingApprovals: v,
+                        ),
                       ),
                     ),
                   ),
@@ -1315,8 +1297,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: settings.notificationPrefs.automationFailures,
                     onChanged: (v) => notifier.updateSettings(
                       OwnerSettingsPatch(
-                        notificationPrefs: settings.notificationPrefs
-                            .copyWith(automationFailures: v),
+                        notificationPrefs: settings.notificationPrefs.copyWith(
+                          automationFailures: v,
+                        ),
                       ),
                     ),
                   ),
@@ -1328,8 +1311,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: settings.notificationPrefs.operationalEvents,
                     onChanged: (v) => notifier.updateSettings(
                       OwnerSettingsPatch(
-                        notificationPrefs: settings.notificationPrefs
-                            .copyWith(operationalEvents: v),
+                        notificationPrefs: settings.notificationPrefs.copyWith(
+                          operationalEvents: v,
+                        ),
                       ),
                     ),
                   ),
@@ -1368,9 +1352,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             children: [
                               Text(
                                 item.name,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: palette.textPrimary,
                                       fontWeight: FontWeight.w500,
@@ -1379,9 +1361,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               const SizedBox(height: 2),
                               Text(
                                 '${item.category} · ${item.lastChecked}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: palette.textMuted,
                                       fontSize: 11,
@@ -1459,18 +1439,14 @@ class _PreferenceSwitchRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
+                style: Theme.of(context).textTheme.titleSmall
                     ?.copyWith(fontSize: 13),
               ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: palette.textMuted,
-                      fontSize: 11,
-                    ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: palette.textMuted, fontSize: 11),
               ),
             ],
           ),
@@ -1542,10 +1518,8 @@ class _ArchGroupCard extends StatelessWidget {
           for (final item in items) ...[
             Text(
               '• $item',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: palette.textMuted,
-                    fontSize: 11,
-                  ),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: palette.textMuted, fontSize: 11),
             ),
             const SizedBox(height: 6),
           ],

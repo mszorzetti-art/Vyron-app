@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -17,10 +18,7 @@ import '../charts/vyron_charts.dart';
 enum _ProductsViewMode { byCurrency, catalog }
 
 class ProductsScreen extends ConsumerStatefulWidget {
-  const ProductsScreen({
-    super.key,
-    this.productId,
-  });
+  const ProductsScreen({super.key, this.productId});
 
   final String? productId;
 
@@ -56,15 +54,18 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     return switch (metric) {
       ProductChartMetric.opportunityScore =>
         p.opportunityScore != null ? '${p.opportunityScore}/100' : tNotInformed,
-      ProductChartMetric.epcValue => p.epcValue != null
-          ? formatCurrencyForLang(p.epcValue!, p.currency, lang)
-          : tNotInformed,
-      ProductChartMetric.commissionRatePct => p.commissionRatePct != null
-          ? formatPercentForLang(p.commissionRatePct!, lang, 1)
-          : tNotInformed,
-      ProductChartMetric.demandTrendPct => p.demandTrendPct != null
-          ? '${p.demandTrendPct! > 0 ? '+' : ''}${formatPercentForLang(p.demandTrendPct!, lang, 1)}'
-          : tNotInformed,
+      ProductChartMetric.epcValue =>
+        p.epcValue != null
+            ? formatCurrencyForLang(p.epcValue!, p.currency, lang)
+            : tNotInformed,
+      ProductChartMetric.commissionRatePct =>
+        p.commissionRatePct != null
+            ? formatPercentForLang(p.commissionRatePct!, lang, 1)
+            : tNotInformed,
+      ProductChartMetric.demandTrendPct =>
+        p.demandTrendPct != null
+            ? '${p.demandTrendPct! > 0 ? '+' : ''}${formatPercentForLang(p.demandTrendPct!, lang, 1)}'
+            : tNotInformed,
     };
   }
 
@@ -92,22 +93,23 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final filteredProducts = domain.products
         .map((p) => localizeProduct(p, lang))
         .where((p) {
-      if (excludeTestData && p.isTest) return false;
-      if (globalBrandFilter != 'all' &&
-          p.brandId != globalBrandFilter &&
-          !p.linkedBrandIds.contains(globalBrandFilter)) {
-        return false;
-      }
-      if (_statusFilter != 'all' && p.status.wire != _statusFilter) {
-        return false;
-      }
-      if (query.isNotEmpty) {
-        final hay =
-            '${p.name} ${p.platform} ${p.category} ${p.externalId}'.toLowerCase();
-        if (!hay.contains(query)) return false;
-      }
-      return true;
-    }).toList();
+          if (excludeTestData && p.isTest) return false;
+          if (globalBrandFilter != 'all' &&
+              p.brandId != globalBrandFilter &&
+              !p.linkedBrandIds.contains(globalBrandFilter)) {
+            return false;
+          }
+          if (_statusFilter != 'all' && p.status.wire != _statusFilter) {
+            return false;
+          }
+          if (query.isNotEmpty) {
+            final hay = '${p.name} ${p.platform} ${p.category} ${p.externalId}'
+                .toLowerCase();
+            if (!hay.contains(query)) return false;
+          }
+          return true;
+        })
+        .toList();
 
     final currencyGroups = groupProductsByCurrency(filteredProducts);
 
@@ -139,7 +141,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         formattedValue: _formatChartMetricValue(p, _chartMetric, lang),
         badge: labelProductStatus(p.status, lang),
         isMissing: item.missingData,
-        color: item.missingData ? VyronColors.amber : VyronColors.electricCobalt,
+        color: item.missingData
+            ? VyronColors.amber
+            : VyronColors.electricCobalt,
       );
     }).toList();
 
@@ -155,9 +159,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
     final compareProducts = _compareIds
         .map(
-          (id) => domain.products
-              .cast<Product?>()
-              .firstWhere((p) => p?.id == id, orElse: () => null),
+          (id) => domain.products.cast<Product?>().firstWhere(
+            (p) => p?.id == id,
+            orElse: () => null,
+          ),
         )
         .whereType<Product>()
         .map((p) => localizeProduct(p, lang))
@@ -215,10 +220,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               child: VyronDropdownField<String>(
                 value: _statusFilter,
                 items: [
-                  DropdownMenuItem(
-                    value: 'all',
-                    child: Text(t('common.all')),
-                  ),
+                  DropdownMenuItem(value: 'all', child: Text(t('common.all'))),
                   for (final st in ProductStatus.values)
                     DropdownMenuItem(
                       value: st.wire,
@@ -309,7 +311,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     ],
                   );
 
-                  if (constraints.maxWidth >= 820) {
+                  if (constraints.maxWidth >= 1040) {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -320,7 +322,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        controls,
+                        Flexible(child: controls),
                       ],
                     );
                   }
@@ -355,8 +357,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       .where((c) => c.productId == selectedChartProd!.id)
                       .length,
                   language: lang,
-                  onClose: () =>
-                      setState(() => _selectedChartProductId = null),
+                  onClose: () => setState(() => _selectedChartProductId = null),
                   onOpenDossier: () => navigateToVyronModule(
                     ref,
                     NavModule.products,
@@ -379,10 +380,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 VyronSectionTitle(
-                  title: t(
-                    'products.comparePanelTitle',
-                    {'count': '${compareProducts.length}'},
-                  ),
+                  title: t('products.comparePanelTitle', {
+                    'count': '${compareProducts.length}',
+                  }),
                   trailing: TextButton(
                     key: const Key('products-compare-clear'),
                     onPressed: () => setState(_compareIds.clear),
@@ -464,8 +464,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                                       fontSize: 12,
                                       color: p.epcValue == null
                                           ? (isDark
-                                              ? VyronColors.amberDarkText
-                                              : VyronColors.amberLightText)
+                                                ? VyronColors.amberDarkText
+                                                : VyronColors.amberLightText)
                                           : palette.textPrimary,
                                     ),
                                   ),
@@ -498,13 +498,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   VyronSectionTitle(
-                    title: t(
-                      'products.currencyGroupTitle',
-                      {
-                        'currency': group.currency.wire,
-                        'count': '${group.items.length}',
-                      },
-                    ),
+                    title: t('products.currencyGroupTitle', {
+                      'currency': group.currency.wire,
+                      'count': '${group.items.length}',
+                    }),
                     subtitle: t('products.currencyGroupHint'),
                   ),
                   const SizedBox(height: 12),
@@ -665,16 +662,15 @@ class _ProductChartDrilldown extends StatelessWidget {
                   fontSize: 11.5,
                   color: product.epcValue == null
                       ? (isDark
-                          ? VyronColors.amberDarkText
-                          : VyronColors.amberLightText)
+                            ? VyronColors.amberDarkText
+                            : VyronColors.amberLightText)
                       : palette.textPrimary,
                 ),
               ),
               Text(
-                t(
-                  'products.chart.drillContents',
-                  {'count': '$linkedContentsCount'},
-                ),
+                t('products.chart.drillContents', {
+                  'count': '$linkedContentsCount',
+                }),
                 style: TextStyle(fontSize: 11.5, color: palette.textMuted),
               ),
             ],
@@ -746,7 +742,7 @@ class _ProductsCatalogList extends StatelessWidget {
               child: DataTable(
                 headingRowHeight: 36,
                 dataRowMinHeight: 54,
-                dataRowMaxHeight: 74,
+                dataRowMaxHeight: 88,
                 columnSpacing: 14,
                 horizontalMargin: 8,
                 columns: [
@@ -786,11 +782,13 @@ class _ProductsCatalogList extends StatelessWidget {
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 210),
                             child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   p.name,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
@@ -800,6 +798,7 @@ class _ProductsCatalogList extends StatelessWidget {
                                 const SizedBox(height: 2),
                                 Wrap(
                                   spacing: 6,
+                                  runSpacing: 2,
                                   children: [
                                     Text(
                                       '${p.platform} · ${p.externalId}',
@@ -839,13 +838,15 @@ class _ProductsCatalogList extends StatelessWidget {
                             runSpacing: 4,
                             children: [
                               VyronToneBadge(
-                                label:
-                                    labelProductGradeBadge(p.qualityGrade, language),
+                                label: labelProductGradeBadge(
+                                  p.qualityGrade,
+                                  language,
+                                ),
                                 tone: p.qualityGrade == ProductQualityGrade.a
                                     ? VyronMetricTone.emerald
                                     : p.qualityGrade == ProductQualityGrade.c
-                                        ? VyronMetricTone.crimson
-                                        : VyronMetricTone.neutral,
+                                    ? VyronMetricTone.crimson
+                                    : VyronMetricTone.neutral,
                               ),
                               VyronStatusLabel(
                                 status: labelComplianceState(
@@ -885,8 +886,8 @@ class _ProductsCatalogList extends StatelessWidget {
                                         1,
                                       )
                                     : (p.cpaValue != null
-                                        ? 'CPA ${formatCurrencyForLang(p.cpaValue!, p.currency, language)}'
-                                        : t('common.na')),
+                                          ? 'CPA ${formatCurrencyForLang(p.cpaValue!, p.currency, language)}'
+                                          : t('common.na')),
                                 style: const TextStyle(
                                   fontFamily: VyronTypography.mono,
                                   fontSize: 11.5,
@@ -901,8 +902,8 @@ class _ProductsCatalogList extends StatelessWidget {
                                   fontSize: 11,
                                   color: p.epcValue == null
                                       ? (isDark
-                                          ? VyronColors.amberDarkText
-                                          : VyronColors.amberLightText)
+                                            ? VyronColors.amberDarkText
+                                            : VyronColors.amberLightText)
                                       : palette.textMuted,
                                 ),
                               ),
@@ -912,10 +913,9 @@ class _ProductsCatalogList extends StatelessWidget {
                         DataCell(
                           Text(
                             p.cookieWindowDays != null
-                                ? t(
-                                    'common.daysShort',
-                                    {'days': '${p.cookieWindowDays}'},
-                                  )
+                                ? t('common.daysShort', {
+                                    'days': '${p.cookieWindowDays}',
+                                  })
                                 : t('common.na'),
                             style: TextStyle(
                               fontFamily: VyronTypography.mono,
@@ -936,8 +936,8 @@ class _ProductsCatalogList extends StatelessWidget {
                               color: p.opportunityScore != null
                                   ? palette.cobaltText
                                   : (isDark
-                                      ? VyronColors.amberDarkText
-                                      : VyronColors.amberLightText),
+                                        ? VyronColors.amberDarkText
+                                        : VyronColors.amberLightText),
                             ),
                           ),
                         ),
@@ -1023,8 +1023,8 @@ class _ProductsCatalogList extends StatelessWidget {
                             color: p.opportunityScore != null
                                 ? palette.cobaltText
                                 : (isDark
-                                    ? VyronColors.amberDarkText
-                                    : VyronColors.amberLightText),
+                                      ? VyronColors.amberDarkText
+                                      : VyronColors.amberLightText),
                           ),
                         ),
                       ],
@@ -1041,13 +1041,15 @@ class _ProductsCatalogList extends StatelessWidget {
                             tone: VyronMetricTone.amber,
                           ),
                         VyronToneBadge(
-                          label:
-                              labelProductGradeBadge(p.qualityGrade, language),
+                          label: labelProductGradeBadge(
+                            p.qualityGrade,
+                            language,
+                          ),
                           tone: p.qualityGrade == ProductQualityGrade.a
                               ? VyronMetricTone.emerald
                               : p.qualityGrade == ProductQualityGrade.c
-                                  ? VyronMetricTone.crimson
-                                  : VyronMetricTone.neutral,
+                              ? VyronMetricTone.crimson
+                              : VyronMetricTone.neutral,
                         ),
                         VyronStatusLabel(
                           status: labelProductStatus(p.status, language),
@@ -1075,8 +1077,8 @@ class _ProductsCatalogList extends StatelessWidget {
                             fontSize: 11.5,
                             color: p.epcValue == null
                                 ? (isDark
-                                    ? VyronColors.amberDarkText
-                                    : VyronColors.amberLightText)
+                                      ? VyronColors.amberDarkText
+                                      : VyronColors.amberLightText)
                                 : palette.textMuted,
                           ),
                         ),
@@ -1149,8 +1151,9 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
 
     final product = localizeProduct(rawProd, lang);
     final scoreInfo = scoreProductV61(product, language: lang);
-    final linkedContents =
-        domain.contents.where((c) => c.productId == product.id).toList();
+    final linkedContents = domain.contents
+        .where((c) => c.productId == product.id)
+        .toList();
 
     Brand? primaryBrand;
     for (final b in domain.brands) {
@@ -1167,9 +1170,11 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
               ch.brandId == product.brandId,
         )
         .toList();
-    final fallbackChannels =
-        availableChannels.isNotEmpty ? availableChannels : domain.channels;
-    final resolvedChannelId = (_selectedChannelId != null &&
+    final fallbackChannels = availableChannels.isNotEmpty
+        ? availableChannels
+        : domain.channels;
+    final resolvedChannelId =
+        (_selectedChannelId != null &&
             fallbackChannels.any((c) => c.id == _selectedChannelId))
         ? _selectedChannelId!
         : (fallbackChannels.isNotEmpty ? fallbackChannels.first.id : '');
@@ -1203,11 +1208,11 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                   onPressed: product.status == ProductStatus.approved
                       ? null
                       : () => _openDecisionModal(
-                            context,
-                            lang,
-                            product,
-                            ProductStatus.approved,
-                          ),
+                          context,
+                          lang,
+                          product,
+                          ProductStatus.approved,
+                        ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: VyronColors.emerald,
                     foregroundColor: Colors.white,
@@ -1219,11 +1224,11 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                   onPressed: product.status == ProductStatus.rejected
                       ? null
                       : () => _openDecisionModal(
-                            context,
-                            lang,
-                            product,
-                            ProductStatus.rejected,
-                          ),
+                          context,
+                          lang,
+                          product,
+                          ProductStatus.rejected,
+                        ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: isDark
                         ? VyronColors.crimsonDarkText
@@ -1236,11 +1241,11 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                   onPressed: product.status == ProductStatus.archived
                       ? null
                       : () => _openDecisionModal(
-                            context,
-                            lang,
-                            product,
-                            ProductStatus.archived,
-                          ),
+                          context,
+                          lang,
+                          product,
+                          ProductStatus.archived,
+                        ),
                   child: Text(t('products.detail.archive')),
                 ),
               ],
@@ -1251,15 +1256,12 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
 
         VyronPageHeader(
           title: product.name,
-          subtitle: t(
-            'products.detail.subtitle',
-            {
-              'platform': product.platform,
-              'externalId': product.externalId,
-              'currency': product.currency.wire,
-              'market': labelComplianceMarket(product.complianceMarket, lang),
-            },
-          ),
+          subtitle: t('products.detail.subtitle', {
+            'platform': product.platform,
+            'externalId': product.externalId,
+            'currency': product.currency.wire,
+            'market': labelComplianceMarket(product.complianceMarket, lang),
+          }),
           actions: [
             if (product.isTest)
               VyronToneBadge(
@@ -1308,18 +1310,15 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                             lang,
                           )
                         : t('products.notInformed'),
-                    helper: t(
-                      'products.detail.kpi.comm',
-                      {
-                        'val': product.commissionRatePct != null
-                            ? formatPercentForLang(
-                                product.commissionRatePct!,
-                                lang,
-                                1,
-                              )
-                            : t('products.notInformed'),
-                      },
-                    ),
+                    helper: t('products.detail.kpi.comm', {
+                      'val': product.commissionRatePct != null
+                          ? formatPercentForLang(
+                              product.commissionRatePct!,
+                              lang,
+                              1,
+                            )
+                          : t('products.notInformed'),
+                    }),
                   ),
                 ),
                 SizedBox(
@@ -1334,25 +1333,19 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                           )
                         : t('products.unknownNull'),
                     helper: product.cpaValue != null
-                        ? t(
-                            'products.detail.kpi.cpa',
-                            {
-                              'val': formatCurrencyForLang(
-                                product.cpaValue!,
-                                product.currency,
-                                lang,
-                              ),
-                            },
-                          )
-                        : t(
-                            'products.detail.kpi.confidence',
-                            {
-                              'val': labelDataConfidence(
-                                product.dataConfidence,
-                                lang,
-                              ),
-                            },
-                          ),
+                        ? t('products.detail.kpi.cpa', {
+                            'val': formatCurrencyForLang(
+                              product.cpaValue!,
+                              product.currency,
+                              lang,
+                            ),
+                          })
+                        : t('products.detail.kpi.confidence', {
+                            'val': labelDataConfidence(
+                              product.dataConfidence,
+                              lang,
+                            ),
+                          }),
                     tone: product.epcValue == null
                         ? VyronMetricTone.amber
                         : VyronMetricTone.neutral,
@@ -1363,20 +1356,16 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                   child: VyronMetricBlock(
                     label: t('products.detail.kpi.cookie'),
                     value: product.cookieWindowDays != null
-                        ? t(
-                            'products.detail.kpi.days',
-                            {'days': '${product.cookieWindowDays}'},
-                          )
+                        ? t('products.detail.kpi.days', {
+                            'days': '${product.cookieWindowDays}',
+                          })
                         : t('products.notInformed'),
-                    helper: t(
-                      'products.detail.kpi.competition',
-                      {
-                        'val': labelCompetitionLevel(
-                          product.competitionLevel,
-                          lang,
-                        ),
-                      },
-                    ),
+                    helper: t('products.detail.kpi.competition', {
+                      'val': labelCompetitionLevel(
+                        product.competitionLevel,
+                        lang,
+                      ),
+                    }),
                   ),
                 ),
                 SizedBox(
@@ -1385,10 +1374,9 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                     label: t('products.detail.kpi.qualityCompliance'),
                     value:
                         '${labelProductGradeBadge(product.qualityGrade, lang)} · ${labelComplianceState(product.complianceState, lang)}',
-                    helper: t(
-                      'products.detail.kpi.linkedContents',
-                      {'count': '${linkedContents.length}'},
-                    ),
+                    helper: t('products.detail.kpi.linkedContents', {
+                      'count': '${linkedContents.length}',
+                    }),
                   ),
                 ),
               ],
@@ -1418,9 +1406,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                           children: [
                             Text(
                               t('products.detail.gov.qualityTitle'),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
+                              style: Theme.of(context).textTheme.labelLarge
                                   ?.copyWith(fontSize: 12.5),
                             ),
                             const SizedBox(height: 3),
@@ -1482,18 +1468,13 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              t(
-                                'products.detail.gov.complianceTitle',
-                                {
-                                  'market': labelComplianceMarket(
-                                    product.complianceMarket,
-                                    lang,
-                                  ),
-                                },
-                              ),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
+                              t('products.detail.gov.complianceTitle', {
+                                'market': labelComplianceMarket(
+                                  product.complianceMarket,
+                                  lang,
+                                ),
+                              }),
+                              style: Theme.of(context).textTheme.labelLarge
                                   ?.copyWith(fontSize: 12.5),
                             ),
                             const SizedBox(height: 3),
@@ -1533,9 +1514,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
               const SizedBox(height: 16),
               Text(
                 t('products.detail.gov.brandsTitle'),
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge
+                style: Theme.of(context).textTheme.labelLarge
                     ?.copyWith(fontSize: 12.5),
               ),
               const SizedBox(height: 3),
@@ -1582,9 +1561,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  VyronSectionTitle(
-                    title: t('products.detail.evidenceTitle'),
-                  ),
+                  VyronSectionTitle(title: t('products.detail.evidenceTitle')),
                   const SizedBox(height: 10),
                   if (product.evidence.isEmpty)
                     Text(
@@ -1616,15 +1593,12 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                                   ),
                                 ),
                                 Text(
-                                  t(
-                                    'products.detail.verifiedAt',
-                                    {
-                                      'date': formatDateForLang(
-                                        ev.verifiedAt,
-                                        lang,
-                                      ),
-                                    },
-                                  ),
+                                  t('products.detail.verifiedAt', {
+                                    'date': formatDateForLang(
+                                      ev.verifiedAt,
+                                      lang,
+                                    ),
+                                  }),
                                   style: TextStyle(
                                     fontFamily: VyronTypography.mono,
                                     fontSize: 10.5,
@@ -1653,10 +1627,9 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   VyronSectionTitle(
-                    title: t(
-                      'products.detail.createContentTitle',
-                      {'brand': primaryBrand?.name ?? product.brandId},
-                    ),
+                    title: t('products.detail.createContentTitle', {
+                      'brand': primaryBrand?.name ?? product.brandId,
+                    }),
                   ),
                   const SizedBox(height: 12),
                   if (fallbackChannels.isNotEmpty) ...[
@@ -1696,8 +1669,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                     onPressed: resolvedChannelId.isEmpty
                         ? null
                         : () {
-                            final created =
-                                notifier.generateContentFromProduct(
+                            final created = notifier.generateContentFromProduct(
                               product.id,
                               resolvedChannelId,
                               _contentFormat,
@@ -1790,10 +1762,9 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          t(
-                            'products.detail.byActor',
-                            {'actor': localizeActor(dec.actor, lang)},
-                          ),
+                          t('products.detail.byActor', {
+                            'actor': localizeActor(dec.actor, lang),
+                          }),
                           style: TextStyle(
                             fontSize: 11,
                             color: palette.textMuted,
@@ -1817,11 +1788,9 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
   ) async {
     await showVyronModalDialog<void>(
       context: context,
-      title: translate(
-        lang,
-        'products.modal.decisionTitle',
-        {'status': labelProductStatus(nextStatus, lang)},
-      ),
+      title: translate(lang, 'products.modal.decisionTitle', {
+        'status': labelProductStatus(nextStatus, lang),
+      }),
       subtitle: translate(lang, 'products.modal.decisionSubtitle'),
       language: lang,
       maxWidth: 480,
@@ -1838,10 +1807,7 @@ class _ProductDetailViewState extends ConsumerState<_ProductDetailView> {
 }
 
 class _DecisionDialogBody extends StatefulWidget {
-  const _DecisionDialogBody({
-    required this.language,
-    required this.onConfirm,
-  });
+  const _DecisionDialogBody({required this.language, required this.onConfirm});
 
   final UiLanguage language;
   final ValueChanged<String> onConfirm;
@@ -1973,8 +1939,9 @@ class _CreateProductDialogBodyState extends State<_CreateProductDialogBody> {
     final price = double.tryParse(_priceCtrl.text.trim().replaceAll(',', '.'));
     final comm = double.tryParse(_commCtrl.text.trim().replaceAll(',', '.'));
     final epcText = _epcCtrl.text.trim();
-    final epc =
-        epcText.isEmpty ? null : double.tryParse(epcText.replaceAll(',', '.'));
+    final epc = epcText.isEmpty
+        ? null
+        : double.tryParse(epcText.replaceAll(',', '.'));
     final cookieText = _cookieCtrl.text.trim();
     final cookie = cookieText.isEmpty ? null : int.tryParse(cookieText);
 
@@ -2086,9 +2053,12 @@ class _CreateProductDialogBodyState extends State<_CreateProductDialogBody> {
             Expanded(
               child: TextField(
                 controller: _priceCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: t('products.modal.price')),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: t('products.modal.price'),
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -2097,18 +2067,9 @@ class _CreateProductDialogBodyState extends State<_CreateProductDialogBody> {
                 labelText: t('products.modal.currency'),
                 value: _currency,
                 items: const [
-                  DropdownMenuItem(
-                    value: CurrencyCode.brl,
-                    child: Text('BRL'),
-                  ),
-                  DropdownMenuItem(
-                    value: CurrencyCode.usd,
-                    child: Text('USD'),
-                  ),
-                  DropdownMenuItem(
-                    value: CurrencyCode.eur,
-                    child: Text('EUR'),
-                  ),
+                  DropdownMenuItem(value: CurrencyCode.brl, child: Text('BRL')),
+                  DropdownMenuItem(value: CurrencyCode.usd, child: Text('USD')),
+                  DropdownMenuItem(value: CurrencyCode.eur, child: Text('EUR')),
                 ],
                 onChanged: (v) {
                   if (v != null) setState(() => _currency = v);
@@ -2119,10 +2080,12 @@ class _CreateProductDialogBodyState extends State<_CreateProductDialogBody> {
             Expanded(
               child: TextField(
                 controller: _commCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration:
-                    InputDecoration(labelText: t('products.modal.commPct')),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: t('products.modal.commPct'),
+                ),
               ),
             ),
           ],
@@ -2134,8 +2097,9 @@ class _CreateProductDialogBodyState extends State<_CreateProductDialogBody> {
               child: TextField(
                 key: const Key('create-product-epc'),
                 controller: _epcCtrl,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: InputDecoration(
                   labelText: t('products.modal.epcLabel'),
                   hintText: t('products.modal.epcPlaceholder'),

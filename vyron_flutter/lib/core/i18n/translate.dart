@@ -5,11 +5,7 @@ import 'pt_br.dart';
 Map<String, String> getDictionary(UiLanguage lang) =>
     lang == UiLanguage.enUS ? enUS : ptBR;
 
-String translate(
-  UiLanguage lang,
-  String key, [
-  Map<String, Object?>? params,
-]) {
+String translate(UiLanguage lang, String key, [Map<String, Object?>? params]) {
   final dict = getDictionary(lang);
   var text = dict[key] ?? ptBR[key] ?? key;
   if (params != null && params.isNotEmpty) {

@@ -11,7 +11,6 @@ class _SeedAuthInput {
     required this.expiresAt,
     required this.rulesVersion,
     required this.evidenceVerifiedAt,
-    this.offerEndsAt,
   });
 
   final String actor;
@@ -19,7 +18,6 @@ class _SeedAuthInput {
   final String expiresAt;
   final String rulesVersion;
   final String evidenceVerifiedAt;
-  final String? offerEndsAt;
 }
 
 class _SeedVersionInput {
@@ -30,7 +28,6 @@ class _SeedVersionInput {
     this.feedbackCategory,
     required this.timestamp,
     required this.scriptSnapshot,
-    this.manifestHash,
   });
 
   final String version;
@@ -39,7 +36,6 @@ class _SeedVersionInput {
   final FeedbackCategory? feedbackCategory;
   final String timestamp;
   final String scriptSnapshot;
-  final String? manifestHash;
 }
 
 ContentItem _hydrateContent({
@@ -141,13 +137,12 @@ ContentItem _hydrateContent({
             expiresAt: authorize.expiresAt,
             rulesVersion: authorize.rulesVersion,
             evidenceVerifiedAt: authorize.evidenceVerifiedAt,
-            offerEndsAt: authorize.offerEndsAt,
           ),
     versions: versions
         .map(
           (v) => ContentVersion(
             version: v.version,
-            manifestHash: v.manifestHash ?? hash,
+            manifestHash: hash,
             author: v.author,
             note: v.note,
             feedbackCategory: v.feedbackCategory,
@@ -187,8 +182,7 @@ VyronState buildInitialVyronState() {
         secondaryColor: '#101216',
         typographyNote: 'Plus Jakarta Sans + JetBrains Mono para benchmarks',
         tagline: 'Engenharia aplicada ao espaço de trabalho.',
-        description:
-            'Operação editorial e comercial focada em periféricos mecânicos, monitores OLED e ergonomia de alta precisão para profissionais de tecnologia no Brasil (conformidade CDC/CONAR).',
+        description: 'Operação editorial e comercial focada em periféricos mecânicos, monitores OLED e ergonomia de alta precisão para profissionais de tecnologia no Brasil (conformidade CDC/CONAR).',
         createdAt: '2026-02-14',
       ),
       Brand(
@@ -213,8 +207,7 @@ VyronState buildInitialVyronState() {
         secondaryColor: '#292E36',
         typographyNote: 'Manrope + tabular numerals',
         tagline: 'Quiet precision for modern work.',
-        description:
-            'Marca internacional preparada para o piloto UE/França (Loi 2023-451 / DSA), voltada à curadoria de setups arquitetônicos e guias digitais de ergonomia.',
+        description: 'Marca internacional preparada para o piloto UE/França (Loi 2023-451 / DSA), voltada à curadoria de setups arquitetônicos e guias digitais de ergonomia.',
         createdAt: '2026-04-03',
       ),
       Brand(
@@ -239,8 +232,7 @@ VyronState buildInitialVyronState() {
         secondaryColor: '#AEB7C2',
         typographyNote: 'Outfit + IBM Plex Mono',
         tagline: 'Clarity measured in decibels.',
-        description:
-            'Canal e portal técnico especializado em interfaces de áudio, microfones dinâmicos e suítes DSP com monetização via PartnerStack e Amazon Global.',
+        description: 'Canal e portal técnico especializado em interfaces de áudio, microfones dinâmicos e suítes DSP com monetização via PartnerStack e Amazon Global.',
         createdAt: '2026-06-21',
       ),
       Brand(
@@ -265,8 +257,7 @@ VyronState buildInitialVyronState() {
         secondaryColor: '#AEB7C2',
         typographyNote: 'DM Sans',
         tagline: 'Rotinas domésticas silenciosas.',
-        description:
-            'Vertical em pausa tática para revisão de portfólio Matter/Thread e renegociação de parcerias diretas.',
+        description: 'Vertical em pausa tática para revisão de portfólio Matter/Thread e renegociação de parcerias diretas.',
         createdAt: '2026-01-19',
       ),
     ],
@@ -300,16 +291,14 @@ VyronState buildInitialVyronState() {
             id: 'ev-1',
             sourceName: 'Google Trends BR',
             url: 'https://trends.google.com',
-            summary:
-                'Crescimento de +24% nas buscas por "teclado custom wireless" nos últimos 90 dias.',
+            summary: 'Crescimento de +24% nas buscas por "teclado custom wireless" nos últimos 90 dias.',
             verifiedAt: '2026-11-02',
           ),
           ProductEvidence(
             id: 'ev-2',
             sourceName: 'Histórico Apex Q3',
             url: 'https://vyron.internal/analytics',
-            summary:
-                'Taxa de conversão média de 4,8% em reviews comparativos acima de 12 minutos.',
+            summary: 'Taxa de conversão média de 4,8% em reviews comparativos acima de 12 minutos.',
             verifiedAt: '2026-11-05',
           ),
         ],
@@ -318,8 +307,7 @@ VyronState buildInitialVyronState() {
             id: 'dec-1',
             previousStatus: ProductStatus.candidate,
             newStatus: ProductStatus.approved,
-            justification:
-                'EPC superior a R\$ 2,00 com alta retenção em audiência de engenharia de software.',
+            justification: 'EPC superior a R\$ 2,00 com alta retenção em audiência de engenharia de software.',
             actor: 'Proprietário',
             timestamp: '2026-11-06T14:20:00Z',
           ),
@@ -355,8 +343,7 @@ VyronState buildInitialVyronState() {
             id: 'ev-3',
             sourceName: 'Dell Partner Portal',
             url: 'https://partners.dell.com',
-            summary:
-                'Janela de cookie estendida de 30 dias + bônus CPA por pedido corporativo.',
+            summary: 'Janela de cookie estendida de 30 dias + bônus CPA por pedido corporativo.',
             verifiedAt: '2026-11-10',
           ),
         ],
@@ -365,8 +352,7 @@ VyronState buildInitialVyronState() {
             id: 'dec-2',
             previousStatus: ProductStatus.candidate,
             newStatus: ProductStatus.approved,
-            justification:
-                'Ticket elevado com cookie de 30 dias e baixa saturação no YouTube Brasil.',
+            justification: 'Ticket elevado com cookie de 30 dias e baixa saturação no YouTube Brasil.',
             actor: 'Proprietário',
             timestamp: '2026-11-11T09:15:00Z',
           ),
@@ -402,8 +388,7 @@ VyronState buildInitialVyronState() {
             id: 'ev-4',
             sourceName: 'Pinterest Trend Index',
             url: 'https://trends.pinterest.com',
-            summary:
-                'Pins de desk setup minimalista com ScreenBar têm CTR 2,3x acima da média da conta.',
+            summary: 'Pins de desk setup minimalista com ScreenBar têm CTR 2,3x acima da média da conta.',
             verifiedAt: '2026-11-01',
           ),
         ],
@@ -412,8 +397,7 @@ VyronState buildInitialVyronState() {
             id: 'dec-3',
             previousStatus: ProductStatus.candidate,
             newStatus: ProductStatus.approved,
-            justification:
-                'Conversão recorrente via Pinterest e YouTube Shorts para público US/EU.',
+            justification: 'Conversão recorrente via Pinterest e YouTube Shorts para público US/EU.',
             actor: 'Proprietário',
             timestamp: '2026-11-03T16:40:00Z',
           ),
@@ -449,8 +433,7 @@ VyronState buildInitialVyronState() {
             id: 'ev-5',
             sourceName: 'Radar de Produtos (Agente)',
             url: 'https://vyron.internal/agents',
-            summary:
-                'Sinal identificado em 14 threads de r/battlestations com intenção explícita de compra.',
+            summary: 'Sinal identificado em 14 threads de r/battlestations com intenção explícita de compra.',
             verifiedAt: '2026-11-17',
           ),
         ],
@@ -486,8 +469,7 @@ VyronState buildInitialVyronState() {
             id: 'ev-6',
             sourceName: 'YouTube Search Insights',
             url: 'https://studio.youtube.com',
-            summary:
-                'Volume de busca mensal cresceu 22% com queda de oferta em comparativos práticos.',
+            summary: 'Volume de busca mensal cresceu 22% com queda de oferta em comparativos práticos.',
             verifiedAt: '2026-11-09',
           ),
         ],
@@ -496,8 +478,7 @@ VyronState buildInitialVyronState() {
             id: 'dec-4',
             previousStatus: ProductStatus.candidate,
             newStatus: ProductStatus.approved,
-            justification:
-                'Excelente sinergia com roteiros de tratamento acústico para criadores.',
+            justification: 'Excelente sinergia com roteiros de tratamento acústico para criadores.',
             actor: 'Proprietário',
             timestamp: '2026-11-10T11:30:00Z',
           ),
@@ -533,8 +514,7 @@ VyronState buildInitialVyronState() {
             id: 'ev-7',
             sourceName: 'PluginBoutique Telemetry',
             url: 'https://pluginboutique.com',
-            summary:
-                'Comissão de 18% com baixa taxa de reembolso (1,2%) em licenças digitais.',
+            summary: 'Comissão de 18% com baixa taxa de reembolso (1,2%) em licenças digitais.',
             verifiedAt: '2026-11-16',
           ),
         ],
@@ -570,8 +550,7 @@ VyronState buildInitialVyronState() {
             id: 'ev-unknown',
             sourceName: 'Awin FR Feed Import',
             url: 'https://ui.awin.com',
-            summary:
-                'EPC e janela de cookie não expostos pelo anunciante no feed inicial (mantidos como null).',
+            summary: 'EPC e janela de cookie não expostos pelo anunciante no feed inicial (mantidos como null).',
             verifiedAt: '2026-11-18',
           ),
         ],
@@ -607,8 +586,7 @@ VyronState buildInitialVyronState() {
             id: 'ev-8',
             sourceName: 'Benchmark Interno',
             url: 'https://vyron.internal',
-            summary:
-                'Margem líquida por clique muito inferior ao piso operacional da Apex (R\$ 1,00 EPC).',
+            summary: 'Margem líquida por clique muito inferior ao piso operacional da Apex (R\$ 1,00 EPC).',
             verifiedAt: '2026-11-04',
           ),
         ],
@@ -617,8 +595,7 @@ VyronState buildInitialVyronState() {
             id: 'dec-5',
             previousStatus: ProductStatus.candidate,
             newStatus: ProductStatus.rejected,
-            justification:
-                'Ticket baixo, alta devolução e nota C de qualidade incompatível com posicionamento.',
+            justification: 'Ticket baixo, alta devolução e nota C de qualidade incompatível com posicionamento.',
             actor: 'Proprietário',
             timestamp: '2026-11-04T19:00:00Z',
           ),
@@ -655,8 +632,7 @@ VyronState buildInitialVyronState() {
             id: 'dec-6',
             previousStatus: ProductStatus.approved,
             newStatus: ProductStatus.archived,
-            justification:
-                'Arquivado temporariamente devido à pausa operacional da marca Veloce Casa.',
+            justification: 'Arquivado temporariamente devido à pausa operacional da marca Veloce Casa.',
             actor: 'Proprietário',
             timestamp: '2026-10-28T10:00:00Z',
           ),
@@ -840,8 +816,7 @@ VyronState buildInitialVyronState() {
         channelId: 'ch-apex-yt',
         productId: 'prod-keychron-q1',
         title: 'Keychron Q1 Pro após 90 dias: vale o investimento no Brasil?',
-        description:
-            'Análise técnica após 90 dias de uso em programação e design, com medições reais de latência Bluetooth/2.4GHz e acústica.',
+        description: 'Análise técnica após 90 dias de uso em programação e design, com medições reais de latência Bluetooth/2.4GHz e acústica.',
         format: ContentFormat.longForm,
         category: ContentCategory.comercialContextual,
         visibility: ContentVisibility.publicVis,
@@ -851,18 +826,14 @@ VyronState buildInitialVyronState() {
         status: ContentStatus.published,
         scheduledDate: '2026-11-08',
         publishedAt: '2026-11-08',
-        brief:
-            'Análise técnica de latência sem fio, acústica gasket mount e custo total com importação/estoque local.',
-        angleIdea:
-            'Testes reais em ambiente de programação + comparativo direto de som.',
-        script:
-            '[00:00] Gancho: Por que 80% dos teclados wireless decepcionam em latência?\n[01:30] Construção em alumínio CNC e estabilidade.\n[05:40] Teste de digitação e modificação mínima.\n[11:20] Veredito financeiro e links verificados.',
+        brief: 'Análise técnica de latência sem fio, acústica gasket mount e custo total com importação/estoque local.',
+        angleIdea: 'Testes reais em ambiente de programação + comparativo direto de som.',
+        script: '[00:00] Gancho: Por que 80% dos teclados wireless decepcionam em latência?\n[01:30] Construção em alumínio CNC e estabilidade.\n[05:40] Teste de digitação e modificação mínima.\n[11:20] Veredito financeiro e links verificados.',
         affiliateLinkUrl: 'https://amzn.to/apex-q1pro?src=yt_cnt1',
         verifiedDestinationUrl: 'https://www.amazon.com.br/dp/B0KEYQ1P',
         linkVerifiedAt: '2026-11-08T13:30:00Z',
         commercialConditionsVerifiedAt: '2026-11-08T13:30:00Z',
-        affiliateDisclosure:
-            'Publicidade / Links de afiliado: podemos receber comissão por compras qualificadas sem custo adicional (CONAR/CDC).',
+        affiliateDisclosure: 'Publicidade / Links de afiliado: podemos receber comissão por compras qualificadas sem custo adicional (CONAR/CDC).',
         aiDisclosureRequired: false,
         aiDisclosureText: '',
         relevanceTestPassed: true,
@@ -878,7 +849,10 @@ VyronState buildInitialVyronState() {
             consultedAt: '2026-11-07',
           ),
         ],
-        references: const ['Keychron Spec Sheet Q1P', 'Tabela de Latência RTINGS'],
+        references: const [
+          'Keychron Spec Sheet Q1P',
+          'Tabela de Latência RTINGS',
+        ],
         versions: const [
           _SeedVersionInput(
             version: 'v2.0',
@@ -886,13 +860,13 @@ VyronState buildInitialVyronState() {
             note: 'Aprovado e publicado com cards de link rastreados.',
             feedbackCategory: FeedbackCategory.aprovacao,
             timestamp: '2026-11-08T14:00:00Z',
-            scriptSnapshot:
-                '[00:00] Gancho: Por que 80% dos teclados wireless decepcionam...',
+            scriptSnapshot: '[00:00] Gancho: Por que 80% dos teclados wireless decepcionam...',
           ),
           _SeedVersionInput(
             version: 'v1.0',
             author: 'Content Studio Agent',
-            note: 'Roteiro inicial estruturado a partir do briefing do produto.',
+            note:
+                'Roteiro inicial estruturado a partir do briefing do produto.',
             timestamp: '2026-11-06T18:10:00Z',
             scriptSnapshot: 'Estrutura preliminar em 4 blocos.',
           ),
@@ -922,8 +896,7 @@ VyronState buildInitialVyronState() {
         channelId: 'ch-apex-yt',
         productId: 'prod-dell-oled',
         title: 'Monitor 4K para Código e Design: Dell UltraSharp 32 na prática',
-        description:
-            'Avaliação de subpixel layout para texto nítido, hub Thunderbolt de 90W e calibração de fábrica sRGB/DCI-P3.',
+        description: 'Avaliação de subpixel layout para texto nítido, hub Thunderbolt de 90W e calibração de fábrica sRGB/DCI-P3.',
         format: ContentFormat.longForm,
         category: ContentCategory.comercialContextual,
         visibility: ContentVisibility.unlisted,
@@ -932,20 +905,16 @@ VyronState buildInitialVyronState() {
         unclassifiedRiskFlag: false,
         status: ContentStatus.inReview,
         scheduledDate: '2026-11-21',
-        brief:
-            'Demonstrar nitidez de texto (subpixel layout), hub Thunderbolt integrado e calibração sRGB.',
-        angleIdea:
-            'Fluxo de trabalho com 1 único cabo USB-C para MacBook e Workstation.',
-        script:
-            '[00:00] O erro caro ao escolher monitor 4K para leitura de código.\n[02:15] Hub de 90W e organização limpa.\n[07:00] Colorimetria medida em laboratório.\n[12:10] Para quem o investimento se paga em 6 meses.',
+        brief: 'Demonstrar nitidez de texto (subpixel layout), hub Thunderbolt integrado e calibração sRGB.',
+        angleIdea: 'Fluxo de trabalho com 1 único cabo USB-C para MacBook e Workstation.',
+        script: '[00:00] O erro caro ao escolher monitor 4K para leitura de código.\n[02:15] Hub de 90W e organização limpa.\n[07:00] Colorimetria medida em laboratório.\n[12:10] Para quem o investimento se paga em 6 meses.',
         affiliateLinkUrl: 'https://dell.to/apex-u3223qe?src=yt_cnt2',
         verifiedDestinationUrl:
             'https://www.dell.com/pt-br/shop/ultrasharp-u3223qe',
         linkVerifiedAt: '2026-11-18T14:00:00Z',
         commercialConditionsVerifiedAt: '2026-11-18T14:00:00Z',
         offerEndsAt: '2026-11-28T23:59:59Z',
-        affiliateDisclosure:
-            'Divulgação transparente: links de afiliado Dell geram comissão sem alterar o preço final.',
+        affiliateDisclosure: 'Divulgação transparente: links de afiliado Dell geram comissão sem alterar o preço final.',
         aiDisclosureRequired: false,
         aiDisclosureText: '',
         relevanceTestPassed: true,
@@ -954,8 +923,7 @@ VyronState buildInitialVyronState() {
         dossier: const [
           DossierSource(
             id: 'dos-2',
-            claim:
-                'Contraste estático 2000:1 IPS Black medido com colorímetro Calibrite',
+            claim: 'Contraste estático 2000:1 IPS Black medido com colorímetro Calibrite',
             sourceTitle: 'Manual Técnico Dell U3223QE & Relatório Calibrite',
             level: 1,
             consultedAt: '2026-11-17',
@@ -976,10 +944,10 @@ VyronState buildInitialVyronState() {
           _SeedVersionInput(
             version: 'v1.1',
             author: 'Proprietário',
-            note: 'Ajuste na introdução para reforçar foco em ergonomia visual.',
+            note:
+                'Ajuste na introdução para reforçar foco em ergonomia visual.',
             timestamp: '2026-11-17T19:00:00Z',
-            scriptSnapshot:
-                '[00:00] O erro caro ao escolher monitor 4K para leitura de código.',
+            scriptSnapshot: '[00:00] O erro caro ao escolher monitor 4K para leitura de código.',
           ),
         ],
       ),
@@ -989,8 +957,7 @@ VyronState buildInitialVyronState() {
         channelId: 'ch-apex-ig',
         productId: 'prod-keychron-q1',
         title: 'Sound Test: Switch Banana vs Brown em Alumínio CNC',
-        description:
-            'Comparativo binaural direto entre switches táteis sem música de fundo, focado em quem trabalha 8h/dia.',
+        description: 'Comparativo binaural direto entre switches táteis sem música de fundo, focado em quem trabalha 8h/dia.',
         format: ContentFormat.shorts,
         category: ContentCategory.descoberta,
         visibility: ContentVisibility.unlisted,
@@ -999,17 +966,14 @@ VyronState buildInitialVyronState() {
         unclassifiedRiskFlag: false,
         status: ContentStatus.approved,
         scheduledDate: '2026-11-19',
-        brief:
-            'Corte vertical de 42 segundos com foco em áudio binaural sem trilha sonora.',
+        brief: 'Corte vertical de 42 segundos com foco em áudio binaural sem trilha sonora.',
         angleIdea: 'Comparação direta A/B nos primeiros 3 segundos.',
-        script:
-            '0-3s: Sem música, apenas o som real.\n3-20s: Tactile Banana.\n20-38s: Brown padrão.\n38-42s: Qual você usaria 8h/dia?',
+        script: '0-3s: Sem música, apenas o som real.\n3-20s: Tactile Banana.\n20-38s: Brown padrão.\n38-42s: Qual você usaria 8h/dia?',
         affiliateLinkUrl: 'https://amzn.to/apex-q1pro?src=ig_cnt3',
         verifiedDestinationUrl: 'https://www.amazon.com.br/dp/B0KEYQ1P',
         linkVerifiedAt: '2026-11-18T15:00:00Z',
         commercialConditionsVerifiedAt: '2026-11-18T15:00:00Z',
-        affiliateDisclosure:
-            'Link comercial na bio / vídeo relacionado com divulgação de afiliado.',
+        affiliateDisclosure: 'Link comercial na bio / vídeo relacionado com divulgação de afiliado.',
         aiDisclosureRequired: false,
         aiDisclosureText: '',
         relevanceTestPassed: true,
@@ -1049,8 +1013,7 @@ VyronState buildInitialVyronState() {
         channelId: 'ch-nordic-yt',
         productId: 'prod-benq-halo',
         title: 'Zero Glare Desk Lighting: Architecture of a Calm Studio',
-        description:
-            'How asymmetric optics eliminate screen reflection on OLED monitors, backed by real lux meter measurements.',
+        description: 'How asymmetric optics eliminate screen reflection on OLED monitors, backed by real lux meter measurements.',
         format: ContentFormat.longForm,
         category: ContentCategory.comercialContextual,
         visibility: ContentVisibility.publicVis,
@@ -1060,18 +1023,14 @@ VyronState buildInitialVyronState() {
         status: ContentStatus.published,
         scheduledDate: '2026-11-11',
         publishedAt: '2026-11-11',
-        brief:
-            'Show how asymmetric optics eliminate monitor reflection during night sessions.',
+        brief: 'Show how asymmetric optics eliminate monitor reflection during night sessions.',
         angleIdea: 'Architectural lighting diagram + real lux meter readings.',
-        script:
-            '00:00 Why overhead lights ruin OLED contrast.\n02:10 Asymmetric beam geometry explained.\n06:45 BenQ ScreenBar Halo vs standard desk lamp.',
+        script: '00:00 Why overhead lights ruin OLED contrast.\n02:10 Asymmetric beam geometry explained.\n06:45 BenQ ScreenBar Halo vs standard desk lamp.',
         affiliateLinkUrl: 'https://imp.i/nordic-halo?src=yt_cnt4',
-        verifiedDestinationUrl:
-            'https://www.benq.com/en-us/lighting/monitor-light/screenbar-halo.html',
+        verifiedDestinationUrl: 'https://www.benq.com/en-us/lighting/monitor-light/screenbar-halo.html',
         linkVerifiedAt: '2026-11-11T14:00:00Z',
         commercialConditionsVerifiedAt: '2026-11-11T14:00:00Z',
-        affiliateDisclosure:
-            'Disclosure (FTC / UE Loi 2023-451): Collaboration / affiliate links included; honest independent measurements.',
+        affiliateDisclosure: 'Disclosure (FTC / UE Loi 2023-451): Collaboration / affiliate links included; honest independent measurements.',
         aiDisclosureRequired: false,
         aiDisclosureText: '',
         relevanceTestPassed: true,
@@ -1080,7 +1039,8 @@ VyronState buildInitialVyronState() {
         dossier: const [
           DossierSource(
             id: 'dos-5',
-            claim: 'Iluminância recomendada de 500 lux em superfície de trabalho',
+            claim:
+                'Iluminância recomendada de 500 lux em superfície de trabalho',
             sourceTitle:
                 'Norma EN 12464-1 Iluminação de Locais de Trabalho Interiores',
             level: 1,
@@ -1123,8 +1083,7 @@ VyronState buildInitialVyronState() {
         channelId: 'ch-nordic-pin',
         productId: 'prod-benq-halo',
         title: 'Minimalist Oak & Obsidian Desk Blueprint (5 Pins)',
-        description:
-            'Architectural blueprint carousel with exact desk dimensions, concealed cable tray specs, and lighting links.',
+        description: 'Architectural blueprint carousel with exact desk dimensions, concealed cable tray specs, and lighting links.',
         format: ContentFormat.shorts,
         category: ContentCategory.conexao,
         visibility: ContentVisibility.privateVis,
@@ -1133,21 +1092,17 @@ VyronState buildInitialVyronState() {
         unclassifiedRiskFlag: false,
         status: ContentStatus.draft,
         scheduledDate: '2026-11-24',
-        brief:
-            'Carousel vertical pins with dimensions, cable routing tray specs, and lighting links.',
+        brief: 'Carousel vertical pins with dimensions, cable routing tray specs, and lighting links.',
         angleIdea: 'Clean architectural blueprint overlay on dark walnut desk.',
-        script:
-            'Slide 1: Full setup elevation\nSlide 2: Cable management under-tray\nSlide 3: ScreenBar Halo wireless dial',
+        script: 'Slide 1: Full setup elevation\nSlide 2: Cable management under-tray\nSlide 3: ScreenBar Halo wireless dial',
         affiliateLinkUrl: 'https://imp.i/nordic-halo?src=pin_cnt5',
-        verifiedDestinationUrl:
-            'https://www.benq.com/en-us/lighting/monitor-light/screenbar-halo.html',
+        verifiedDestinationUrl: 'https://www.benq.com/en-us/lighting/monitor-light/screenbar-halo.html',
         linkVerifiedAt: '2026-11-18T08:00:00Z',
         commercialConditionsVerifiedAt: '2026-11-18T08:00:00Z',
         affiliateDisclosure:
             'Affiliate link disclosure included in pin caption.',
         aiDisclosureRequired: true,
-        aiDisclosureText:
-            'Diagramas conceituais auxiliados por renderização sintética (rotulado conforme padrão YouTube/EU).',
+        aiDisclosureText: 'Diagramas conceituais auxiliados por renderização sintética (rotulado conforme padrão YouTube/EU).',
         relevanceTestPassed: true,
         editorialChecklistPassed: false,
         humanHoursLogged: 3.0,
@@ -1169,8 +1124,7 @@ VyronState buildInitialVyronState() {
         channelId: 'ch-kinetix-yt',
         productId: 'prod-shure-mv7x',
         title: 'Shure MV7+ in an Untreated Room: Real DSP Stress Test',
-        description:
-            'Evaluating onboard DSP denoiser vs post-production RX 11 inside an untreated glass room.',
+        description: 'Evaluating onboard DSP denoiser vs post-production RX 11 inside an untreated glass room.',
         format: ContentFormat.longForm,
         category: ContentCategory.comercialContextual,
         visibility: ContentVisibility.privateVis,
@@ -1179,12 +1133,10 @@ VyronState buildInitialVyronState() {
         unclassifiedRiskFlag: false,
         status: ContentStatus.brief,
         scheduledDate: '2026-11-27',
-        brief:
-            'Test onboard Denoiser and Popper Stopper in a reflective glass office without acoustic foam.',
+        brief: 'Test onboard Denoiser and Popper Stopper in a reflective glass office without acoustic foam.',
         angleIdea:
             'Raw room audio vs onboard DSP vs iZotope RX post-processing.',
-        script:
-            'Pauta inicial: capturar 3 ambientes (vidro, carpete, estúdio tratado) com o mesmo ganho de pré-amplificador.',
+        script: 'Pauta inicial: capturar 3 ambientes (vidro, carpete, estúdio tratado) com o mesmo ganho de pré-amplificador.',
         affiliateLinkUrl: 'https://bhpho.to/kinetix-mv7p?src=yt_cnt6',
         verifiedDestinationUrl: '',
         linkVerifiedAt: '',
@@ -1212,9 +1164,9 @@ VyronState buildInitialVyronState() {
         brandId: 'brand-apex',
         channelId: 'ch-apex-web',
         productId: 'prod-dell-oled',
-        title: 'Guia Definitivo: Densidade de Pixels (PPI) para macOS e Windows',
-        description:
-            'Artigo técnico evergreen com tabela de escalonamento HiDPI para monitores 27" e 32" 4K.',
+        title:
+            'Guia Definitivo: Densidade de Pixels (PPI) para macOS e Windows',
+        description: 'Artigo técnico evergreen com tabela de escalonamento HiDPI para monitores 27" e 32" 4K.',
         format: ContentFormat.article,
         category: ContentCategory.descoberta,
         visibility: ContentVisibility.unlisted,
@@ -1223,19 +1175,15 @@ VyronState buildInitialVyronState() {
         unclassifiedRiskFlag: false,
         status: ContentStatus.inReview,
         scheduledDate: '2026-11-20',
-        brief:
-            'Artigo técnico com calculadora comparativa de escalonamento 1440p vs 4K vs 5K.',
-        angleIdea:
-            'Ferramenta de referência evergreen para capturar tráfego orgânico.',
-        script:
-            'Seção 1: Por que 27" 4K vs 32" 4K muda a nitidez no macOS.\nSeção 2: Tabela comparativa de PPI.\nSeção 3: Recomendações por faixa de orçamento.',
+        brief: 'Artigo técnico com calculadora comparativa de escalonamento 1440p vs 4K vs 5K.',
+        angleIdea: 'Ferramenta de referência evergreen para capturar tráfego orgânico.',
+        script: 'Seção 1: Por que 27" 4K vs 32" 4K muda a nitidez no macOS.\nSeção 2: Tabela comparativa de PPI.\nSeção 3: Recomendações por faixa de orçamento.',
         affiliateLinkUrl: 'https://dell.to/apex-u3223qe?src=web_cnt7',
         verifiedDestinationUrl:
             'https://www.dell.com/pt-br/shop/ultrasharp-u3223qe',
         linkVerifiedAt: '2026-11-18T11:00:00Z',
         commercialConditionsVerifiedAt: '2026-11-18T11:00:00Z',
-        affiliateDisclosure:
-            'Nota editorial: recomendações baseadas em densidade de pixels; links podem gerar comissão.',
+        affiliateDisclosure: 'Nota editorial: recomendações baseadas em densidade de pixels; links podem gerar comissão.',
         aiDisclosureRequired: false,
         aiDisclosureText: '',
         relevanceTestPassed: true,
@@ -1267,8 +1215,7 @@ VyronState buildInitialVyronState() {
         brandId: 'brand-nordic',
         channelId: 'ch-nordic-tt',
         title: '3 Cable Routing Mistakes Ruining Your Desk',
-        description:
-            'Short-form cut rejected during human review due to sensationalist hook.',
+        description: 'Short-form cut rejected during human review due to sensationalist hook.',
         format: ContentFormat.shorts,
         category: ContentCategory.descoberta,
         visibility: ContentVisibility.privateVis,
@@ -1296,8 +1243,7 @@ VyronState buildInitialVyronState() {
           _SeedVersionInput(
             version: 'v1.0',
             author: 'Content Studio Agent',
-            note:
-                'Rejeitado na revisão: tom sensacionalista incompatível com a estética sóbria da Nordic Desk.',
+            note: 'Rejeitado na revisão: tom sensacionalista incompatível com a estética sóbria da Nordic Desk.',
             feedbackCategory: FeedbackCategory.tom,
             timestamp: '2026-11-13T12:00:00Z',
             scriptSnapshot: 'Hook: Stop hiding cables with tape...',
@@ -1499,8 +1445,7 @@ VyronState buildInitialVyronState() {
         name: 'Observador de Demanda & Tendências',
         category: AgentCategory.research,
         autonomyLevel: 1,
-        responsibility:
-            'Monitora variações de busca, lançamentos e lacunas editoriais por mercado e idioma (somente leitura).',
+        responsibility: 'Monitora variações de busca, lançamentos e lacunas editoriais por mercado e idioma (somente leitura).',
         state: AgentRunState.running,
         brandScope: 'Todas',
         dependencies: ['Integrador Google Trends (Demo)', 'Base de Marcas'],
@@ -1524,8 +1469,7 @@ VyronState buildInitialVyronState() {
             timestamp: '2026-11-18T16:50:00Z',
             status: AgentExecutionStatus.success,
             durationSec: 18,
-            summary:
-                '14 sinais de demanda avaliados; 2 oportunidades acima de score 80.',
+            summary: '14 sinais de demanda avaliados; 2 oportunidades acima de score 80.',
             recordsAffected: 2,
           ),
           AgentExecutionLog(
@@ -1543,8 +1487,7 @@ VyronState buildInitialVyronState() {
         name: 'Qualificador Comercial (score-6.1)',
         category: AgentCategory.productIntelligence,
         autonomyLevel: 2,
-        responsibility:
-            'Executa score-6.1 (v0-hipotese) por moeda nativa mantendo campos null explícitos e submete candidatos.',
+        responsibility: 'Executa score-6.1 (v0-hipotese) por moeda nativa mantendo campos null explícitos e submete candidatos.',
         state: AgentRunState.waitingApproval,
         brandScope: 'brand-nordic',
         dependencies: [
@@ -1558,8 +1501,7 @@ VyronState buildInitialVyronState() {
           'Submeter candidato para aprovação humana obrigatória',
         ],
         pendingApprovalCount: 2,
-        pendingApprovalSummary:
-            '2 produtos candidatos (Herman Miller Embody Refurb e iZotope RX 11) aguardam decisão humana.',
+        pendingApprovalSummary: '2 produtos candidatos (Herman Miller Embody Refurb e iZotope RX 11) aguardam decisão humana.',
         lastRunAt: '2026-11-18T15:30:00Z',
         limits: AgentPolicyLimits(
           requireHumanApproval: true,
@@ -1573,8 +1515,7 @@ VyronState buildInitialVyronState() {
             timestamp: '2026-11-18T15:30:00Z',
             status: AgentExecutionStatus.awaitingApproval,
             durationSec: 12,
-            summary:
-                'Pontuação calculada; bloqueado por política antes de alterar status para Approved.',
+            summary: 'Pontuação calculada; bloqueado por política antes de alterar status para Approved.',
             recordsAffected: 2,
           ),
         ],
@@ -1584,8 +1525,7 @@ VyronState buildInitialVyronState() {
         name: 'Estruturador de Briefings & Dossiês (Bloco 6)',
         category: AgentCategory.content,
         autonomyLevel: 3,
-        responsibility:
-            'Gera rascunhos, dossiês de fontes (níveis 1-4) e calcula manifesto SHA-256 aguardando autorização individual.',
+        responsibility: 'Gera rascunhos, dossiês de fontes (níveis 1-4) e calcula manifesto SHA-256 aguardando autorização individual.',
         state: AgentRunState.running,
         brandScope: 'Todas',
         dependencies: [
@@ -1599,8 +1539,7 @@ VyronState buildInitialVyronState() {
           'Submeter para Painel de Aprovação Individual',
         ],
         pendingApprovalCount: 2,
-        pendingApprovalSummary:
-            '2 roteiros em In Review (Monitor Dell 32 4K e Guia PPI) aguardam hash individual.',
+        pendingApprovalSummary: '2 roteiros em In Review (Monitor Dell 32 4K e Guia PPI) aguardam hash individual.',
         lastRunAt: '2026-11-18T14:10:00Z',
         limits: AgentPolicyLimits(
           requireHumanApproval: true,
@@ -1624,8 +1563,7 @@ VyronState buildInitialVyronState() {
         name: 'Detector de Anomalias & Atribuição',
         category: AgentCategory.analytics,
         autonomyLevel: 1,
-        responsibility:
-            'Monitora quedas de retenção 30s, bridge Shorts->Longo e valida tracking src (V1-V5).',
+        responsibility: 'Monitora quedas de retenção 30s, bridge Shorts->Longo e valida tracking src (V1-V5).',
         state: AgentRunState.idle,
         brandScope: 'Todas',
         dependencies: ['Channels Sync', 'Content Metrics'],
@@ -1648,8 +1586,7 @@ VyronState buildInitialVyronState() {
             timestamp: '2026-11-18T12:00:00Z',
             status: AgentExecutionStatus.success,
             durationSec: 14,
-            summary:
-                'Anomalia positiva detectada: Pinterest Nordic +18,3% alcance em 30d.',
+            summary: 'Anomalia positiva detectada: Pinterest Nordic +18,3% alcance em 30d.',
             recordsAffected: 8,
           ),
         ],
@@ -1659,8 +1596,7 @@ VyronState buildInitialVyronState() {
         name: 'Conciliador de Comissões & Caixa',
         category: AgentCategory.finance,
         autonomyLevel: 2,
-        responsibility:
-            'Separa Pending, Confirmed (12.1.1) e Received (caixa), isolando registros is_test.',
+        responsibility: 'Separa Pending, Confirmed (12.1.1) e Received (caixa), isolando registros is_test.',
         state: AgentRunState.idle,
         brandScope: 'Todas',
         dependencies: ['Registros Financeiros', 'Tabela Câmbio FX'],
@@ -1683,8 +1619,7 @@ VyronState buildInitialVyronState() {
             timestamp: '2026-11-18T08:00:00Z',
             status: AgentExecutionStatus.success,
             durationSec: 7,
-            summary:
-                '13 lançamentos reais conciliados (1 registro is_test isolado).',
+            summary: '13 lançamentos reais conciliados (1 registro is_test isolado).',
             recordsAffected: 13,
           ),
         ],
@@ -1694,8 +1629,7 @@ VyronState buildInitialVyronState() {
         name: 'Monitor de Saúde de Canais & Job Runs',
         category: AgentCategory.operations,
         autonomyLevel: 1,
-        responsibility:
-            'Verifica tokens de leitura, recursos avançados YouTube e identifica job_runs órfãos para reconciliação.',
+        responsibility: 'Verifica tokens de leitura, recursos avançados YouTube e identifica job_runs órfãos para reconciliação.',
         state: AgentRunState.error,
         brandScope: 'brand-nordic',
         dependencies: ['Channels API Registry', 'job_runs'],
@@ -1706,8 +1640,7 @@ VyronState buildInitialVyronState() {
         ],
         pendingApprovalCount: 0,
         lastRunAt: '2026-11-18T16:12:00Z',
-        lastError:
-            'Canal TikTok (@nordic.desk) retornou token expirado; 1 job_run órfão (#104) detectado.',
+        lastError: 'Canal TikTok (@nordic.desk) retornou token expirado; 1 job_run órfão (#104) detectado.',
         limits: AgentPolicyLimits(
           requireHumanApproval: true,
           maxActionsPerDay: 12,
@@ -1735,8 +1668,7 @@ VyronState buildInitialVyronState() {
         status: JobRunStatus.running,
         startedAt: '2026-11-18T13:15:00Z',
         recordsProcessed: 4,
-        summary:
-            'Execução interrompida por timeout de runner (órfã — requer jobs reconcile antes de retomar Stop All).',
+        summary: 'Execução interrompida por timeout de runner (órfã — requer jobs reconcile antes de retomar Stop All).',
       ),
       JobRun(
         id: 103,
@@ -1746,8 +1678,7 @@ VyronState buildInitialVyronState() {
         startedAt: '2026-11-18T08:02:00Z',
         finishedAt: '2026-11-18T08:02:09Z',
         recordsProcessed: 9,
-        summary:
-            'score-6.1 (v0-hipotese) recalculado por moeda nativa (BRL, USD, EUR); campos null preservados.',
+        summary: 'score-6.1 (v0-hipotese) recalculado por moeda nativa (BRL, USD, EUR); campos null preservados.',
       ),
       JobRun(
         id: 102,
@@ -1774,7 +1705,8 @@ VyronState buildInitialVyronState() {
     systemControl: const SystemControlState(
       state: SystemControlStatus.active,
       actor: 'Proprietário',
-      reason: 'Operação controlada em Fase A (publicação automática desligada).',
+      reason:
+          'Operação controlada em Fase A (publicação automática desligada).',
       updatedAt: '2026-11-18T08:00:00Z',
       publishingEnabled: false,
       phaseBPublicAllowed: false,
@@ -1784,73 +1716,63 @@ VyronState buildInitialVyronState() {
         id: 'R-04',
         priority: RiskPriority.p0,
         title: 'Autorização vinculada ao hash SHA-256 da versão',
-        controlSummary:
-            'Herança zero: qualquer edição no manifesto invalida aprovação anterior e retorna peça para In Review.',
+        controlSummary: 'Herança zero: qualquer edição no manifesto invalida aprovação anterior e retorna peça para In Review.',
         status: RiskStatus.mitigadoDemo,
       ),
       RiskRegisterEntry(
         id: 'R-05',
         priority: RiskPriority.p0,
         title: 'Stop All com bloqueio fail-closed e trilha append-only',
-        controlSummary:
-            'system_controls ACTIVE/HALTED + audit_log; resume bloqueado enquanto houver job_run órfão.',
+        controlSummary: 'system_controls ACTIVE/HALTED + audit_log; resume bloqueado enquanto houver job_run órfão.',
         status: RiskStatus.mitigadoDemo,
       ),
       RiskRegisterEntry(
         id: 'R-07',
         priority: RiskPriority.p0,
         title: 'Separação financeira rigorosa (Pending vs Confirmed vs Caixa)',
-        controlSummary:
-            'Reinvestimentos autorizados apenas sobre netRealizedCash; dados is_test isolados.',
+        controlSummary: 'Reinvestimentos autorizados apenas sobre netRealizedCash; dados is_test isolados.',
         status: RiskStatus.mitigadoDemo,
       ),
       RiskRegisterEntry(
         id: 'R-08',
         priority: RiskPriority.p1,
-        title:
-            'Conformidade comercial & IA generativa (Brasil CDC/CONAR + França/UE)',
-        controlSummary:
-            'Disclosures obrigatórios no manifesto e bloqueio para temas sensíveis sem autorização individual.',
+        title: 'Conformidade comercial & IA generativa (Brasil CDC/CONAR + França/UE)',
+        controlSummary: 'Disclosures obrigatórios no manifesto e bloqueio para temas sensíveis sem autorização individual.',
         status: RiskStatus.mitigadoDemo,
       ),
       RiskRegisterEntry(
         id: 'R-11',
         priority: RiskPriority.p1,
         title: 'Fallback de publicação pública no YouTube (videos.insert)',
-        controlSummary:
-            'Visibilidade explícita obrigatória; public bloqueado na Fase A (apenas private/unlisted).',
+        controlSummary: 'Visibilidade explícita obrigatória; public bloqueado na Fase A (apenas private/unlisted).',
         status: RiskStatus.mitigadoDemo,
       ),
       RiskRegisterEntry(
         id: 'R-12',
         priority: RiskPriority.p1,
         title: 'PostgreSQL hospedado & Proveniência CI (Condição C3)',
-        controlSummary:
-            'Lotes 1-9 validados em PostgreSQL efêmero; --commit em produção exige runner autorizado.',
+        controlSummary: 'Lotes 1-9 validados em PostgreSQL efêmero; --commit em produção exige runner autorizado.',
         status: RiskStatus.pendenteInfra,
       ),
       RiskRegisterEntry(
         id: 'R-24',
         priority: RiskPriority.p1,
         title: 'Reconciliação de jobs órfãos (Débito M2)',
-        controlSummary:
-            'Comando autopilot jobs reconcile marca execuções travadas como failed antes de liberar resume.',
+        controlSummary: 'Comando autopilot jobs reconcile marca execuções travadas como failed antes de liberar resume.',
         status: RiskStatus.mitigadoDemo,
       ),
       RiskRegisterEntry(
         id: 'R-29',
         priority: RiskPriority.p2,
         title: 'Atribuição real por peça via src/UTM (Protocolo V1-V5)',
-        controlSummary:
-            'Métricas por conteúdo rotuladas como Estimativa [Em investigação] até validação V1-V5 no Bloco 9.',
+        controlSummary: 'Métricas por conteúdo rotuladas como Estimativa [Em investigação] até validação V1-V5 no Bloco 9.',
         status: RiskStatus.aberto,
       ),
       RiskRegisterEntry(
         id: 'R-31',
         priority: RiskPriority.p2,
         title: 'Ranking de produtos sem conversão FX prematura',
-        controlSummary:
-            'score-6.1 ranqueia estritamente por moeda nativa e mantém desconhecidos como null.',
+        controlSummary: 'score-6.1 ranqueia estritamente por moeda nativa e mantém desconhecidos como null.',
         status: RiskStatus.mitigadoDemo,
       ),
     ],
@@ -1861,8 +1783,7 @@ VyronState buildInitialVyronState() {
         brandId: 'brand-nordic',
         category: ActivityCategory.automacao,
         action: 'Falha em Monitor de Saúde de Canais',
-        detail:
-            'Token de leitura expirado no canal TikTok @nordic.desk e job #104 detectado como órfão.',
+        detail: 'Token de leitura expirado no canal TikTok @nordic.desk e job #104 detectado como órfão.',
         actor: 'ag-ops-sync',
         severity: ActivitySeverity.error,
       ),
@@ -1872,8 +1793,7 @@ VyronState buildInitialVyronState() {
         brandId: 'brand-nordic',
         category: ActivityCategory.produto,
         action: 'Candidato qualificado via score-6.1',
-        detail:
-            'Herman Miller Embody (Refurb) atingiu 82/100 (moeda USD) e aguarda aprovação humana.',
+        detail: 'Herman Miller Embody (Refurb) atingiu 82/100 (moeda USD) e aguarda aprovação humana.',
         actor: 'ag-product-intel',
         severity: ActivitySeverity.warning,
       ),
@@ -1883,8 +1803,7 @@ VyronState buildInitialVyronState() {
         brandId: 'brand-apex',
         category: ActivityCategory.autorizacaoHash,
         action: 'Autorização individual emitida (Fase A · unlisted)',
-        detail:
-            'Sound Test: Switch Banana vs Brown vinculado ao hash SHA-256 até 2026-11-22.',
+        detail: 'Sound Test: Switch Banana vs Brown vinculado ao hash SHA-256 até 2026-11-22.',
         justification: '6 verificações pré-envio aprovadas.',
         actor: 'Proprietário',
         severity: ActivitySeverity.success,
@@ -1906,8 +1825,7 @@ VyronState buildInitialVyronState() {
         brandId: 'brand-apex',
         category: ActivityCategory.financas,
         action: 'Comissão confirmada pela plataforma (12.1.1)',
-        detail:
-            'Dell Affiliate Program confirmou R\$ 5.790,00 (14 conversões). Aguardando repasse em caixa.',
+        detail: 'Dell Affiliate Program confirmou R\$ 5.790,00 (14 conversões). Aguardando repasse em caixa.',
         actor: 'ag-finance-reconcile',
         severity: ActivitySeverity.success,
       ),
@@ -1917,10 +1835,8 @@ VyronState buildInitialVyronState() {
         brandId: 'brand-apex',
         category: ActivityCategory.decisao,
         action: 'Produto aprovado: Monitor Dell UltraSharp 32" 4K',
-        detail:
-            'Status alterado de Candidate para Approved (Nota A · Compliance APPROVED).',
-        justification:
-            'Ticket elevado com cookie de 30 dias e baixa saturação no YouTube Brasil.',
+        detail: 'Status alterado de Candidate para Approved (Nota A · Compliance APPROVED).',
+        justification: 'Ticket elevado com cookie de 30 dias e baixa saturação no YouTube Brasil.',
         actor: 'Proprietário',
         severity: ActivitySeverity.success,
       ),
@@ -1930,9 +1846,9 @@ VyronState buildInitialVyronState() {
         brandId: 'brand-apex',
         category: ActivityCategory.decisao,
         action: 'Produto rejeitado: Hub USB Genérico 11-em-1',
-        detail: 'Status alterado de Candidate para Rejected (Nota C · BLOCKED).',
-        justification:
-            'Ticket baixo, alta devolução e desalinhamento com posicionamento premium.',
+        detail:
+            'Status alterado de Candidate para Rejected (Nota C · BLOCKED).',
+        justification: 'Ticket baixo, alta devolução e desalinhamento com posicionamento premium.',
         actor: 'Proprietário',
         severity: ActivitySeverity.warning,
       ),
@@ -1942,8 +1858,7 @@ VyronState buildInitialVyronState() {
         id: 'not-1',
         type: NotificationType.approvalPending,
         title: '2 produtos candidatos e 2 roteiros aguardam aprovação',
-        message:
-            'Herman Miller Embody, iZotope RX 11 e 2 roteiros em In Review exigem decisão individual.',
+        message: 'Herman Miller Embody, iZotope RX 11 e 2 roteiros em In Review exigem decisão individual.',
         timestamp: '2026-11-18T15:30:00Z',
         read: false,
         targetModule: NavModule.content,
@@ -1955,8 +1870,7 @@ VyronState buildInitialVyronState() {
         id: 'not-2',
         type: NotificationType.automationError,
         title: 'Job órfão #104 & atenção no TikTok (@nordic.desk)',
-        message:
-            'Execute jobs reconcile no executor de lotes e revise o token do canal @nordic.desk.',
+        message: 'Execute jobs reconcile no executor de lotes e revise o token do canal @nordic.desk.',
         timestamp: '2026-11-18T16:12:00Z',
         read: false,
         targetModule: NavModule.automations,
@@ -1977,8 +1891,7 @@ VyronState buildInitialVyronState() {
         id: 'not-4',
         type: NotificationType.opportunity,
         title: 'Anomalia positiva no Pinterest (Nordic Desk)',
-        message:
-            'Alcance cresceu +18,3% em 30 dias impulsionado por pins de iluminação ScreenBar.',
+        message: 'Alcance cresceu +18,3% em 30 dias impulsionado por pins de iluminação ScreenBar.',
         timestamp: '2026-11-18T12:05:00Z',
         read: false,
         targetModule: NavModule.analytics,

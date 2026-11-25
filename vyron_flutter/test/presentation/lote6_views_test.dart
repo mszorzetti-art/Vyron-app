@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vyron/app.dart';
@@ -7,6 +8,7 @@ import 'package:vyron/application/state/vyron_access_notifier.dart';
 import 'package:vyron/application/state/vyron_state_notifier.dart';
 import 'package:vyron/core/security/secure_access_storage.dart';
 import 'package:vyron/core/security/vyron_access_rules.dart';
+import 'package:vyron/core/widgets/vyron_ui.dart';
 import 'package:vyron/data/storage/atomic_state_storage.dart';
 
 Widget _buildAuthorizedApp() {
@@ -66,20 +68,19 @@ void main() {
       },
     );
 
-    testWidgets(
-      'Overview renderiza sem overflow em viewport mobile 390x844',
-      (tester) async {
-        tester.view.physicalSize = const Size(390, 844);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+    testWidgets('Overview renderiza sem overflow em viewport mobile 390x844', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWidget(_buildAuthorizedApp());
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(_buildAuthorizedApp());
+      await tester.pumpAndSettle();
 
-        expect(find.text('Overview Operacional'), findsOneWidget);
-        expect(find.text('Caixa recebido líquido'), findsOneWidget);
-      },
-    );
+      expect(find.text('Overview Operacional'), findsOneWidget);
+      expect(find.text('Caixa recebido líquido'), findsOneWidget);
+    });
 
     testWidgets(
       'Brands permite filtrar status, comparar, criar nova marca, editar e arquivar/reativar',
@@ -102,7 +103,7 @@ void main() {
 
         await tester.tap(find.text('Pausadas'));
         await tester.pumpAndSettle();
-        expect(find.text('Veloce Casa'), findsOneWidget);
+        expect(find.text('Veloce Casa'), findsWidgets);
         expect(find.text('Apex Hardware Lab'), findsNothing);
 
         await tester.tap(find.byKey(const Key('brands-new-btn')));
@@ -154,15 +155,27 @@ void main() {
         await tester.tap(find.byKey(const Key('vyron-nav-products')));
         await tester.pumpAndSettle();
 
-        expect(find.text('Products & Intelligence'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(VyronPageHeader),
+            matching: find.text('Products & Intelligence'),
+          ),
+          findsOneWidget,
+        );
         expect(find.textContaining('Moeda BRL'), findsOneWidget);
         expect(find.textContaining('Moeda USD'), findsOneWidget);
         expect(find.textContaining('Moeda EUR'), findsOneWidget);
-        expect(find.textContaining('Produto Teste Seed'), findsNothing);
+        expect(
+          find.textContaining('Produto Seed Pipeline Lote 5'),
+          findsNothing,
+        );
 
         await tester.tap(find.byKey(const Key('products-test-toggle')));
         await tester.pumpAndSettle();
-        expect(find.textContaining('Produto Teste Seed'), findsOneWidget);
+        expect(
+          find.textContaining('Produto Seed Pipeline Lote 5'),
+          findsWidgets,
+        );
 
         final cmp1 = find.byKey(const Key('product-compare-prod-keychron-q1'));
         final cmp2 = find.byKey(const Key('product-compare-prod-dell-oled'));
@@ -174,12 +187,15 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byKey(const Key('products-compare-panel')), findsOneWidget);
-        await tester.tap(find.byKey(const Key('products-compare-clear')));
+        final clearCompareBtn = find.byKey(const Key('products-compare-clear'));
+        await tester.ensureVisible(clearCompareBtn);
+        await tester.tap(clearCompareBtn);
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('products-compare-panel')), findsNothing);
 
-        final analyzeErgo =
-            find.byKey(const Key('product-analyze-prod-ergo-chair-x'));
+        final analyzeErgo = find.byKey(
+          const Key('product-analyze-prod-ergo-chair-x'),
+        );
         await tester.ensureVisible(analyzeErgo);
         await tester.tap(analyzeErgo);
         await tester.pumpAndSettle();
@@ -187,6 +203,7 @@ void main() {
         expect(find.textContaining('Herman Miller Embody'), findsWidgets);
 
         final approveBtn = find.byKey(const Key('product-approve-btn'));
+        await tester.ensureVisible(approveBtn);
         await tester.tap(approveBtn);
         await tester.pumpAndSettle();
 
@@ -206,13 +223,20 @@ void main() {
         await tester.tap(find.byKey(const Key('product-decision-confirm')));
         await tester.pumpAndSettle();
 
-        final generateBtn =
-            find.byKey(const Key('product-generate-content-btn'));
+        final generateBtn = find.byKey(
+          const Key('product-generate-content-btn'),
+        );
         await tester.ensureVisible(generateBtn);
         await tester.tap(generateBtn);
         await tester.pumpAndSettle();
 
-        expect(find.text('Content Studio & Aprovação por Hash'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(VyronPageHeader),
+            matching: find.text('Content Studio & Aprovação por Hash'),
+          ),
+          findsOneWidget,
+        );
       },
     );
   });

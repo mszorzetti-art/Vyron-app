@@ -1,6 +1,8 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -9,6 +11,7 @@ import '../../core/i18n/translate.dart';
 import '../../core/routing/vyron_router.dart';
 import '../../core/theme/vyron_colors.dart';
 import '../../core/widgets/vyron_ui.dart';
+import '../../domain/models/brand_product_models.dart';
 import '../../domain/models/content_channel_finance_models.dart';
 import '../../domain/models/vyron_enums.dart';
 import '../../domain/rules/vyron_rules.dart';
@@ -52,10 +55,7 @@ const List<String> _monthsEn = [
 ];
 
 class ContentScreen extends ConsumerStatefulWidget {
-  const ContentScreen({
-    super.key,
-    this.contentId,
-  });
+  const ContentScreen({super.key, this.contentId});
 
   final String? contentId;
 
@@ -119,7 +119,8 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
     ContentItem item,
     UiLanguage lang,
   ) async {
-    final initial = DateTime.tryParse('${item.scheduledDate}T00:00:00Z') ??
+    final initial =
+        DateTime.tryParse('${item.scheduledDate}T00:00:00Z') ??
         DateTime.utc(2026, 11, 21);
     final picked = await showDatePicker(
       context: context,
@@ -130,14 +131,14 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
     if (picked == null || !mounted) return;
     final iso =
         '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-    ref.read(vyronStateProvider.notifier).updateContent(
+    ref
+        .read(vyronStateProvider.notifier)
+        .updateContent(
           item.id,
           ContentUpdatePatch(scheduledDate: iso),
-          versionNote: translate(
-            lang,
-            'content.field.rescheduledNote',
-            {'date': formatDateForLang(iso, lang)},
-          ),
+          versionNote: translate(lang, 'content.field.rescheduledNote', {
+            'date': formatDateForLang(iso, lang),
+          }),
         );
   }
 
@@ -187,7 +188,8 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
             activeContent,
             domain.systemControl,
             nowIso: DateTime.now().toUtc().toIso8601String(),
-            evidenceFreshnessMaxHours: domain.settings.evidenceFreshnessMaxHours,
+            evidenceFreshnessMaxHours:
+                domain.settings.evidenceFreshnessMaxHours,
             language: lang,
           )
         : null;
@@ -451,8 +453,9 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   border: Border(
-                                    bottom:
-                                        BorderSide(color: palette.panelBorder),
+                                    bottom: BorderSide(
+                                      color: palette.panelBorder,
+                                    ),
                                     right: wd != weekdays.last
                                         ? BorderSide(color: palette.panelBorder)
                                         : BorderSide.none,
@@ -490,11 +493,13 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                 if (day == null || iso == null) {
                                   return Expanded(
                                     child: Container(
-                                      constraints:
-                                          const BoxConstraints(minHeight: 94),
+                                      constraints: const BoxConstraints(
+                                        minHeight: 94,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: palette.surfaceAlt
-                                            .withValues(alpha: 0.22),
+                                        color: palette.surfaceAlt.withValues(
+                                          alpha: 0.22,
+                                        ),
                                         border: Border(
                                           bottom: isLastRow
                                               ? BorderSide.none
@@ -518,8 +523,9 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
 
                                 return Expanded(
                                   child: Container(
-                                    constraints:
-                                        const BoxConstraints(minHeight: 98),
+                                    constraints: const BoxConstraints(
+                                      minHeight: 98,
+                                    ),
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
                                       color: palette.surface,
@@ -549,7 +555,8 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                             Text(
                                               '$day',
                                               style: TextStyle(
-                                                fontFamily: VyronTypography.mono,
+                                                fontFamily:
+                                                    VyronTypography.mono,
                                                 fontSize: 11,
                                                 color: palette.textMuted,
                                               ),
@@ -558,18 +565,18 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                               key: Key('cal-add-$iso'),
                                               onTap: () =>
                                                   _openCreateContentModal(
-                                                context,
-                                                lang,
-                                                initialDate: iso,
-                                              ),
+                                                    context,
+                                                    lang,
+                                                    initialDate: iso,
+                                                  ),
                                               borderRadius:
                                                   BorderRadius.circular(4),
                                               child: Padding(
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                  horizontal: 4,
-                                                  vertical: 1,
-                                                ),
+                                                      horizontal: 4,
+                                                      vertical: 1,
+                                                    ),
                                                 child: Text(
                                                   '+',
                                                   style: TextStyle(
@@ -595,21 +602,21 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                                   if (b.id == item.brandId) {
                                                     brandAccent =
                                                         parseVyronHexColor(
-                                                      b.accentColor,
-                                                    );
+                                                          b.accentColor,
+                                                        );
                                                     break;
                                                   }
                                                 }
                                                 final loc =
                                                     localizeContentDisplay(
-                                                  item,
-                                                  lang,
-                                                );
+                                                      item,
+                                                      lang,
+                                                    );
                                                 return Padding(
                                                   padding:
                                                       const EdgeInsets.only(
-                                                    top: 4,
-                                                  ),
+                                                        top: 4,
+                                                      ),
                                                   child: InkWell(
                                                     key: Key(
                                                       'cal-item-${item.id}',
@@ -627,19 +634,20 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                                     },
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                      4,
-                                                    ),
+                                                          4,
+                                                        ),
                                                     child: Container(
                                                       padding:
                                                           const EdgeInsets.all(
-                                                        5,
-                                                      ),
+                                                            5,
+                                                          ),
                                                       decoration: BoxDecoration(
                                                         color:
                                                             palette.background,
                                                         borderRadius:
-                                                            BorderRadius
-                                                                .circular(4),
+                                                            BorderRadius.circular(
+                                                              4,
+                                                            ),
                                                         border: Border.all(
                                                           color: palette
                                                               .panelBorder,
@@ -655,15 +663,13 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                                               Container(
                                                                 width: 6,
                                                                 height: 6,
-                                                                decoration:
-                                                                    BoxDecoration(
+                                                                decoration: BoxDecoration(
                                                                   color:
                                                                       brandAccent,
                                                                   borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                    1,
-                                                                  ),
+                                                                      BorderRadius.circular(
+                                                                        1,
+                                                                      ),
                                                                 ),
                                                               ),
                                                               const SizedBox(
@@ -676,8 +682,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                                                   overflow:
                                                                       TextOverflow
                                                                           .ellipsis,
-                                                                  style:
-                                                                      TextStyle(
+                                                                  style: TextStyle(
                                                                     fontSize: 9,
                                                                     color: palette
                                                                         .textMuted,
@@ -697,11 +702,11 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                                                     .ellipsis,
                                                             style:
                                                                 const TextStyle(
-                                                              fontSize: 10,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                            ),
+                                                                  fontSize: 10,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
                                                           ),
                                                         ],
                                                       ),
@@ -785,11 +790,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            queuePanel,
-            const SizedBox(height: 18),
-            workspaceColumn,
-          ],
+          children: [queuePanel, const SizedBox(height: 18), workspaceColumn],
         );
       },
     );
@@ -815,19 +816,16 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: palette.panelBorder),
-              ),
+              border: Border(bottom: BorderSide(color: palette.panelBorder)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    t(
-                      'content.queueTitle',
-                      {'count': '${visibleContents.length}'},
-                    ),
+                    t('content.queueTitle', {
+                      'count': '${visibleContents.length}',
+                    }),
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -875,7 +873,8 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                     final loc = localizeContentDisplay(c, lang);
                     final isSelected = activeContent?.id == c.id;
                     final auth = c.authorization;
-                    final hashAuthOk = auth != null &&
+                    final hashAuthOk =
+                        auth != null &&
                         auth.revoked != true &&
                         auth.authorizedHash == c.currentManifestHash;
 
@@ -893,13 +892,15 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? VyronColors.electricCobalt
-                                  .withValues(alpha: isDark ? 0.16 : 0.09)
+                              ? VyronColors.electricCobalt.withValues(
+                                  alpha: isDark ? 0.16 : 0.09,
+                                )
                               : Colors.transparent,
                           border: idx < visibleContents.length - 1
                               ? Border(
-                                  bottom:
-                                      BorderSide(color: palette.panelBorder),
+                                  bottom: BorderSide(
+                                    color: palette.panelBorder,
+                                  ),
                                 )
                               : null,
                         ),
@@ -956,15 +957,15 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                   hashAuthOk
                                       ? t('content.hashOk')
                                       : c.authorization != null
-                                          ? t('content.hashInvalid')
-                                          : t('content.noHash'),
+                                      ? t('content.hashInvalid')
+                                      : t('content.noHash'),
                                   style: TextStyle(
                                     fontFamily: VyronTypography.mono,
                                     fontSize: 10,
                                     color: hashAuthOk
                                         ? (isDark
-                                            ? VyronColors.emeraldDarkText
-                                            : VyronColors.emeraldLightText)
+                                              ? VyronColors.emeraldDarkText
+                                              : VyronColors.emeraldLightText)
                                         : palette.textMuted,
                                   ),
                                 ),
@@ -1000,11 +1001,8 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
         title: t('content.emptyTitle'),
         description: t('content.emptyDesc'),
         actionLabel: t('content.emptyCta'),
-        onAction: () => _openCreateContentModal(
-          context,
-          lang,
-          initialDate: '2026-11-25',
-        ),
+        onAction: () =>
+            _openCreateContentModal(context, lang, initialDate: '2026-11-25'),
       );
     }
 
@@ -1252,8 +1250,8 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                 controller: _hoursCtrl,
                                 keyboardType:
                                     const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
+                                      decimal: true,
+                                    ),
                                 textAlign: TextAlign.right,
                                 style: const TextStyle(
                                   fontFamily: VyronTypography.mono,
@@ -1472,8 +1470,9 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                               Flexible(
                                 child: Text(
                                   t('content.hashPanel.title'),
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium,
                                 ),
                               ),
                             ],
@@ -1553,8 +1552,10 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                           Text(
                             t('content.hashPanel.byActorExpires', {
                               'actor': localizeActor(auth.actor, lang),
-                              'date':
-                                  formatDateTimeForLang(auth.expiresAt, lang),
+                              'date': formatDateTimeForLang(
+                                auth.expiresAt,
+                                lang,
+                              ),
                             }),
                             style: TextStyle(
                               fontFamily: VyronTypography.mono,
@@ -1657,11 +1658,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      authCard,
-                      const SizedBox(height: 10),
-                      gateCard,
-                    ],
+                    children: [authCard, const SizedBox(height: 10), gateCard],
                   );
                 },
               ),
@@ -1687,11 +1684,11 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                         size: 17,
                         color: chk.passed
                             ? (isDark
-                                ? VyronColors.emeraldDarkText
-                                : VyronColors.emeraldLightText)
+                                  ? VyronColors.emeraldDarkText
+                                  : VyronColors.emeraldLightText)
                             : (isDark
-                                ? VyronColors.crimsonDarkText
-                                : VyronColors.crimsonLightText),
+                                  ? VyronColors.crimsonDarkText
+                                  : VyronColors.crimsonLightText),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -1791,9 +1788,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
               Container(
                 padding: const EdgeInsets.only(top: 14),
                 decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: palette.panelBorder),
-                  ),
+                  border: Border(top: BorderSide(color: palette.panelBorder)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1866,8 +1861,10 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
                                   note.isNotEmpty
                                       ? note
                                       : t('content.movedToNote', {
-                                          'status':
-                                              labelContentStatus(st, lang),
+                                          'status': labelContentStatus(
+                                            st,
+                                            lang,
+                                          ),
                                         }),
                                 );
                                 _statusNoteCtrl.clear();
@@ -2008,9 +2005,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
             Container(
               padding: const EdgeInsets.only(top: 12),
               decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: palette.panelBorder),
-                ),
+                border: Border(top: BorderSide(color: palette.panelBorder)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2186,12 +2181,6 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
   }) async {
     final domain = ref.read(vyronStateProvider).domain;
     final notifier = ref.read(vyronStateProvider.notifier);
-    final actorCtrl = TextEditingController(text: domain.settings.ownerName);
-    final validCtrl = TextEditingController(
-      text: '${domain.settings.defaultAuthValidityHours}',
-    );
-    final noteCtrl = TextEditingController();
-    final formKey = GlobalKey<FormState>();
 
     await showVyronModalDialog<void>(
       context: context,
@@ -2199,132 +2188,25 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
       subtitle: translate(lang, 'content.modal.authSubtitle'),
       language: lang,
       builder: (dialogContext) {
-        final palette = dialogContext.vyronColors;
-        return Form(
-          key: formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: palette.background,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: palette.panelBorder),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      translate(lang, 'content.modal.manifestHash', {
-                        'hash': recalculatedHash,
-                      }),
-                      style: const TextStyle(
-                        fontFamily: VyronTypography.mono,
-                        fontSize: 11,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      translate(lang, 'content.modal.visibility', {
-                        'visibility':
-                            labelContentVisibility(item.visibility, lang),
-                      }),
-                      style: const TextStyle(
-                        fontFamily: VyronTypography.mono,
-                        fontSize: 11,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      translate(lang, 'content.modal.rulesType'),
-                      style: const TextStyle(
-                        fontFamily: VyronTypography.mono,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      key: const Key('auth-modal-actor'),
-                      controller: actorCtrl,
-                      decoration: InputDecoration(
-                        labelText: translate(lang, 'content.modal.authorizer'),
-                      ),
-                      validator: (v) =>
-                          v == null || v.trim().isEmpty ? '*' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      key: const Key('auth-modal-hours'),
-                      controller: validCtrl,
-                      keyboardType: TextInputType.number,
-                      style: const TextStyle(fontFamily: VyronTypography.mono),
-                      decoration: InputDecoration(
-                        labelText:
-                            translate(lang, 'content.modal.validityHours'),
-                      ),
-                      validator: (v) {
-                        final n = int.tryParse(v ?? '');
-                        if (n == null || n < 1 || n > 168) return '1-168';
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                key: const Key('auth-modal-note'),
-                controller: noteCtrl,
-                decoration: InputDecoration(
-                  labelText: translate(lang, 'content.modal.auditNote'),
-                  hintText:
-                      translate(lang, 'content.modal.auditNotePlaceholder'),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  OutlinedButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                    child: Text(translate(lang, 'common.cancel')),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    key: const Key('auth-modal-confirm'),
-                    onPressed: () {
-                      if (!formKey.currentState!.validate()) return;
-                      notifier.authorizeContentVersion(
-                        item.id,
-                        actor: actorCtrl.text.trim(),
-                        validHours:
-                            math.max(1, int.tryParse(validCtrl.text) ?? 48),
-                        note: noteCtrl.text.trim(),
-                      );
-                      Navigator.of(dialogContext).pop();
-                    },
-                    child: Text(translate(lang, 'content.modal.confirmAuth')),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        return _AuthorizeHashModalBody(
+          item: item,
+          recalculatedHash: recalculatedHash,
+          lang: lang,
+          initialActor: domain.settings.ownerName,
+          initialValidHours: domain.settings.defaultAuthValidityHours,
+          onCancel: () => Navigator.of(dialogContext).pop(),
+          onConfirm: (actor, validHours, note) {
+            notifier.authorizeContentVersion(
+              item.id,
+              actor: actor,
+              validHours: validHours,
+              note: note,
+            );
+            Navigator.of(dialogContext).pop();
+          },
         );
       },
     );
-
-    actorCtrl.dispose();
-    validCtrl.dispose();
-    noteCtrl.dispose();
   }
 
   Future<void> _openRejectFeedbackModal(
@@ -2333,9 +2215,6 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
     required UiLanguage lang,
   }) async {
     final notifier = ref.read(vyronStateProvider.notifier);
-    var selectedCategory = FeedbackCategory.tom;
-    final noteCtrl = TextEditingController();
-    final formKey = GlobalKey<FormState>();
 
     await showVyronModalDialog<void>(
       context: context,
@@ -2343,81 +2222,20 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
       subtitle: translate(lang, 'content.modal.rejectSubtitle'),
       language: lang,
       builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (ctx, setModalState) {
-            return Form(
-              key: formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  VyronDropdownField<FeedbackCategory>(
-                    key: const Key('reject-modal-category'),
-                    labelText: translate(lang, 'content.modal.rejectCategory'),
-                    value: selectedCategory,
-                    items: [
-                      for (final cat in _rejectionCategories)
-                        DropdownMenuItem(
-                          value: cat,
-                          child: Text(labelFeedbackCategory(cat, lang)),
-                        ),
-                    ],
-                    onChanged: (next) {
-                      if (next != null) {
-                        setModalState(() => selectedCategory = next);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    key: const Key('reject-modal-note'),
-                    controller: noteCtrl,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: translate(lang, 'content.modal.rejectReason'),
-                      hintText:
-                          translate(lang, 'content.modal.rejectPlaceholder'),
-                    ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? '*' : null,
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      OutlinedButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: Text(translate(lang, 'common.cancel')),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        key: const Key('reject-modal-confirm'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: VyronColors.crimson,
-                        ),
-                        onPressed: () {
-                          if (!formKey.currentState!.validate()) return;
-                          notifier.rejectContentWithFeedback(
-                            item.id,
-                            category: selectedCategory,
-                            note: noteCtrl.text.trim(),
-                          );
-                          Navigator.of(dialogContext).pop();
-                        },
-                        child: Text(
-                          translate(lang, 'content.modal.confirmReject'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+        return _RejectFeedbackModalBody(
+          lang: lang,
+          onCancel: () => Navigator.of(dialogContext).pop(),
+          onConfirm: (category, note) {
+            notifier.rejectContentWithFeedback(
+              item.id,
+              category: category,
+              note: note,
             );
+            Navigator.of(dialogContext).pop();
           },
         );
       },
     );
-
-    noteCtrl.dispose();
   }
 
   Future<void> _openCreateContentModal(
@@ -2427,20 +2245,7 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
   }) async {
     final domain = ref.read(vyronStateProvider).domain;
     final notifier = ref.read(vyronStateProvider.notifier);
-
-    final titleCtrl = TextEditingController();
-    final briefCtrl = TextEditingController();
-    var brandId = domain.brands.isNotEmpty ? domain.brands.first.id : '';
-    var channelId = domain.channels.isNotEmpty ? domain.channels.first.id : '';
-    var productId = '';
-    var format = ContentFormat.longForm;
-    var category = ContentCategory.comercialContextual;
-    var visibility = ContentVisibility.privateVis;
-    var plannedDate = initialDate;
-    final formKey = GlobalKey<FormState>();
-
-    final nonTestProducts =
-        domain.products.where((p) => !p.isTest).toList();
+    final nonTestProducts = domain.products.where((p) => !p.isTest).toList();
 
     await showVyronModalDialog<void>(
       context: context,
@@ -2449,307 +2254,617 @@ class _ContentScreenState extends ConsumerState<ContentScreen> {
       language: lang,
       maxWidth: 560,
       builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (ctx, setModalState) {
-            return Form(
-              key: formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextFormField(
-                    key: const Key('create-content-title'),
-                    controller: titleCtrl,
-                    decoration: InputDecoration(
-                      labelText: translate(lang, 'content.modal.titleReq'),
-                      hintText:
-                          translate(lang, 'content.modal.titlePlaceholder'),
-                    ),
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? '*' : null,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      if (domain.brands.isNotEmpty)
-                        Expanded(
-                          child: VyronDropdownField<String>(
-                            key: const Key('create-content-brand'),
-                            labelText: translate(lang, 'content.modal.brand'),
-                            value: brandId,
-                            items: [
-                              for (final b in domain.brands)
-                                DropdownMenuItem(
-                                  value: b.id,
-                                  child: Text(
-                                    b.name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                            ],
-                            onChanged: (next) {
-                              if (next != null) {
-                                setModalState(() => brandId = next);
-                              }
-                            },
-                          ),
-                        ),
-                      if (domain.brands.isNotEmpty && domain.channels.isNotEmpty)
-                        const SizedBox(width: 12),
-                      if (domain.channels.isNotEmpty)
-                        Expanded(
-                          child: VyronDropdownField<String>(
-                            key: const Key('create-content-channel'),
-                            labelText:
-                                translate(lang, 'content.modal.channel'),
-                            value: channelId,
-                            items: [
-                              for (final ch in domain.channels)
-                                DropdownMenuItem(
-                                  value: ch.id,
-                                  child: Text(
-                                    '${ch.name} (${ch.platform.wire})',
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                            ],
-                            onChanged: (next) {
-                              if (next != null) {
-                                setModalState(() => channelId = next);
-                              }
-                            },
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  LayoutBuilder(
-                    builder: (cCtx, cCons) {
-                      final wide = cCons.maxWidth >= 420;
-                      final fDrop = VyronDropdownField<ContentFormat>(
-                        labelText: translate(lang, 'content.modal.format'),
-                        value: format,
-                        items: [
-                          for (final f in ContentFormat.values)
-                            DropdownMenuItem(
-                              value: f,
-                              child: Text(
-                                labelContentFormat(f, lang),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                        ],
-                        onChanged: (next) {
-                          if (next != null) setModalState(() => format = next);
-                        },
-                      );
-                      final cDrop = VyronDropdownField<ContentCategory>(
-                        labelText: translate(lang, 'content.modal.category'),
-                        value: category,
-                        items: [
-                          for (final cat in ContentCategory.values)
-                            DropdownMenuItem(
-                              value: cat,
-                              child: Text(
-                                labelContentCategory(cat, lang),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                        ],
-                        onChanged: (next) {
-                          if (next != null) {
-                            setModalState(() => category = next);
-                          }
-                        },
-                      );
-                      final vDrop = VyronDropdownField<ContentVisibility>(
-                        labelText:
-                            translate(lang, 'content.modal.visibilityLabel'),
-                        value: visibility,
-                        items: [
-                          for (final v in ContentVisibility.values)
-                            DropdownMenuItem(
-                              value: v,
-                              child: Text(
-                                labelContentVisibility(v, lang),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                        ],
-                        onChanged: (next) {
-                          if (next != null) {
-                            setModalState(() => visibility = next);
-                          }
-                        },
-                      );
-                      if (wide) {
-                        return Row(
-                          children: [
-                            Expanded(child: fDrop),
-                            const SizedBox(width: 8),
-                            Expanded(child: cDrop),
-                            const SizedBox(width: 8),
-                            Expanded(child: vDrop),
-                          ],
-                        );
-                      }
-                      return Column(
-                        children: [
-                          fDrop,
-                          const SizedBox(height: 10),
-                          cDrop,
-                          const SizedBox(height: 10),
-                          vDrop,
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              translate(lang, 'content.modal.plannedDate'),
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: ctx.vyronColors.textMuted,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            OutlinedButton.icon(
-                              onPressed: () async {
-                                final initial = DateTime.tryParse(
-                                      '${plannedDate}T00:00:00Z',
-                                    ) ??
-                                    DateTime.utc(2026, 11, 25);
-                                final picked = await showDatePicker(
-                                  context: ctx,
-                                  initialDate: initial,
-                                  firstDate: DateTime.utc(2024, 1, 1),
-                                  lastDate: DateTime.utc(2030, 12, 31),
-                                );
-                                if (picked != null) {
-                                  setModalState(() {
-                                    plannedDate =
-                                        '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-                                  });
-                                }
-                              },
-                              icon: const Icon(
-                                Icons.calendar_today_outlined,
-                                size: 14,
-                              ),
-                              label: Text(
-                                formatDateForLang(plannedDate, lang),
-                                style: const TextStyle(
-                                  fontFamily: VyronTypography.mono,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: VyronDropdownField<String>(
-                          labelText:
-                              translate(lang, 'content.modal.productOptional'),
-                          value: productId,
-                          items: [
-                            DropdownMenuItem(
-                              value: '',
-                              child: Text(translate(lang, 'common.none')),
-                            ),
-                            for (final p in nonTestProducts)
-                              DropdownMenuItem(
-                                value: p.id,
-                                child: Text(
-                                  localizeProduct(p, lang).name,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                          ],
-                          onChanged: (next) {
-                            if (next != null) {
-                              setModalState(() => productId = next);
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    key: const Key('create-content-brief'),
-                    controller: briefCtrl,
-                    maxLines: 2,
-                    decoration: InputDecoration(
-                      labelText: translate(lang, 'content.modal.brief'),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      OutlinedButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: Text(translate(lang, 'common.cancel')),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        key: const Key('create-content-submit'),
-                        onPressed: () {
-                          if (!formKey.currentState!.validate()) return;
-                          final created = notifier.createContent(
-                            ContentCreateInput(
-                              brandId: brandId,
-                              channelId: channelId,
-                              productId:
-                                  productId.isEmpty ? null : productId,
-                              title: titleCtrl.text.trim(),
-                              format: format,
-                              category: category,
-                              visibility: visibility,
-                              status: ContentStatus.brief,
-                              scheduledDate: plannedDate,
-                              brief: briefCtrl.text.trim().isNotEmpty
-                                  ? briefCtrl.text.trim()
-                                  : translate(lang, 'content.modal.createTitle'),
-                              angleIdea: lang == UiLanguage.enUS
-                                  ? 'Technical and comparative approach.'
-                                  : 'Abordagem técnica e comparativa.',
-                              script: lang == UiLanguage.enUS
-                                  ? '1. Technical hook\n2. Practical evidence\n3. Final recommendation'
-                                  : '1. Gancho técnico\n2. Evidência prática\n3. Recomendação final',
-                              references: const [],
-                            ),
-                          );
-                          Navigator.of(dialogContext).pop();
-                          navigateToVyronModule(
-                            ref,
-                            NavModule.content,
-                            contentId: created.id,
-                            setContentId: true,
-                            contentSubView: ContentSubView.studio,
-                          );
-                        },
-                        child: Text(translate(lang, 'content.modal.createBtn')),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+        return _CreateContentModalBody(
+          lang: lang,
+          initialDate: initialDate,
+          brands: domain.brands,
+          channels: domain.channels,
+          nonTestProducts: nonTestProducts,
+          onCancel: () => Navigator.of(dialogContext).pop(),
+          onSubmit: (input) {
+            final created = notifier.createContent(input);
+            Navigator.of(dialogContext).pop();
+            navigateToVyronModule(
+              ref,
+              NavModule.content,
+              contentId: created.id,
+              setContentId: true,
+              contentSubView: ContentSubView.studio,
             );
           },
         );
       },
     );
+  }
+}
 
-    titleCtrl.dispose();
-    briefCtrl.dispose();
+class _AuthorizeHashModalBody extends StatefulWidget {
+  const _AuthorizeHashModalBody({
+    required this.item,
+    required this.recalculatedHash,
+    required this.lang,
+    required this.initialActor,
+    required this.initialValidHours,
+    required this.onCancel,
+    required this.onConfirm,
+  });
+
+  final ContentItem item;
+  final String recalculatedHash;
+  final UiLanguage lang;
+  final String initialActor;
+  final int initialValidHours;
+  final VoidCallback onCancel;
+  final void Function(String actor, int validHours, String note) onConfirm;
+
+  @override
+  State<_AuthorizeHashModalBody> createState() =>
+      _AuthorizeHashModalBodyState();
+}
+
+class _AuthorizeHashModalBodyState extends State<_AuthorizeHashModalBody> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _actorCtrl;
+  late final TextEditingController _validCtrl;
+  late final TextEditingController _noteCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _actorCtrl = TextEditingController(text: widget.initialActor);
+    _validCtrl = TextEditingController(text: '${widget.initialValidHours}');
+    _noteCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _actorCtrl.dispose();
+    _validCtrl.dispose();
+    _noteCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.vyronColors;
+    final lang = widget.lang;
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: palette.background,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: palette.panelBorder),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  translate(lang, 'content.modal.manifestHash', {
+                    'hash': widget.recalculatedHash,
+                  }),
+                  style: const TextStyle(
+                    fontFamily: VyronTypography.mono,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  translate(lang, 'content.modal.visibility', {
+                    'visibility': labelContentVisibility(
+                      widget.item.visibility,
+                      lang,
+                    ),
+                  }),
+                  style: const TextStyle(
+                    fontFamily: VyronTypography.mono,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  translate(lang, 'content.modal.rulesType'),
+                  style: const TextStyle(
+                    fontFamily: VyronTypography.mono,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  key: const Key('auth-modal-actor'),
+                  controller: _actorCtrl,
+                  decoration: InputDecoration(
+                    labelText: translate(lang, 'content.modal.authorizer'),
+                  ),
+                  validator: (v) => v == null || v.trim().isEmpty ? '*' : null,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  key: const Key('auth-modal-hours'),
+                  controller: _validCtrl,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(fontFamily: VyronTypography.mono),
+                  decoration: InputDecoration(
+                    labelText: translate(lang, 'content.modal.validityHours'),
+                  ),
+                  validator: (v) {
+                    final n = int.tryParse(v ?? '');
+                    if (n == null || n < 1 || n > 168) return '1-168';
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            key: const Key('auth-modal-note'),
+            controller: _noteCtrl,
+            decoration: InputDecoration(
+              labelText: translate(lang, 'content.modal.auditNote'),
+              hintText: translate(lang, 'content.modal.auditNotePlaceholder'),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              OutlinedButton(
+                onPressed: widget.onCancel,
+                child: Text(translate(lang, 'common.cancel')),
+              ),
+              ElevatedButton(
+                key: const Key('auth-modal-confirm'),
+                onPressed: () {
+                  if (!_formKey.currentState!.validate()) return;
+                  widget.onConfirm(
+                    _actorCtrl.text.trim(),
+                    math.max(1, int.tryParse(_validCtrl.text) ?? 48),
+                    _noteCtrl.text.trim(),
+                  );
+                },
+                child: Text(translate(lang, 'content.modal.confirmAuth')),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RejectFeedbackModalBody extends StatefulWidget {
+  const _RejectFeedbackModalBody({
+    required this.lang,
+    required this.onCancel,
+    required this.onConfirm,
+  });
+
+  final UiLanguage lang;
+  final VoidCallback onCancel;
+  final void Function(FeedbackCategory category, String note) onConfirm;
+
+  @override
+  State<_RejectFeedbackModalBody> createState() =>
+      _RejectFeedbackModalBodyState();
+}
+
+class _RejectFeedbackModalBodyState extends State<_RejectFeedbackModalBody> {
+  final _formKey = GlobalKey<FormState>();
+  final _noteCtrl = TextEditingController();
+  FeedbackCategory _selectedCategory = FeedbackCategory.tom;
+
+  @override
+  void dispose() {
+    _noteCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = widget.lang;
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          VyronDropdownField<FeedbackCategory>(
+            key: const Key('reject-modal-category'),
+            labelText: translate(lang, 'content.modal.rejectCategory'),
+            value: _selectedCategory,
+            items: [
+              for (final cat in _rejectionCategories)
+                DropdownMenuItem(
+                  value: cat,
+                  child: Text(labelFeedbackCategory(cat, lang)),
+                ),
+            ],
+            onChanged: (next) {
+              if (next != null) {
+                setState(() => _selectedCategory = next);
+              }
+            },
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            key: const Key('reject-modal-note'),
+            controller: _noteCtrl,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: translate(lang, 'content.modal.rejectReason'),
+              hintText: translate(lang, 'content.modal.rejectPlaceholder'),
+            ),
+            validator: (v) => v == null || v.trim().isEmpty ? '*' : null,
+          ),
+          const SizedBox(height: 18),
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              OutlinedButton(
+                onPressed: widget.onCancel,
+                child: Text(translate(lang, 'common.cancel')),
+              ),
+              ElevatedButton(
+                key: const Key('reject-modal-confirm'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: VyronColors.crimson,
+                ),
+                onPressed: () {
+                  if (!_formKey.currentState!.validate()) return;
+                  widget.onConfirm(_selectedCategory, _noteCtrl.text.trim());
+                },
+                child: Text(translate(lang, 'content.modal.confirmReject')),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CreateContentModalBody extends StatefulWidget {
+  const _CreateContentModalBody({
+    required this.lang,
+    required this.initialDate,
+    required this.brands,
+    required this.channels,
+    required this.nonTestProducts,
+    required this.onCancel,
+    required this.onSubmit,
+  });
+
+  final UiLanguage lang;
+  final String initialDate;
+  final List<Brand> brands;
+  final List<Channel> channels;
+  final List<Product> nonTestProducts;
+  final VoidCallback onCancel;
+  final ValueChanged<ContentCreateInput> onSubmit;
+
+  @override
+  State<_CreateContentModalBody> createState() =>
+      _CreateContentModalBodyState();
+}
+
+class _CreateContentModalBodyState extends State<_CreateContentModalBody> {
+  final _formKey = GlobalKey<FormState>();
+  final _titleCtrl = TextEditingController();
+  final _briefCtrl = TextEditingController();
+  late String _brandId;
+  late String _channelId;
+  String _productId = '';
+  ContentFormat _format = ContentFormat.longForm;
+  ContentCategory _category = ContentCategory.comercialContextual;
+  ContentVisibility _visibility = ContentVisibility.privateVis;
+  late String _plannedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _brandId = widget.brands.isNotEmpty ? widget.brands.first.id : '';
+    _channelId = widget.channels.isNotEmpty ? widget.channels.first.id : '';
+    _plannedDate = widget.initialDate;
+  }
+
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    _briefCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = widget.lang;
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextFormField(
+            key: const Key('create-content-title'),
+            controller: _titleCtrl,
+            decoration: InputDecoration(
+              labelText: translate(lang, 'content.modal.titleReq'),
+              hintText: translate(lang, 'content.modal.titlePlaceholder'),
+            ),
+            validator: (v) => v == null || v.trim().isEmpty ? '*' : null,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              if (widget.brands.isNotEmpty)
+                Expanded(
+                  child: VyronDropdownField<String>(
+                    key: const Key('create-content-brand'),
+                    labelText: translate(lang, 'content.modal.brand'),
+                    value: _brandId,
+                    items: [
+                      for (final b in widget.brands)
+                        DropdownMenuItem(
+                          value: b.id,
+                          child: Text(b.name, overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: (next) {
+                      if (next != null) {
+                        setState(() => _brandId = next);
+                      }
+                    },
+                  ),
+                ),
+              if (widget.brands.isNotEmpty && widget.channels.isNotEmpty)
+                const SizedBox(width: 12),
+              if (widget.channels.isNotEmpty)
+                Expanded(
+                  child: VyronDropdownField<String>(
+                    key: const Key('create-content-channel'),
+                    labelText: translate(lang, 'content.modal.channel'),
+                    value: _channelId,
+                    items: [
+                      for (final ch in widget.channels)
+                        DropdownMenuItem(
+                          value: ch.id,
+                          child: Text(
+                            '${ch.name} (${ch.platform.wire})',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                    onChanged: (next) {
+                      if (next != null) {
+                        setState(() => _channelId = next);
+                      }
+                    },
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          LayoutBuilder(
+            builder: (cCtx, cCons) {
+              final wide = cCons.maxWidth >= 420;
+              final fDrop = VyronDropdownField<ContentFormat>(
+                labelText: translate(lang, 'content.modal.format'),
+                value: _format,
+                items: [
+                  for (final f in ContentFormat.values)
+                    DropdownMenuItem(
+                      value: f,
+                      child: Text(
+                        labelContentFormat(f, lang),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+                onChanged: (next) {
+                  if (next != null) setState(() => _format = next);
+                },
+              );
+              final cDrop = VyronDropdownField<ContentCategory>(
+                labelText: translate(lang, 'content.modal.category'),
+                value: _category,
+                items: [
+                  for (final cat in ContentCategory.values)
+                    DropdownMenuItem(
+                      value: cat,
+                      child: Text(
+                        labelContentCategory(cat, lang),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+                onChanged: (next) {
+                  if (next != null) {
+                    setState(() => _category = next);
+                  }
+                },
+              );
+              final vDrop = VyronDropdownField<ContentVisibility>(
+                labelText: translate(lang, 'content.modal.visibilityLabel'),
+                value: _visibility,
+                items: [
+                  for (final v in ContentVisibility.values)
+                    DropdownMenuItem(
+                      value: v,
+                      child: Text(
+                        labelContentVisibility(v, lang),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+                onChanged: (next) {
+                  if (next != null) {
+                    setState(() => _visibility = next);
+                  }
+                },
+              );
+              if (wide) {
+                return Row(
+                  children: [
+                    Expanded(child: fDrop),
+                    const SizedBox(width: 8),
+                    Expanded(child: cDrop),
+                    const SizedBox(width: 8),
+                    Expanded(child: vDrop),
+                  ],
+                );
+              }
+              return Column(
+                children: [
+                  fDrop,
+                  const SizedBox(height: 10),
+                  cDrop,
+                  const SizedBox(height: 10),
+                  vDrop,
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      translate(lang, 'content.modal.plannedDate'),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.vyronColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        final initial =
+                            DateTime.tryParse('${_plannedDate}T00:00:00Z') ??
+                            DateTime.utc(2026, 11, 25);
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: initial,
+                          firstDate: DateTime.utc(2024, 1, 1),
+                          lastDate: DateTime.utc(2030, 12, 31),
+                        );
+                        if (picked != null && mounted) {
+                          setState(() {
+                            _plannedDate =
+                                '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.calendar_today_outlined, size: 14),
+                      label: Text(
+                        formatDateForLang(_plannedDate, lang),
+                        style: const TextStyle(
+                          fontFamily: VyronTypography.mono,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: VyronDropdownField<String>(
+                  labelText: translate(lang, 'content.modal.productOptional'),
+                  value: _productId,
+                  items: [
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text(translate(lang, 'common.none')),
+                    ),
+                    for (final p in widget.nonTestProducts)
+                      DropdownMenuItem(
+                        value: p.id,
+                        child: Text(
+                          localizeProduct(p, lang).name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (next) {
+                    if (next != null) {
+                      setState(() => _productId = next);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            key: const Key('create-content-brief'),
+            controller: _briefCtrl,
+            maxLines: 2,
+            decoration: InputDecoration(
+              labelText: translate(lang, 'content.modal.brief'),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              OutlinedButton(
+                onPressed: widget.onCancel,
+                child: Text(translate(lang, 'common.cancel')),
+              ),
+              ElevatedButton(
+                key: const Key('create-content-submit'),
+                onPressed: () {
+                  if (!_formKey.currentState!.validate()) return;
+                  widget.onSubmit(
+                    ContentCreateInput(
+                      brandId: _brandId,
+                      channelId: _channelId,
+                      productId: _productId.isEmpty ? null : _productId,
+                      title: _titleCtrl.text.trim(),
+                      format: _format,
+                      category: _category,
+                      visibility: _visibility,
+                      status: ContentStatus.brief,
+                      scheduledDate: _plannedDate,
+                      brief: _briefCtrl.text.trim().isNotEmpty
+                          ? _briefCtrl.text.trim()
+                          : translate(lang, 'content.modal.createTitle'),
+                      angleIdea: lang == UiLanguage.enUS
+                          ? 'Technical and comparative approach.'
+                          : 'Abordagem técnica e comparativa.',
+                      script: lang == UiLanguage.enUS
+                          ? '1. Technical hook\n2. Practical evidence\n3. Final recommendation'
+                          : '1. Gancho técnico\n2. Evidência prática\n3. Recomendação final',
+                      references: const [],
+                    ),
+                  );
+                },
+                child: Text(translate(lang, 'content.modal.createBtn')),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -2798,10 +2913,7 @@ class _CheckToggleCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(fontSize: 12),
-                ),
+                child: Text(label, style: const TextStyle(fontSize: 12)),
               ),
             ],
           ),
@@ -2828,10 +2940,7 @@ class _MiniMetricTile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 11, color: palette.textMuted),
-        ),
+        Text(label, style: TextStyle(fontSize: 11, color: palette.textMuted)),
         const SizedBox(height: 2),
         Text(
           value,

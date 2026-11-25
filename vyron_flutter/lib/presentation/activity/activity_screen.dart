@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../application/state/vyron_state_notifier.dart';
 import '../../core/i18n/domain_labels.dart';
 import '../../core/i18n/formatters.dart';
@@ -51,9 +52,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
             ? VyronColors.emeraldDarkText
             : VyronColors.emeraldLightText;
       case ActivitySeverity.info:
-        return isDark
-            ? VyronColors.cobaltTextDark
-            : VyronColors.electricCobalt;
+        return isDark ? VyronColors.cobaltTextDark : VyronColors.electricCobalt;
     }
   }
 
@@ -72,8 +71,9 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
       period: appState.globalPeriodFilter,
     );
 
-    final localizedEvents =
-        baseFiltered.map((e) => localizeActivity(e, lang)).toList();
+    final localizedEvents = baseFiltered
+        .map((e) => localizeActivity(e, lang))
+        .toList();
 
     final trimmedQ = _query.trim().toLowerCase();
     final events = trimmedQ.isEmpty
@@ -140,11 +140,7 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                seg,
-                const SizedBox(height: 10),
-                search,
-              ],
+              children: [seg, const SizedBox(height: 10), search],
             );
           },
         ),
@@ -164,14 +160,15 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                         event: events[idx],
                         brandName: events[idx].brandId != null
                             ? domain.brands
-                                .where((b) => b.id == events[idx].brandId)
-                                .map((b) => b.name)
-                                .fold<String?>(null, (_, v) => v)
+                                  .where((b) => b.id == events[idx].brandId)
+                                  .map((b) => b.name)
+                                  .fold<String?>(null, (_, v) => v)
                             : null,
-                        actorLabel:
-                            _formatActorLabel(events[idx].actor, lang),
-                        severityColor:
-                            _severityColor(events[idx].severity, isDark),
+                        actorLabel: _formatActorLabel(events[idx].actor, lang),
+                        severityColor: _severityColor(
+                          events[idx].severity,
+                          isDark,
+                        ),
                         language: lang,
                         showDivider: idx < events.length - 1,
                       ),
@@ -233,10 +230,8 @@ class _ActivityRow extends StatelessWidget {
                 children: [
                   Text(
                     event.action,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: severityColor,
-                          fontSize: 13,
-                        ),
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(color: severityColor, fontSize: 13),
                   ),
                   VyronToneBadge(
                     label: labelActivityCategory(event.category, language),
@@ -244,10 +239,8 @@ class _ActivityRow extends StatelessWidget {
                   if (brandName != null)
                     Text(
                       brandName!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: palette.textMuted,
-                            fontSize: 11,
-                          ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: palette.textMuted, fontSize: 11),
                     ),
                 ],
               ),
@@ -264,9 +257,7 @@ class _ActivityRow extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             event.detail,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
+            style: Theme.of(context).textTheme.bodySmall
                 ?.copyWith(color: palette.textMuted),
           ),
           if (event.justification != null &&
@@ -285,9 +276,7 @@ class _ActivityRow extends StatelessWidget {
                 translate(language, 'activity.justificationPrefix', {
                   'text': event.justification!,
                 }),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
+                style: Theme.of(context).textTheme.bodySmall
                     ?.copyWith(color: palette.textPrimary, fontSize: 11),
               ),
             ),

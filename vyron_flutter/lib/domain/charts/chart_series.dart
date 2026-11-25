@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../models/brand_product_models.dart';
 import '../models/content_channel_finance_models.dart';
 import '../models/vyron_enums.dart';
@@ -8,11 +9,11 @@ enum ChartTimeRange { d7, d30, d90, m12, custom }
 
 extension ChartTimeRangePeriod on PeriodFilter {
   ChartTimeRange get asChartRange => switch (this) {
-        PeriodFilter.d7 => ChartTimeRange.d7,
-        PeriodFilter.d30 => ChartTimeRange.d30,
-        PeriodFilter.d90 => ChartTimeRange.d90,
-        PeriodFilter.m12 => ChartTimeRange.m12,
-      };
+    PeriodFilter.d7 => ChartTimeRange.d7,
+    PeriodFilter.d30 => ChartTimeRange.d30,
+    PeriodFilter.d90 => ChartTimeRange.d90,
+    PeriodFilter.m12 => ChartTimeRange.m12,
+  };
 }
 
 ChartTimeRange periodFilterToChartRange(PeriodFilter period) =>
@@ -80,7 +81,8 @@ TimeWindowSpec resolveTimeWindow(
       prevStartDate: prevStartDate,
       prevEndDate: prevEndDate,
       days: days,
-      hasSparseCoverage: customStart.compareTo(demoDataEarliestDate) < 0 ||
+      hasSparseCoverage:
+          customStart.compareTo(demoDataEarliestDate) < 0 ||
           prevStartDate.compareTo(demoDataEarliestDate) < 0,
     );
   }
@@ -103,7 +105,8 @@ TimeWindowSpec resolveTimeWindow(
     prevStartDate: prevStartDate,
     prevEndDate: prevEndDate,
     days: days,
-    hasSparseCoverage: startDate.compareTo(demoDataEarliestDate) < 0 ||
+    hasSparseCoverage:
+        startDate.compareTo(demoDataEarliestDate) < 0 ||
         prevStartDate.compareTo(demoDataEarliestDate) < 0,
   );
 }
@@ -145,22 +148,22 @@ class OverviewFinancePoint {
   final List<String> productIds;
 
   OverviewFinancePoint copyWith({double? projection}) => OverviewFinancePoint(
-        id: id,
-        date: date,
-        isProjection: isProjection,
-        confirmedCommercial: confirmedCommercial,
-        receivedCash: receivedCash,
-        pendingCommissions: pendingCommissions,
-        projection: projection ?? this.projection,
-        previousConfirmed: previousConfirmed,
-        dailyConfirmedDelta: dailyConfirmedDelta,
-        dailyReceivedDelta: dailyReceivedDelta,
-        dailyPendingDelta: dailyPendingDelta,
-        dailyOutflowDelta: dailyOutflowDelta,
-        entryIds: entryIds,
-        brandIds: brandIds,
-        productIds: productIds,
-      );
+    id: id,
+    date: date,
+    isProjection: isProjection,
+    confirmedCommercial: confirmedCommercial,
+    receivedCash: receivedCash,
+    pendingCommissions: pendingCommissions,
+    projection: projection ?? this.projection,
+    previousConfirmed: previousConfirmed,
+    dailyConfirmedDelta: dailyConfirmedDelta,
+    dailyReceivedDelta: dailyReceivedDelta,
+    dailyPendingDelta: dailyPendingDelta,
+    dailyOutflowDelta: dailyOutflowDelta,
+    entryIds: entryIds,
+    brandIds: brandIds,
+    productIds: productIds,
+  );
 }
 
 class OverviewFinanceSeriesResult {
@@ -303,20 +306,23 @@ OverviewFinanceSeriesResult buildOverviewFinanceSeries(
     final prevValue = previousReal.isEmpty
         ? null
         : idx < prevCheckpoints.length
-            ? prevCheckpoints[idx]
-            : (prevCheckpoints.isNotEmpty ? prevCheckpoints.last : 0.0);
+        ? prevCheckpoints[idx]
+        : (prevCheckpoints.isNotEmpty ? prevCheckpoints.last : 0.0);
 
     points.add(
       OverviewFinancePoint(
         id: 'pt-$date',
         date: date,
         isProjection: false,
-        confirmedCommercial:
-            mode == SeriesAggregationMode.cumulative ? runConfirmed : dayConf,
-        receivedCash:
-            mode == SeriesAggregationMode.cumulative ? runReceived : dayRec,
-        pendingCommissions:
-            mode == SeriesAggregationMode.cumulative ? runPending : dayPend,
+        confirmedCommercial: mode == SeriesAggregationMode.cumulative
+            ? runConfirmed
+            : dayConf,
+        receivedCash: mode == SeriesAggregationMode.cumulative
+            ? runReceived
+            : dayRec,
+        pendingCommissions: mode == SeriesAggregationMode.cumulative
+            ? runPending
+            : dayPend,
         projection: null,
         previousConfirmed: prevValue,
         dailyConfirmedDelta: dayConf,
@@ -336,12 +342,12 @@ OverviewFinanceSeriesResult buildOverviewFinanceSeries(
       (acc, e) => acc + convertCurrency(e.amount, e.currency, currency),
     );
     final lastReal = points.last;
-    points[points.length - 1] =
-        lastReal.copyWith(projection: lastReal.confirmedCommercial);
+    points[points.length - 1] = lastReal.copyWith(
+      projection: lastReal.confirmedCommercial,
+    );
 
     final projDates = projections.map((p) => p.date).toList()..sort();
-    final projDate =
-        projDates.isNotEmpty ? projDates.last : '2026-12-15';
+    final projDate = projDates.isNotEmpty ? projDates.last : '2026-12-15';
     points.add(
       OverviewFinancePoint(
         id: 'pt-proj-$projDate',
@@ -403,17 +409,17 @@ class FinanceCashflowPoint {
   final List<String> entryIds;
 
   FinanceCashflowPoint copyWith({double? projection}) => FinanceCashflowPoint(
-        id: id,
-        date: date,
-        isProjection: isProjection,
-        receivedInflow: receivedInflow,
-        confirmedCommercial: confirmedCommercial,
-        pendingCommissions: pendingCommissions,
-        outflows: outflows,
-        projection: projection ?? this.projection,
-        previousReceived: previousReceived,
-        entryIds: entryIds,
-      );
+    id: id,
+    date: date,
+    isProjection: isProjection,
+    receivedInflow: receivedInflow,
+    confirmedCommercial: confirmedCommercial,
+    pendingCommissions: pendingCommissions,
+    outflows: outflows,
+    projection: projection ?? this.projection,
+    previousReceived: previousReceived,
+    entryIds: entryIds,
+  );
 }
 
 class FinanceCashflowSeriesResult {
@@ -544,20 +550,22 @@ FinanceCashflowSeriesResult buildFinanceCashflowSeries(
         id: 'fin-pt-$date',
         date: date,
         isProjection: false,
-        receivedInflow:
-            mode == SeriesAggregationMode.cumulative ? runRec : dayRec,
-        confirmedCommercial:
-            mode == SeriesAggregationMode.cumulative ? runConf : dayConf,
-        pendingCommissions:
-            mode == SeriesAggregationMode.cumulative ? runPend : dayPend,
-        outflows:
-            mode == SeriesAggregationMode.cumulative ? runOut : dayOut,
+        receivedInflow: mode == SeriesAggregationMode.cumulative
+            ? runRec
+            : dayRec,
+        confirmedCommercial: mode == SeriesAggregationMode.cumulative
+            ? runConf
+            : dayConf,
+        pendingCommissions: mode == SeriesAggregationMode.cumulative
+            ? runPend
+            : dayPend,
+        outflows: mode == SeriesAggregationMode.cumulative ? runOut : dayOut,
         projection: null,
         previousReceived: previousReal.isEmpty
             ? null
             : idx < prevCheckpoints.length
-                ? prevCheckpoints[idx]
-                : (prevCheckpoints.isNotEmpty ? prevCheckpoints.last : 0.0),
+            ? prevCheckpoints[idx]
+            : (prevCheckpoints.isNotEmpty ? prevCheckpoints.last : 0.0),
         entryIds: dayEntries.map((e) => e.id).toList(),
       ),
     );
@@ -575,8 +583,7 @@ FinanceCashflowSeriesResult buildFinanceCashflowSeries(
           : projAmount,
     );
     final projDates = projections.map((p) => p.date).toList()..sort();
-    final projDate =
-        projDates.isNotEmpty ? projDates.last : '2026-12-15';
+    final projDate = projDates.isNotEmpty ? projDates.last : '2026-12-15';
     points.add(
       FinanceCashflowPoint(
         id: 'fin-pt-proj-$projDate',
@@ -685,16 +692,16 @@ AnalyticsContentSeriesResult buildAnalyticsContentPoints(
     return true;
   }).toList();
 
-  final inWindow = withMetrics.where((c) {
-    final d = c.publishedAt ?? c.scheduledDate;
-    return d.compareTo(window.startDate) >= 0 &&
-        d.compareTo(window.endDate) <= 0;
-  }).toList()
-    ..sort((a, b) {
-      final da = a.publishedAt ?? a.scheduledDate;
-      final db = b.publishedAt ?? b.scheduledDate;
-      return da.compareTo(db);
-    });
+  final inWindow =
+      withMetrics.where((c) {
+        final d = c.publishedAt ?? c.scheduledDate;
+        return d.compareTo(window.startDate) >= 0 &&
+            d.compareTo(window.endDate) <= 0;
+      }).toList()..sort((a, b) {
+        final da = a.publishedAt ?? a.scheduledDate;
+        final db = b.publishedAt ?? b.scheduledDate;
+        return da.compareTo(db);
+      });
 
   final previousCount = withMetrics.where((c) {
     final d = c.publishedAt ?? c.scheduledDate;
@@ -763,34 +770,37 @@ List<ChannelComparisonItem> buildChannelComparisonItems(
   ChannelPlatform? platform,
   required ChannelChartMetric metric,
 }) {
-  return channels.where((ch) {
-    if (brandId != null && brandId != 'all' && ch.brandId != brandId) {
-      return false;
-    }
-    if (platform != null && ch.platform != platform) return false;
-    return true;
-  }).map((ch) {
-    Brand? brand;
-    for (final b in brands) {
-      if (b.id == ch.brandId) {
-        brand = b;
-        break;
-      }
-    }
-    final rawValue = switch (metric) {
-      ChannelChartMetric.views30d => ch.views30d.toDouble(),
-      ChannelChartMetric.reach30d => ch.reach30d.toDouble(),
-      ChannelChartMetric.followers => ch.followers.toDouble(),
-      ChannelChartMetric.engagementRatePct => ch.engagementRatePct,
-      ChannelChartMetric.growthPct30d => ch.growthPct30d,
-    };
-    return ChannelComparisonItem(
-      channel: ch,
-      brandName: brand?.name ?? ch.brandId,
-      rawValue: rawValue,
-      accentColor: brand?.accentColor ?? '#315FEA',
-    );
-  }).toList()
+  return channels
+      .where((ch) {
+        if (brandId != null && brandId != 'all' && ch.brandId != brandId) {
+          return false;
+        }
+        if (platform != null && ch.platform != platform) return false;
+        return true;
+      })
+      .map((ch) {
+        Brand? brand;
+        for (final b in brands) {
+          if (b.id == ch.brandId) {
+            brand = b;
+            break;
+          }
+        }
+        final rawValue = switch (metric) {
+          ChannelChartMetric.views30d => ch.views30d.toDouble(),
+          ChannelChartMetric.reach30d => ch.reach30d.toDouble(),
+          ChannelChartMetric.followers => ch.followers.toDouble(),
+          ChannelChartMetric.engagementRatePct => ch.engagementRatePct,
+          ChannelChartMetric.growthPct30d => ch.growthPct30d,
+        };
+        return ChannelComparisonItem(
+          channel: ch,
+          brandName: brand?.name ?? ch.brandId,
+          rawValue: rawValue,
+          accentColor: brand?.accentColor ?? '#315FEA',
+        );
+      })
+      .toList()
     ..sort((a, b) => b.rawValue.compareTo(a.rawValue));
 }
 
@@ -834,25 +844,25 @@ List<ProductCurrencyChartItem> buildProductNativeCurrencyComparison(
     return true;
   });
 
-  final mapped = scoped.map((p) {
-    final val = switch (metric) {
-      ProductChartMetric.opportunityScore => p.opportunityScore?.toDouble(),
-      ProductChartMetric.epcValue => p.epcValue,
-      ProductChartMetric.commissionRatePct => p.commissionRatePct,
-      ProductChartMetric.demandTrendPct => p.demandTrendPct,
-    };
-    return ProductCurrencyChartItem(
-      product: p,
-      value: val,
-      missingData: val == null,
-    );
-  }).toList()
-    ..sort((a, b) {
-      if (a.value == null && b.value == null) return 0;
-      if (a.value == null) return 1;
-      if (b.value == null) return -1;
-      return b.value!.compareTo(a.value!);
-    });
+  final mapped =
+      scoped.map((p) {
+        final val = switch (metric) {
+          ProductChartMetric.opportunityScore => p.opportunityScore?.toDouble(),
+          ProductChartMetric.epcValue => p.epcValue,
+          ProductChartMetric.commissionRatePct => p.commissionRatePct,
+          ProductChartMetric.demandTrendPct => p.demandTrendPct,
+        };
+        return ProductCurrencyChartItem(
+          product: p,
+          value: val,
+          missingData: val == null,
+        );
+      }).toList()..sort((a, b) {
+        if (a.value == null && b.value == null) return 0;
+        if (a.value == null) return 1;
+        if (b.value == null) return -1;
+        return b.value!.compareTo(a.value!);
+      });
 
   return mapped;
 }
